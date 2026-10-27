@@ -30,6 +30,23 @@ futuro gateway HTTPS, non un servizio esposto in rete. L'accettazione reale
 richiede ancora gateway autenticato, disco persistente del fornitore e prova
 di riavvio del servizio.
 
+## Fornitore proposto
+
+Per un solo utente propongo **Google Cloud**. Il codice rimane su GitHub e
+l'app Mac rimane l'interfaccia principale; Google Cloud ospiterà solo la presa
+in carico, il lavoro temporaneo e la pagina privata del pilota. La proposta usa
+Cloud Run per API e worker, Cloud Storage per pacchetti e PDF temporanei,
+Firestore per stato e decisioni idempotenti, Cloud Tasks o Scheduler per
+riconciliare i Batch e Secret Manager per la chiave OpenAI. L'accesso da Mac e
+telefono richiederà autenticazione gestita, non un link pubblico al PDF.
+
+Le risorse andranno collocate in una regione europea dopo aver verificato la
+disponibilità di tutti i servizi necessari. Non è stato creato alcun progetto
+Google Cloud e non esiste un preventivo misurato. Prima di attivare la
+fatturazione servono una prova con input fittizi, limiti di spesa e una stima
+basata su dimensioni e durate misurate. Anche quando il worker è fermo possono
+restare costi di storage temporaneo, richieste, log e servizi di controllo.
+
 ## Architettura proposta per il flusso completo
 
 1. **Mac e presa in carico.** L'app crea il pacchetto, lo carica tramite HTTPS
@@ -68,7 +85,7 @@ di riavvio del servizio.
 
 ## Dipendenze ancora aperte
 
-Servono un account presso un fornitore cloud, una regione, storage temporaneo
+Servono un account Google Cloud con fatturazione, una regione, storage temporaneo
 persistente, una modalità di accesso privata da Mac e telefono e un canale di
 avviso. Nessun servizio è stato distribuito e nessuna chiave OpenAI è stata
 salvata nel repository. Il sistema deve restare in modalità locale finché il
