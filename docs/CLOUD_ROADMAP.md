@@ -46,6 +46,7 @@ Google Cloud e non esiste un preventivo misurato. Prima di attivare la
 fatturazione servono una prova con input fittizi, limiti di spesa e una stima
 basata su dimensioni e durate misurate. Anche quando il worker è fermo possono
 restare costi di storage temporaneo, richieste, log e servizi di controllo.
+Una simulazione di budget con ipotesi esplicite è in [COST_ESTIMATE.md](COST_ESTIMATE.md).
 
 ## Architettura proposta per il flusso completo
 
