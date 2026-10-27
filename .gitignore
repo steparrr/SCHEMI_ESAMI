@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.DS_Store
+._*
+pyinstaller-config/
+build/
+dist/
+esami/
+backups/
+logs/
+state/
+.cache/

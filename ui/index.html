@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="it">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Schemi Esami</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<aside class="sidebar">
+  <div class="brand"><span class="brand-mark">S</span><div>Schemi<span>Il tuo spazio di studio</span></div></div>
+  <button id="newExam" class="new-button">+ Nuova materia</button>
+  <div class="nav-label">LE TUE MATERIE</div><nav id="examList" aria-label="Materie"></nav>
+  <div class="sidebar-footer"><button id="openSettings">Impostazioni del modello</button><span>Locale sul Mac · V2</span></div>
+</aside>
+<main>
+  <header class="topbar"><span>Materiali → schemi</span><span class="local-badge"><i></i> Sul tuo Mac</span></header>
+  <div class="heading"><div><div class="eyebrow">PREPARA IL TUO ESAME</div><h1 id="pageTitle">Una materia, tutti i materiali.</h1><p>Carica le fonti. Gli argomenti e il numero degli schemi vengono organizzati automaticamente.</p></div></div>
+  <div id="notice" role="status" class="notice" hidden></div>
+  <form id="examForm">
+    <section class="panel settings-row">
+      <label class="subject">Nome della materia<input id="examName" name="name" placeholder="Es. Riabilitazione pediatrica" maxlength="160" required></label>
+      <fieldset class="mode-field"><legend>Modalità</legend><div class="mode-switch"><label><input type="radio" name="mode" value="completa" checked><span>Completa</span></label><label><input type="radio" name="mode" value="veloce"><span>Veloce</span></label></div></fieldset>
+      <label id="pagesField" class="pages-field" hidden>Massimo pagine totali<input id="maxPages" type="number" min="1" max="1000" value="20"><small>Comprende immagini e fonti.</small></label>
+    </section>
+    <div class="upload-grid">
+      <section class="panel upload-panel"><div class="section-head"><span class="step-number">01</span><div><h2>Materiali del corso</h2><p>Sbobine, slide, dispense e fotografie.</p></div></div>
+        <label class="dropzone" data-kind="materiali" tabindex="0"><span class="upload-symbol">↑</span><strong>Trascina qui i tuoi file</strong><span>oppure selezionali dal Mac</span><input type="file" multiple data-kind="materiali" aria-label="Carica materiali del corso"><small>PDF · DOCX · PPTX · immagini · Excel · testo</small></label>
+        <div id="files-materiali" class="file-list"></div>
+      </section>
+      <section class="panel upload-panel"><div class="section-head"><span class="step-number">02</span><div><h2>Domande d’esame</h2><p>Facoltative. Servono a dare priorità agli argomenti.</p></div></div>
+        <label class="dropzone compact" data-kind="domande" tabindex="0"><strong>Trascina o seleziona i file delle domande</strong><input type="file" multiple data-kind="domande" aria-label="Carica file delle domande"><small>Documenti, fogli Excel, fotografie e screenshot</small></label>
+        <label class="paste-label">Oppure incolla le domande<textarea id="questionsText" rows="5" placeholder="Una domanda per riga, oppure incolla un resoconto d’esame."></textarea></label>
+        <div id="files-domande" class="file-list"></div>
+      </section>
+    </div>
+    <details class="panel optional"><summary>Programma ufficiale e indicazioni <span>facoltativi</span></summary><div class="optional-body">
+      <label class="dropzone compact" data-kind="programma" tabindex="0"><strong>Carica il programma ufficiale</strong><span>Aiuta a controllare quali argomenti sono richiesti.</span><input type="file" multiple data-kind="programma" aria-label="Carica programma ufficiale"></label>
+      <div id="files-programma" class="file-list"></div><label>Indicazioni per gli schemi<textarea id="instructions" rows="2" placeholder="Es. preparazione per un orale; conserva i confronti fra quadri simili."></textarea></label>
+    </div></details>
+    <div class="action-row"><div><strong>PDF separati + PDF unico</strong><small>File numerati in ordine di studio. Il modello usato è <span id="examModel">—</span>.</small><small>Generazione tramite Batch API sul tuo account. “Veloce” regola la sintesi.</small></div><div class="actions"><button type="button" id="saveExam" class="button ghost">Salva</button><button type="button" id="nightExam" class="button secondary">Genera stanotte</button><button type="submit" id="generateExam" class="button primary">Genera ora <span>↗</span></button></div></div>
+  </form>
+  <section id="results" class="panel results" hidden><div class="section-head"><span class="step-number">03</span><div><h2>I tuoi schemi</h2><p id="progressText">In preparazione</p></div><span id="pageCount" class="count-badge"></span></div><div id="phaseSteps" class="phase-steps"></div><div id="resultList"></div><div id="combinedLinks" class="combined-links"></div><details id="audit" hidden><summary>Organizzazione e copertura dei materiali</summary><div id="auditText"></div></details><button id="upgradeExam" class="button ghost" hidden>Rigenera con il modello predefinito</button></section>
+  <footer>Fonti conservate alla fine dei PDF · Originali caricati organizzati per materia</footer>
+</main>
+<dialog id="settingsDialog"><form id="settingsForm"><div class="dialog-heading"><div><div class="eyebrow">IMPOSTAZIONI</div><h2>Un modello aggiornabile.</h2></div><button type="button" id="closeSettings" class="close-button" aria-label="Chiudi">×</button></div><p>Queste impostazioni valgono per le nuove materie. Le materie esistenti conservano il modello scelto alla creazione.</p>
+  <label>Identificativo API del modello<input id="defaultModel" list="models" required placeholder="Identificativo dalla documentazione del modello"><datalist id="models"></datalist></label><button type="button" id="refreshModels" class="button ghost">Aggiorna elenco modelli disponibili</button><small id="modelInfo">L’elenco indica disponibilità, non qualità o compatibilità con questa pipeline.</small>
+  <div class="profile-grid"><label>Livello di ragionamento<input id="effort" list="efforts" placeholder="Vuoto: parametro non inviato"><datalist id="efforts"><option value="none"><option value="low"><option value="medium"><option value="high"><option value="xhigh"><option value="max"></datalist></label><label>Massimo token di output<input id="outputTokens" type="number" min="1000" max="200000" required></label><label>Massimo token per il retry<input id="retryTokens" type="number" min="1000" max="200000" required></label></div>
+  <label class="check-label"><input id="hasImages" type="checkbox" checked>Il modello supporta immagini</label><label class="check-label"><input id="hasStructured" type="checkbox" checked>Il modello supporta output JSON strutturati</label><p class="help">Usa i parametri previsti dalla documentazione del modello. La compatibilità completa viene verificata dal servizio durante l’invio.</p><div class="dialog-actions"><button type="submit" class="button primary">Salva modello predefinito</button></div></form></dialog>
+<script nonce="__TOKEN__">window.SCHEMI_TOKEN="__TOKEN__";</script><script src="/app.js"></script>
+</body></html>

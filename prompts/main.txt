@@ -1,0 +1,245 @@
+# SCHEMI PER ESAMI — PROMPT V1 (HTML + MERMAID + IMMAGINI LOCALI)
+
+## OBIETTIVO
+Genera uno schema ad alta resa per l’esame indicato nella configurazione, fedele alle fonti fornite.
+L'output deve essere HTML strutturato, pronto per la pipeline locale di rendering PDF.
+
+## VINCOLI DI OUTPUT
+Restituisci ESCLUSIVAMENTE:
+
+<article class="study-schema">
+...
+</article>
+
+Non usare Markdown.
+Non usare code fence.
+Non aggiungere testo prima o dopo l'<article>.
+Non inserire URL o fonti inline nel corpo.
+Le fonti saranno gestite separatamente dalla pipeline.
+
+## STRUTTURA DIDATTICA
+Organizza il contenuto con:
+- h1 per il titolo;
+- h2 per le sezioni principali;
+- h3 per sottosezioni quando servono;
+- paragrafi brevi;
+- elenchi per informazioni memorizzabili;
+- tabelle HTML vere per confronti/classificazioni;
+- callout HTML solo quando realmente utili.
+
+Adatta le sezioni alla materia e allo specifico argomento. Per un argomento clinico considera definizione, fisiopatologia, clinica, diagnosi, trattamento e complicanze. Per un argomento anatomico, farmacologico, normativo, epidemiologico o teorico usa soltanto le sezioni pertinenti. Non aggiungere biomeccanica, chirurgia o classificazioni ortopediche se non presenti nel materiale e pertinenti all'esame. Copri tutti i punti del programma dello schema e le domande effettivamente presenti nelle fonti. Segnala lacune e discordanza fra fonti senza riempirle con contenuti non documentati.
+
+## TABELLE
+Usa esclusivamente HTML vero:
+<table>
+  <thead>...</thead>
+  <tbody>...</tbody>
+</table>
+
+Preferisci 2–5 colonne.
+Evita celle eccessivamente lunghe.
+Non simulare tabelle con testo o spazi.
+
+## DIAGRAMMI DI FLUSSO — MERMAID BILANCIATO PER A4
+
+Quando un argomento contiene una sequenza logica, decisionale, fisiopatologica,
+diagnostica o terapeutica realmente utile allo studio, crea un diagramma Mermaid.
+
+NON usare:
+- ASCII art;
+- frecce Unicode come sostituto del diagramma;
+- tabelle per simulare flowchart.
+
+### OBIETTIVO GRAFICO
+
+I diagrammi saranno inseriti in PDF A4.
+
+Devono quindi risultare:
+- grandi e leggibili;
+- né estremamente verticali;
+- né estremamente orizzontali;
+- preferibilmente rettangolari e proporzionati alla larghezza della pagina.
+
+### SCELTA AUTOMATICA DEL FORMATO
+
+#### A. Diagramma breve
+
+Se il flusso ha indicativamente fino a 5–6 nodi e rimane leggibile in un'unica fascia,
+usa:
+
+<div class="mermaid-block" data-flow-type="diagnostic">
+  <div class="flow-title">Titolo del diagramma</div>
+  <pre class="mermaid">
+flowchart LR
+    A["..."] --> B["..."]
+  </pre>
+</div>
+
+Per diagrammi brevi prevalentemente sequenziali preferire `flowchart LR`.
+
+Se una struttura molto breve è naturalmente gerarchica, è ammesso `flowchart TD`,
+ma solo se non genera una colonna eccessivamente alta.
+
+#### B. Diagramma medio/lungo
+
+Se il flusso ha circa 7–12 nodi, oppure un singolo Mermaid produrrebbe
+una figura troppo alta o troppo larga, usa OBBLIGATORIAMENTE un
+`mermaid-board` a due fasce:
+
+<div class="mermaid-board" data-flow-type="diagnostic">
+  <div class="flow-title">Titolo del diagramma</div>
+
+  <pre class="mermaid-row">
+flowchart LR
+    A["..."] --> B["..."] --> C{"...?"}
+    C -->|Sì| D["..."]
+    C -->|No| E["..."]
+    D --> F["..."]
+    E --> F
+  </pre>
+
+  <pre class="mermaid-row">
+flowchart LR
+    G{"...?"}
+    G -->|Sì| H["..."]
+    G -->|No| I["..."]
+    H --> I
+    I --> J["..."]
+  </pre>
+</div>
+
+Il renderer locale inserirà automaticamente una freccia verticale fra le due fasce.
+
+### REGOLE PER DIVIDERE IN DUE FASCE
+
+- la prima fascia deve rappresentare la prima metà logica dell'algoritmo;
+- la seconda fascia deve continuare direttamente il ragionamento;
+- non duplicare interi blocchi di testo;
+- il punto finale della prima fascia deve portare semanticamente al primo nodo della seconda;
+- mantenere le singole fasce compatte;
+- cercare una distribuzione visiva equilibrata dei nodi;
+- evitare una prima fascia enorme e una seconda quasi vuota.
+
+### DIAGRAMMI MOLTO COMPLESSI
+
+Se servirebbero più di circa 12 nodi:
+- NON rimpicciolire tutto;
+- preferire due diagrammi distinti;
+- oppure due `mermaid-board` separati con titoli specifici.
+
+### SINTASSI E LEGGIBILITÀ
+
+- preferire nodi di 2–12 parole;
+- massimo 2–3 rami principali per decisione;
+- usare `{"Decisione?"}` per i nodi decisionali;
+- usare etichette `|Sì|`, `|No|` quando appropriate;
+- niente styling Mermaid personalizzato;
+- niente HTML dentro il codice Mermaid;
+- niente URL;
+- niente fonti inline;
+- non inventare cut-off, indicazioni o passaggi decisionali non sostenuti dalle fonti.
+
+### PRIORITÀ
+
+Valuta in questo ordine:
+1. iter diagnostico;
+2. trattamento;
+3. fisiopatologia.
+
+Di norma inserire 1–3 diagrammi realmente utili per schema.
+
+### REGOLA FINALE
+
+Non usare mai frecce testuali come sostituto di un vero diagramma Mermaid.
+Il resto dello schema deve rimanere HTML normale.
+
+## IMMAGINI LOCALI
+Può essere fornito un IMAGE MANIFEST.
+Puoi usare SOLO immagini presenti nel manifest.
+
+Ogni immagine inserita deve usare ESATTAMENTE:
+
+<figure class="image-card">
+  <img data-local-id="LOCAL_IMAGE_ID" alt="Breve descrizione">
+  <figcaption>Didascalia didattica</figcaption>
+  <div class="recognize-box">
+    <div class="recognize-title">Cosa riconoscere</div>
+    <ul>
+      <li>Reperto realmente visibile e utile</li>
+    </ul>
+  </div>
+</figure>
+
+Non inventare LOCAL_IMAGE_ID.
+Non fingere di aver visto un'immagine se hai solo una descrizione insufficiente.
+Non usare immagini decorative.
+
+Preferisci immagini utili per l'argomento: anatomia, istologia, reperti clinici o strumentali, meccanismi, procedure, classificazioni e grafici realmente presenti nelle fonti.
+
+Quantità indicativa:
+- schema clinico: 1–3;
+- anatomico/radiologico: 3–6;
+- iconografico: anche di più, solo se utili.
+
+Colloca ogni immagine vicino al testo pertinente.
+La didascalia deve spiegare perché l'immagine è didatticamente utile.
+
+## CALLOUT
+Se necessari usa:
+<div class="callout key">...</div>
+<div class="callout warning">...</div>
+<div class="callout memory">...</div>
+<div class="callout discordance">...</div>
+
+Non abusarne.
+
+## QUALITÀ E IMPAGINAZIONE
+Prima di terminare controlla:
+- HTML ben formato;
+- nessun Markdown residuo;
+- nessun tag troncato;
+- nessuna parola spezzata artificialmente;
+- tabelle coerenti per numero di colonne;
+- flowchart Mermaid sintatticamente validi;
+- nessun URL nel testo;
+- nessun LOCAL_IMAGE_ID inventato;
+- nessuna ripetizione inutile;
+- nessun paragrafo eccessivamente lungo.
+
+## REGOLA FINALE
+Restituisci soltanto l'<article class="study-schema"> completo.
+
+## GERARCHIA DEI TITOLI — OBBLIGATORIA
+
+Usa i livelli HTML in modo rigorosamente coerente:
+
+- `<h1>`: SOLO il titolo generale dello schema.
+  Esempio:
+  `<h1>Schema 01 — Titolo dell’argomento</h1>`
+
+- `<h2>`: SOLO i macro-argomenti principali dello schema.
+  Esempi:
+  `<h2>1. Primo macro-argomento</h2>`
+  `<h2>2. Secondo macro-argomento</h2>`
+
+- `<h3>`: sottosezioni interne al macro-argomento.
+  Esempi:
+  `<h3>Definizione e anatomia</h3>`
+  `<h3>Clinica</h3>`
+  `<h3>Diagnosi</h3>`
+  `<h3>Trattamento</h3>`
+
+- `<h4>`: eventuale livello ulteriore, da usare solo quando realmente necessario.
+
+Non saltare livelli.
+Non usare `<h2>` per semplici sottosezioni.
+Non usare grassetto al posto di un titolo strutturale.
+
+La pipeline PDF applicherà automaticamente uno stile uniforme:
+- H1: rosso scuro, 21 pt;
+- H2: rosso, 15 pt;
+- H3: blu, 11.5 pt;
+- H4: grigio-blu, 10.2 pt.
+
+Ogni nuovo H2 successivo al primo verrà automaticamente fatto iniziare su una nuova pagina.
+Per questo motivo un H2 deve corrispondere realmente a un nuovo macro-argomento.
