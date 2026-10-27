@@ -60,6 +60,7 @@ def _has_secret_field(value):
 
 def _source_files(project: Path, root: Path, slug: str) -> list[tuple[str, Path]]:
     files = [("config/pipeline.json", project / "config/pipeline.json"),
+             ("config/mermaid.json", project / "config/mermaid.json"),
              ("prompts/main.txt", project / "prompts/main.txt"),
              (f"esami/{slug}/esame.json", root / "esame.json")]
     custom = root / "prompt.txt"
@@ -81,7 +82,7 @@ def _valid_name(name: str, slug: str) -> bool:
     parts = tuple(name.split("/"))
     if not parts or any(part in {"", ".", ".."} for part in parts):
         return False
-    if name in {"config/pipeline.json", "prompts/main.txt", f"esami/{slug}/esame.json",
+    if name in {"config/pipeline.json", "config/mermaid.json", "prompts/main.txt", f"esami/{slug}/esame.json",
                 f"esami/{slug}/prompt.txt"}:
         return True
     return len(parts) >= 4 and parts[:3] == ("esami", slug, "input")
@@ -173,8 +174,20 @@ def verify_package(package: Path, project: Path | None = None) -> dict:
         files = manifest.get("files")
         if not isinstance(files, dict) or set(names) != set(files) | {"manifest.json"}:
             raise ValueError("Elenco dei file del pacchetto non corrispondente.")
-        if not {"config/pipeline.json", "prompts/main.txt", f"esami/{slug}/esame.json"}.issubset(files):
+        if not {"config/pipeline.json", "config/mermaid.json", "prompts/main.txt",
+                f"esami/{slug}/esame.json"}.issubset(files):
             raise ValueError("File obbligatori mancanti.")
+        if not any(name.startswith(f"esami/{slug}/input/") for name in files):
+            raise ValueError("Nessun materiale d'esame nel pacchetto.")
+        if (archive.getinfo(f"esami/{slug}/esame.json").file_size > MAX_MANIFEST_BYTES
+                or archive.getinfo("config/pipeline.json").file_size > MAX_MANIFEST_BYTES):
+            raise ValueError("Configurazione o esame troppo grandi.")
+        exam = json.loads(archive.read(f"esami/{slug}/esame.json"))
+        config = json.loads(archive.read("config/pipeline.json"))
+        if _has_secret_field(exam) or _has_secret_field(config):
+            raise ValueError("Il pacchetto contiene un campo di credenziale.")
+        if exam.get("revision", 0) != manifest.get("revision"):
+            raise ValueError("Revisione dell'esame non corrispondente.")
         total = 0
         for info in infos:
             if info.is_dir() or (info.external_attr >> 16) & 0o170000 == 0o120000:
@@ -226,6 +239,23 @@ def extract_package(package: Path, destination: Path, project: Path) -> dict:
                     os.fsync(output.fileno())
                 if checksum.hexdigest() != details["sha256"]:
                     raise ValueError("Il pacchetto è cambiato durante l'estrazione.")
+        for folder in ("scripts", "renderer"):
+            (temporary / folder).mkdir()
+            for source in (Path(project) / folder).glob("*.py"):
+                shutil.copy2(source, temporary / folder / source.name)
+        if code_fingerprint(temporary) != manifest["code_fingerprint"]:
+            raise ValueError("Il codice del worker è cambiato durante la preparazione.")
+        exam_root = temporary / "esami" / manifest["exam_slug"]
+        for folder in ("corpus", "images/originals", "source_packs", "external_supplements",
+                       "output/pdf", "output/html", "output/raw", "output/reports", "batch", "state",
+                       "logs", "diagrams/generated"):
+            (exam_root / folder).mkdir(parents=True, exist_ok=True)
+        for root, dirs, _ in os.walk(temporary, topdown=False):
+            handle = os.open(root, os.O_RDONLY)
+            try:
+                os.fsync(handle)
+            finally:
+                os.close(handle)
         temporary.rename(destination)
         directory = os.open(destination.parent, os.O_RDONLY)
         try:

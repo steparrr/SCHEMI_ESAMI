@@ -23,6 +23,13 @@ esistenti per non perdere ID o duplicare richieste. Verifica l'integrità e
 permette un'estrazione atomica in una directory nuova. Non invia il pacchetto
 in rete e non autorizza ancora il messaggio «Puoi spegnere il Mac».
 
+`scripts/cloud_inbox.py` registra localmente una presa in carico durevole e
+idempotente: un retry dello stesso pacchetto restituisce la stessa ricevuta,
+mentre lo stesso ID con contenuto diverso è rifiutato. È una libreria per il
+futuro gateway HTTPS, non un servizio esposto in rete. L'accettazione reale
+richiede ancora gateway autenticato, disco persistente del fornitore e prova
+di riavvio del servizio.
+
 ## Architettura proposta per il flusso completo
 
 1. **Mac e presa in carico.** L'app crea il pacchetto, lo carica tramite HTTPS
