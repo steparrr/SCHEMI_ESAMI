@@ -1,5 +1,22 @@
 # Schemi Esami nel cloud: stato e percorso
 
+## Scelta a costo minimo dopo il confronto sui costi
+
+La soluzione da valutare per prima è mantenere sul Mac preparazione, OCR,
+controllo del PDF pilota, rendering e archivio finale. Solo le richieste Batch
+vengono elaborate da OpenAI. Dopo che il pilota è stato controllato sul Mac e
+gli altri Batch hanno ID di accettazione persistiti, il Mac può essere spento
+durante l'attesa remota; alla riapertura riprende download e PDF. Questa
+soluzione non richiede un fornitore cloud aggiuntivo, ma **non offre**
+approvazione del pilota o monitoraggio dell'app dal telefono a Mac spento, né
+produce PDF mentre il Mac è spento. Un esito di invio incerto resta da
+riconciliare senza seconda POST.
+
+La proposta Google Cloud descritta sotto rimane un'opzione separata se in
+futuro diventano indispensabili la produzione dei PDF e la revisione del
+pilota dal telefono senza riaccendere il Mac. Il codice di handoff già aggiunto
+è preparatorio e non cambia il percorso locale esistente.
+
 ## Stato verificato
 
 Il codice estratto dallo ZIP `Sorgenti` è nel repository. La GUI è Tkinter su

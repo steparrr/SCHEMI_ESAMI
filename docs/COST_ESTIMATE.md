@@ -1,5 +1,24 @@
 # Stima preliminare dei costi cloud
 
+## Alternativa senza cloud aggiuntivo
+
+Se preparazione, OCR, PDF pilota e PDF finali restano sul Mac, e OpenAI esegue
+soltanto i Batch già accettati mentre il Mac è spento, il **costo aggiuntivo di
+Google Cloud è €0**. Restano le normali tariffe OpenAI, l'elettricità del Mac e
+lo spazio disco locale. Il Mac deve restare acceso per generare e approvare il
+pilota; dopo l'accettazione degli altri Batch può essere spento, ma download e
+PDF finali aspettano la riapertura. Nessuna pagina mobile dell'app è operativa
+in questo percorso.
+
+Per Psichiatria non è disponibile una stima numerica verificata delle richieste
+OpenAI: gli allegati citano quell'esame, ma non forniscono dimensioni, durata o
+token misurati. Il report cloud precedente dice esplicitamente che la sua
+vecchia stima per Psichiatria era ipotetica. La spesa OpenAI effettiva va
+ricostruita dal riepilogo d'uso o dagli output del lavoro, senza caricare
+materiali di studio integrali su GitHub.
+
+## Opzione Google Cloud completa
+
 **Data:** 27 ottobre 2026. **Stato:** simulazione per pianificare il budget,
 non preventivo. Il servizio cloud non è ancora distribuito. Nel repository ci
 sono i sorgenti, ma non misure di esami reali, durate, dimensioni o consumo di
