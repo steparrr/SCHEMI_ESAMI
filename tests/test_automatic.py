@@ -61,6 +61,14 @@ class AutomaticTests(unittest.TestCase):
         self.base = Path(self.temp.name)
         shutil.copytree(PROJECT / "config", self.base / "config")
         self.root = create_exam("Materia tecnica", self.base)
+        # These cases exercise the established non-pilot workflow with tiny
+        # simulated one-page plans. Pilot gating and 25-page minimums have
+        # dedicated coverage in test_pipeline.py and test_study_pages.py.
+        exam = read_json(self.root / "esame.json")
+        exam["pipeline"]["review_first_schema"] = False
+        exam["pipeline"].pop("schema_page_min", None)
+        exam["pipeline"].pop("schema_page_max", None)
+        write_json(self.root / "esame.json", exam)
         for topic in ("alfa", "beta"):
             (self.root / "input/sbobine" / (topic + ".txt")).write_text((topic + " definizione criterio distinzione precisa. ") * 60)
         (self.root / "input/domande/domande.txt").write_text("Descrivi alfa\nDescrivi beta\n")

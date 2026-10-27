@@ -1,5 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules
+from pathlib import Path
+
+spec_root = Path(SPECPATH).resolve()
+datas = [(str(spec_root / folder), folder) for folder in ("scripts", "renderer", "prompts", "config")]
+mac_ocr = spec_root / ".cache/mac-ocr"
+if mac_ocr.is_file():
+    datas.append((str(mac_ocr), ".cache"))
 
 hiddenimports = []
 hiddenimports += collect_submodules('encodings')
@@ -7,10 +14,10 @@ hiddenimports += ['background_worker', 'native_app']
 
 
 a = Analysis(
-    ['/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/native.py'],
-    pathex=['/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/scripts'],
+    [str(spec_root / 'native.py')],
+    pathex=[str(spec_root / 'scripts')],
     binaries=[],
-    datas=[('/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/scripts', 'scripts'), ('/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/.cache/mac-ocr', '.cache'), ('/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/renderer', 'renderer'), ('/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/prompts', 'prompts'), ('/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/config', 'config')],
+    datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
@@ -37,7 +44,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/SchemiEsami.icns'],
+    icon=[str(spec_root / 'SchemiEsami.icns')],
 )
 coll = COLLECT(
     exe,
@@ -50,7 +57,7 @@ coll = COLLECT(
 )
 app = BUNDLE(
     coll,
-    name='Schemi Esami 2026.10.3.app',
-    icon='/Users/Administrator/Documents/Codex/2026-10-12/nel/work/schemi-esami-rescue/SchemiEsami.icns',
+    name='Schemi Esami.app',
+    icon=str(spec_root / 'SchemiEsami.icns'),
     bundle_identifier=None,
 )

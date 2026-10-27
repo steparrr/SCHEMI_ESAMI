@@ -139,9 +139,9 @@ def main():
         codecs.lookup("utf-8-sig")
         assert sqlite3.sqlite_version
         assert background_worker.main and native_app.main and finalize_pdf.finalize
-        assert (project / ".cache/mac-ocr").is_file()
+        ocr_available = (project / ".cache/mac-ocr").is_file() or shutil.which("tesseract") is not None
         assert pymupdf.paper_rect("a4").width > 500
-        print("SELF_TEST_OK", flush=True)
+        print("SELF_TEST_OK" + ("" if ocr_available else " OCR_NON_DISPONIBILE"), flush=True)
     elif "--worker" in sys.argv:
         from background_worker import main as worker_main
         worker_main(project)
