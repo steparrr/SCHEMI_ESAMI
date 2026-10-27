@@ -1,5 +1,12 @@
 # Schemi Esami — finestra locale
 
+> Nota per questo repository: il testo seguente proviene dal pacchetto Mac
+> originale e descrive anche file (`INSTALLA.command`, `AGGIORNA.command`) che
+> non erano presenti nello ZIP `Sorgenti` ricevuto. Per installare dipendenze e
+> lanciare i test da questa copia usa [README.md](README.md). La verifica
+> originale di 45 test riportata sotto è storica; i risultati attuali sono
+> quelli dei test eseguiti sul codice del repository.
+
 La nuova interfaccia è una finestra desktop Tkinter/ttk. Non apre un browser, non avvia un server HTTP e non richiede un indirizzo IP. Usa direttamente lo stesso motore della V2.
 
 ## Aggiornare la V2 già installata
