@@ -1,21 +1,8 @@
 # Schemi Esami nel cloud: stato e percorso
 
-## Scelta del 28 ottobre 2026: cloud a consumo
+## Scelta a costo minimo dopo il confronto sui costi
 
-L'architettura scelta per permettere il lavoro a Mac spento è **Google Cloud
-Run + Mistral AI**. Cloud Run ospiterà l'API privata e i worker attivati solo
-quando serve; Cloud Storage e un archivio di stato persistente conserveranno
-temporaneamente input, risultati, ID remoti e decisioni sul pilota. Il modello
-di riferimento è la linea Mistral Large con input visivo, da fissare a una
-versione API e verificare con una prova rappresentativa. Il codice attuale
-usa ancora OpenAI Responses API: servono un adattatore Mistral, la gestione
-degli invii e delle risposte, l'autenticazione e la pagina per il telefono.
-Nessun servizio Google Cloud è stato distribuito e questa scelta non significa
-ancora che il Mac possa essere spento durante un esame.
-
-## Alternativa locale a costo minimo
-
-La soluzione locale precedente mantiene sul Mac preparazione, OCR,
+La soluzione da valutare per prima è mantenere sul Mac preparazione, OCR,
 controllo del PDF pilota, rendering e archivio finale. Solo le richieste Batch
 vengono elaborate da OpenAI. Dopo che il pilota è stato controllato sul Mac e
 gli altri Batch hanno ID di accettazione persistiti, il Mac può essere spento
@@ -25,9 +12,10 @@ approvazione del pilota o monitoraggio dell'app dal telefono a Mac spento, né
 produce PDF mentre il Mac è spento. Un esito di invio incerto resta da
 riconciliare senza seconda POST.
 
-La soluzione locale resta disponibile finché il percorso cloud scelto non è
-stato implementato e verificato. Il codice di handoff già aggiunto è
-preparatorio e non cambia il percorso locale esistente.
+La proposta Google Cloud descritta sotto rimane un'opzione separata se in
+futuro diventano indispensabili la produzione dei PDF e la revisione del
+pilota dal telefono senza riaccendere il Mac. Il codice di handoff già aggiunto
+è preparatorio e non cambia il percorso locale esistente.
 
 ## Stato verificato
 
@@ -59,16 +47,15 @@ futuro gateway HTTPS, non un servizio esposto in rete. L'accettazione reale
 richiede ancora gateway autenticato, disco persistente del fornitore e prova
 di riavvio del servizio.
 
-## Fornitore scelto e servizi proposti
+## Fornitore proposto
 
-Il fornitore scelto è **Google Cloud**. Il codice rimane su GitHub e
+Per un solo utente propongo **Google Cloud**. Il codice rimane su GitHub e
 l'app Mac rimane l'interfaccia principale; Google Cloud ospiterà solo la presa
 in carico, il lavoro temporaneo e la pagina privata del pilota. La proposta usa
 Cloud Run per API e worker, Cloud Storage per pacchetti e PDF temporanei,
 Firestore per stato e decisioni idempotenti, Cloud Tasks o Scheduler per
-riconciliare le richieste remote e Secret Manager per la chiave Mistral.
-L'accesso da Mac e telefono richiederà autenticazione gestita, non un link
-pubblico al PDF.
+riconciliare i Batch e Secret Manager per la chiave OpenAI. L'accesso da Mac e
+telefono richiederà autenticazione gestita, non un link pubblico al PDF.
 
 Le risorse andranno collocate in una regione europea dopo aver verificato la
 disponibilità di tutti i servizi necessari. Non è stato creato alcun progetto
@@ -87,11 +74,11 @@ Una simulazione di budget con ipotesi esplicite è in [COST_ESTIMATE.md](COST_ES
    l'app mostra che il Mac può essere spento.
 2. **Servizio e worker.** Un'API privata conserva stato e artefatti temporanei.
    Un worker Linux usa il motore esistente con una directory per lavoro,
-   volume persistente, versioni del codice verificate, credenziale Mistral nel
+   volume persistente, versioni del codice verificate, credenziale OpenAI nel
    gestore segreti del fornitore e un lock per lavoro. Il polling può essere
    schedulato; il worker di rendering non deve restare acceso durante l'attesa
-   delle richieste Mistral. Riavvii e timeout devono riconciliare gli ID prima
-   di qualsiasi nuova POST.
+   del Batch. Riavvii e timeout devono riconciliare gli ID prima di qualsiasi
+   nuova POST.
 3. **Pilota sul telefono.** Una pagina privata mostra stato essenziale e PDF
    pilota. Approvazione o feedback sono autenticati, registrati una volta e
    legati all'hash esatto del PDF. Gli altri schemi restano bloccati fino alla
@@ -118,7 +105,7 @@ Una simulazione di budget con ipotesi esplicite è in [COST_ESTIMATE.md](COST_ES
 
 Servono un account Google Cloud con fatturazione, una regione, storage temporaneo
 persistente, una modalità di accesso privata da Mac e telefono e un canale di
-avviso. Nessun servizio è stato distribuito e nessuna chiave Mistral è stata
+avviso. Nessun servizio è stato distribuito e nessuna chiave OpenAI è stata
 salvata nel repository. Il sistema deve restare in modalità locale finché il
 flusso completo non supera i criteri sopra.
 

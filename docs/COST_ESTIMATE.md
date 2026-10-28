@@ -1,27 +1,5 @@
 # Stima preliminare dei costi cloud
 
-## Architettura scelta: Google Cloud Run + Mistral AI
-
-La scelta del 28 ottobre 2026 è eseguire il programma nel cloud **a consumo**,
-con Cloud Run per API e worker e Mistral AI per la generazione. Il calcolo
-Google Cloud più sotto resta uno scenario illustrativo, non una tariffa
-verificata: circa **€3–8 per un esame al mese** con 5 ore di calcolo attivo,
-10 GB di dati temporanei per 7 giorni e 10 GB di download. Cloud Run può
-fermarsi quando è inattivo, mentre storage, stato e controlli periodici
-possono avere piccoli costi anche tra un esame e l'altro.
-
-Il catalogo pubblico LiteLLM consultato il 28 ottobre 2026 riporta per
-`mistral-large-4` **$0,68 per milione di token in ingresso** e **$2,09 per
-milione in uscita**. Il listino ufficiale non è raggiungibile da questo
-ambiente e va controllato prima di impostare un budget. La spesa effettiva
-dipenderà dai token e dalle immagini conteggiati da Mistral, dalla qualità
-degli output, da eventuali retry e da tasse e cambio. La formula è
-`milioni_input × 0,68 + milioni_output × 2,09` dollari, se quelle tariffe
-sono ancora applicabili. Non è stato eseguito alcun lavoro reale con Mistral.
-
-Fonte tariffaria da ricontrollare: [catalogo LiteLLM](https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json),
-[scheda Mistral Large 4](https://docs.mistral.ai/models/mistral-large-4).
-
 ## Alternativa senza cloud aggiuntivo
 
 Se preparazione, OCR, PDF pilota e PDF finali restano sul Mac, e OpenAI esegue
@@ -41,12 +19,12 @@ materiali di studio integrali su GitHub.
 
 ## Opzione Google Cloud completa
 
-**Data:** 28 ottobre 2026. **Stato:** simulazione per pianificare il budget,
+**Data:** 27 ottobre 2026. **Stato:** simulazione per pianificare il budget,
 non preventivo. Il servizio cloud non è ancora distribuito. Nel repository ci
-sono i sorgenti, ma non misure pubblicabili di durate, dimensioni o consumo
-di token per il nuovo modello. I listini ufficiali Google Cloud e Mistral
-hanno restituito HTTP 403 dalla rete di questo ambiente: le tariffe
-ipotizzate qui devono essere verificate prima di attivare risorse a pagamento.
+sono i sorgenti, ma non misure di esami reali, durate, dimensioni o consumo di
+token OpenAI. I listini ufficiali Google Cloud e OpenAI hanno restituito HTTP
+403 dalla rete di questo ambiente: le tariffe ipotizzate qui devono essere
+verificate prima di attivare risorse a pagamento.
 
 ## Ipotesi del calcolo
 
@@ -76,10 +54,10 @@ contato come ora di worker acceso. Le dimensioni e le durate sono scenari,
 
 ## Costi esclusi e limiti
 
-Le richieste **Mistral** sono una voce distinta, potenzialmente superiore al
-costo dell'infrastruttura. Senza misure reali di token in ingresso/uscita con
-il modello scelto, numero di schemi, immagini e retry, non è corretto
-attribuire un importo finale per esame. La formula è:
+Le richieste **OpenAI** sono una voce distinta, potenzialmente superiore al
+costo dell'infrastruttura. Senza conteggi reali di token in ingresso/uscita,
+numero di schemi, immagini, retry e listino corrente del modello configurato
+(`gpt-6.1-sol`), non è corretto attribuire un importo per esame. La formula è:
 `token_input/1.000.000 × prezzo_input + token_output/1.000.000 × prezzo_output`,
 aggiungendo immagini, retry e altri addebiti applicabili. Codex e l'eventuale
 abbonamento dell'utente non sono inclusi. Nessuna cifra sopra è un tetto
@@ -97,11 +75,11 @@ regole di conservazione.
 Misurare su un esame rappresentativo, senza condividere fonti private: GB di
 input, GB di PDF finali, ore effettive di preparazione/OCR/rendering, durata di
 conservazione richiesta, numero di schemi e token/immagini/retry registrati
-dall'uso del modello. Verificare poi prezzi e disponibilità dei servizi nella
+dall'uso OpenAI. Verificare poi prezzi e disponibilità dei servizi nella
 regione europea scelta, prima di impostare un budget di avviso e distribuire
 il servizio.
 
 Listini ufficiali da ricontrollare: [Cloud Run](https://cloud.google.com/run/pricing),
 [Cloud Storage](https://cloud.google.com/storage/pricing),
 [Firestore](https://cloud.google.com/firestore/pricing),
-[Mistral AI](https://docs.mistral.ai/models/mistral-large-4).
+[OpenAI API](https://openai.com/api/pricing/).
