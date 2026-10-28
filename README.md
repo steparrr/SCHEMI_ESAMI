@@ -23,6 +23,11 @@ Tesseract con i pacchetti linguistici disponibili.
 
 ## Funzioni cloud
 
+La soluzione scelta per il lavoro a Mac spento è Google Cloud Run a consumo
+con Mistral AI. La progettazione e le ipotesi di costo sono in
+[`docs/CLOUD_ROADMAP.md`](docs/CLOUD_ROADMAP.md) e
+[`docs/COST_ESTIMATE.md`](docs/COST_ESTIMATE.md).
+
 Il codice su GitHub consente di sviluppare e testare il programma nel cloud
 anche quando il Mac è spento. **La produzione degli esami non è ancora
 autonoma nel cloud.** La preparazione, il polling e i PDF dipendono tuttora da
