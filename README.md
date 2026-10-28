@@ -21,6 +21,13 @@ destinato a PyInstaller su macOS; la build macOS non è stata verificata in un
 ambiente Linux. L'OCR delle scansioni usa il helper macOS se installato oppure
 Tesseract con i pacchetti linguistici disponibili.
 
+Per installare i sorgenti su Mac sono disponibili `INSTALLA.command` e
+`APRI.command`; per aggiornare una cartella V2 già installata, `AGGIORNA.command`.
+Le funzioni locali aggiunte, i limiti e gli eventuali programmi facoltativi
+per Medical Illustrator sono descritti in [LEGGIMI-NATIVA.md](LEGGIMI-NATIVA.md).
+Medical Illustrator crea bozze SVG senza nuove API o software grafici; non
+inserisce automaticamente immagini nei PDF.
+
 ## Funzioni cloud
 
 Il codice su GitHub consente di sviluppare e testare il programma nel cloud

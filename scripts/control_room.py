@@ -1,0 +1,105 @@
+"""Read-only local project view. No remote client is constructed here."""
+from __future__ import annotations
+
+import statistics
+from collections import Counter, defaultdict
+from pathlib import Path
+
+from common import read_json
+from monitor import overview
+from telemetry import Telemetry
+
+
+def snapshot(root: Path, worker_active=False):
+    root = Path(root)
+    state = read_json(root / "state/pipeline.json", {})
+    exam = read_json(root / "esame.json", {})
+    jobs = state.get("jobs") or {}
+    latest = state.get("latest") or {}
+    current = [jobs[key] for key in latest.values() if key in jobs]
+    current.sort(key=lambda job: int(job.get("numero") or 0))
+    batches = state.get("batches") or []
+    events = Telemetry(root).recent(1000)
+    durations = defaultdict(list)
+    failures = Counter()
+    for event in events:
+        stage = event["stage"]
+        if event["status"] == "failure":
+            failures[stage] += 1
+        if event["status"] == "success" and event["duration_ms"] is not None:
+            durations[stage].append(event["duration_ms"])
+    performance = []
+    for stage in sorted(set(durations) | set(failures)):
+        values = sorted(durations[stage])
+        performance.append({"stage": stage, "success": len(values), "failed": failures[stage],
+                            "median_ms": round(statistics.median(values), 1) if values else None,
+                            "max_ms": round(values[-1], 1) if values else None})
+    incidents = []
+    for job in current:
+        if job.get("error"):
+            incidents.append({"kind": "schema", "number": job.get("numero"),
+                              "status": job.get("status"), "detail": str(job["error"])[:300]})
+    for batch in batches:
+        if batch.get("stage") in {"creating", "uncertain"} and not (batch.get("batch_id") or batch.get("response_id")):
+            incidents.append({"kind": "remote_uncertain", "status": batch.get("stage"),
+                              "detail": "Accettazione remota incerta: riconciliare, senza nuovo invio."})
+        elif batch.get("error"):
+            incidents.append({"kind": "batch", "status": batch.get("status"),
+                              "detail": str(batch["error"])[:300]})
+    pilot = state.get("pilot_review") or {}
+    approved = bool(pilot.get("approved_hash") and pilot.get("approved_hash") == latest.get("1"))
+    ready = bool(current and current[0].get("numero") == 1 and current[0].get("status") == "PDF_OK")
+    return {
+        "project": root.name, "name": exam.get("nome", root.name),
+        "execution_mode": exam.get("execution_mode", "batch"),
+        "summary": overview(root, worker_active),
+        "counts": {"pdf_ok": sum(job.get("status") == "PDF_OK" for job in current),
+                   "html_ok": sum(job.get("status") in {"HTML_OK", "RENDERING", "PDF_OK"} for job in current),
+                   "total": len(current),
+                   "accepted_batches": sum(bool(batch.get("batch_id") or batch.get("response_id")) for batch in batches),
+                   "waiting_batches": sum(batch.get("stage") in {"prepared", "uploaded"} for batch in batches)},
+        "pilot": {"generated": ready, "ready_for_review": ready and not approved, "approved": approved},
+        "jobs": [{"number": job.get("numero"), "title": job.get("title"), "hash": str(job.get("hash", ""))[:12],
+                  "status": job.get("status"), "retry": job.get("retry_count", 0),
+                  "pdf": job.get("public_pdf") if job.get("status") == "PDF_OK" else None,
+                  "error": str(job.get("error") or "")[:300]} for job in current],
+        "batches": [{"mode": batch.get("mode"), "id": batch.get("batch_id") or batch.get("response_id"),
+                     "stage": batch.get("stage"), "status": batch.get("status"),
+                     "counts": batch.get("request_counts") or {}, "checked_at": batch.get("remote_checked_at")}
+                    for batch in batches],
+        "performance": performance, "incidents": incidents,
+        "events": [{"at": e["recorded_at_utc"], "stage": e["stage"], "name": e["event_name"],
+                    "status": e["status"], "duration_ms": e["duration_ms"],
+                    "hash": (e["request_hash"] or "")[:12]} for e in events[:100]],
+        "telemetry_available": bool(events),
+    }
+
+
+def format_snapshot(view):
+    counts = view["counts"]
+    lines = [f"{view['name']} · {view['execution_mode']}",
+             f"PDF pronti {counts['pdf_ok']}/{counts['total']} · HTML pronti {counts['html_ok']}/{counts['total']}",
+             f"Batch accettati {counts['accepted_batches']} · in attesa locale {counts['waiting_batches']}",
+             "Pilota: " + ("approvato" if view["pilot"]["approved"] else
+                           "pronto per revisione" if view["pilot"]["ready_for_review"] else "in attesa"),
+             "", "Mac → OpenAI → Mac", view["summary"]["local"], view["summary"]["server"],
+             view["summary"]["finish"], "", "Schemi correnti:"]
+    lines += [f"{j['number']:02d} · {j['title']} · {j['status']} · hash {j['hash']} · retry {j['retry']}"
+              for j in view["jobs"] if isinstance(j["number"], int)]
+    lines += ["", "Batch (stati osservati):"]
+    for b in view["batches"]:
+        lines.append(f"{b['mode'] or 'batch'} · {b['id'] or 'ID non confermato'} · locale {b['stage']} · server {b['status'] or 'non noto'}"
+                     f" · ultimo controllo {b['checked_at'] or 'mai'}")
+    lines += ["", "Durate locali misurate:" if view["telemetry_available"] else
+              "Durate: non disponibili per questo progetto storico."]
+    for row in view["performance"]:
+        lines.append(f"{row['stage']} · riuscite {row['success']} · errori {row['failed']}"
+                     f" · mediana {row['median_ms'] if row['median_ms'] is not None else 'n/d'} ms"
+                     f" · massimo {row['max_ms'] if row['max_ms'] is not None else 'n/d'} ms")
+    lines += ["", "Anomalie:"]
+    lines += [f"{i['kind']} · {i['status']} · {i['detail']}" for i in view["incidents"][:10]] or ["Nessuna anomalia registrata."]
+    lines += ["", "Ultimi eventi locali:"]
+    lines += [f"{e['at']} · {e['stage']} · {e['name']} · {e['status'] or '—'} · "
+              f"{e['duration_ms'] if e['duration_ms'] is not None else 'n/d'} ms"
+              for e in view["events"][:30]]
+    return "\n".join(lines)

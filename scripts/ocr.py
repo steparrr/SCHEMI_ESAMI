@@ -20,7 +20,7 @@ def ocr_image(path: Path):
             raise ValueError("L'OCR richiede la lingua italiana o inglese di Tesseract.")
         process = subprocess.run(["tesseract", str(path), "stdout", "-l", chosen, "--psm", "3"], capture_output=True, text=True, timeout=150)
     else:
-        raise ValueError("OCR non disponibile. Riesegui INSTALLA.command per attivare la lettura di scansioni e fotografie.")
+        raise ValueError("OCR non disponibile. Per scansioni e fotografie installa Tesseract con lingua italiana/inglese oppure usa il helper mac-ocr.")
     if process.returncode:
         raise ValueError("OCR fallito: " + process.stderr.strip()[:700])
     return process.stdout.strip()

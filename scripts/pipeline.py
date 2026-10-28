@@ -20,6 +20,7 @@ from remote import HTTPError
 from exports import export_all, publish
 from model_settings import apply_profile
 from planner import check_analysis, check_plan, prepare_auto
+from telemetry import Telemetry
 
 TERMINAL = {"completed", "failed", "expired", "cancelled"}
 
@@ -119,6 +120,7 @@ class Pipeline:
         self.batches = self.state["batches"]
         self.log_path = root / "logs" / "pipeline.log"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        self.telemetry = Telemetry(root)
 
     def save(self):
         write_json(self.path, self.state)
@@ -257,6 +259,7 @@ class Pipeline:
             temporary.replace(self.root / path)
             self.batches.append({"run_id": run_id, "input_path": str(path), "request_path": group[0]["request"] if mode == "urgent" else None, "mode": mode, "stage": "prepared", "requests": items, "created_at": now()})
             self.save()
+            self.telemetry.record("batch_prepared", "batch_prepare", metrics={"requests": len(items)})
             self.log(f"{'RICHIESTA URGENTE' if mode == 'urgent' else 'MICRO-BATCH'} PRONTA: {len(items)} richieste, run {run_id}")
         self.save()
 
@@ -360,6 +363,8 @@ class Pipeline:
             for item in batch["requests"]:
                 self.jobs[item["hash"]]["status"] = "SUBMITTED"
             self.save()
+            self.telemetry.record("remote_accepted", "remote", locality="remote_observed",
+                                  metrics={"requests": 1})
             self.log("RISPOSTA URGENTE INVIATA: " + response["id"])
         elif batch["stage"] in {"creating", "uncertain"} and not batch.get("response_id"):
             batch.update(stage="uncertain", error="Invio urgente ambiguo: nessun ID ricevuto. Nessun reinvio automatico.")
@@ -374,6 +379,8 @@ class Pipeline:
                                    "failed": int(response.get("status") in {"failed", "cancelled", "incomplete"})}
         batch.pop("error", None)
         self.save()
+        self.telemetry.record("remote_polled", "remote", locality="remote_observed",
+                              metrics={"requests": 1, "completed": batch["request_counts"]["completed"]})
         if response.get("status") in {"queued", "in_progress"}:
             return
         if response.get("status") in {"completed", "incomplete"}:
@@ -435,6 +442,8 @@ class Pipeline:
                     for item in batch["requests"]:
                         self.jobs[item["hash"]]["status"] = "SUBMITTED"
                     self.save()
+                    self.telemetry.record("remote_accepted", "remote", locality="remote_observed",
+                                          metrics={"requests": len(batch["requests"])})
                     self.log("BATCH INVIATO: " + remote["id"])
                 elif batch["stage"] in {"creating", "uncertain"}:
                     remote = self.api.find_batch(batch["input_file_id"], batch["run_id"], self.root.name)
@@ -454,6 +463,11 @@ class Pipeline:
                 batch["remote_checked_at"] = now()
                 batch.pop("error", None)
                 self.save()
+                counts = batch.get("request_counts") or {}
+                self.telemetry.record("remote_polled", "remote", locality="remote_observed",
+                                      metrics={"requests": counts.get("total", 0),
+                                               "completed": counts.get("completed", 0),
+                                               "failed": counts.get("failed", 0)})
                 if remote.get("status") not in TERMINAL:
                     continue
                 for kind in ("output", "error"):
@@ -505,7 +519,8 @@ class Pipeline:
                 (self.root / job["pdf"]).parent.mkdir(parents=True, exist_ok=True)
                 job.update(status="RENDERING", render_started_at=now())
                 self.save()
-                qc = self.render(self.root, job, self.cfg, self.project)
+                with self.telemetry.span("pdf_render", request_hash=job["hash"]):
+                    qc = self.render(self.root, job, self.cfg, self.project)
                 if job.get("page_budget") and qc["pages"] > job["page_budget"]:
                     self.shorten(job, qc["pages"])
                     self.save()

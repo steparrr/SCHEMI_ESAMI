@@ -11,6 +11,7 @@ import fitz
 import ingest_helpers as h
 from common import read_json, write_json
 from formats import IMAGES, extract_pdf, extract_pptx, image_text, normalized_image, spreadsheet_blocks
+from telemetry import Telemetry
 
 IMAGE_FIELDS = ["image_id", "document_id", "source_document", "page_or_position", "path", "filename_originale", "width", "height", "format", "sha256", "perceptual_hash", "caption", "heading", "context_before", "context_after", "status", "filtered_reason"]
 SUPPORTED = {".docx", ".pdf", ".pptx", ".txt", ".md", ".xlsx", ".csv"} | IMAGES
@@ -66,6 +67,7 @@ def parse_document(path, kind, doc_id):
 
 
 def ingest(root: Path, log=print):
+    telemetry = Telemetry(root)
     db = root / "corpus" / "corpus.db"
     db.parent.mkdir(parents=True, exist_ok=True)
     h.create_empty_db(db)
@@ -106,7 +108,8 @@ def ingest(root: Path, log=print):
             if not old:
                 doc_next += 1
             try:
-                blocks, media, questions, chunks, pages = parse_document(path, kind, doc_id)
+                with telemetry.span("document_parse", metrics={"bytes": path.stat().st_size}):
+                    blocks, media, questions, chunks, pages = parse_document(path, kind, doc_id)
                 con.execute("BEGIN")
                 for table, column in (("chunks", "document_id"), ("questions", "source_document_id"), ("images", "document_id"), ("documents", "document_id")):
                     con.execute(f"DELETE FROM {table} WHERE {column}=?", (doc_id,))
@@ -153,11 +156,14 @@ def ingest(root: Path, log=print):
                 con.commit()
                 state["files"][key] = {"sha256": checksum, "document_id": doc_id, "status": "processed"}
                 counts["updated"] += 1
+                telemetry.record("ingest_file_completed", "ingest", metrics={
+                    "bytes": path.stat().st_size, "pages": pages or 0, "images": len(media)})
                 log(f"IMPORTATO: {key}")
             except Exception as error:
                 con.rollback()
                 counts["failed"].append({"file": key, "error": str(error)})
                 state["files"][key] = {"status": "failed", "error": str(error)}
+                telemetry.record("ingest_file_failed", "ingest")
                 log(f"ERRORE IMPORTAZIONE: {key}: {error}")
         h.rebuild_fts(con)
         images = [dict(r) for r in con.execute("SELECT * FROM images ORDER BY image_id, document_id")]

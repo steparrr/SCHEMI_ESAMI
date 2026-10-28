@@ -1,39 +1,57 @@
-# Schemi Esami — finestra locale
+# Schemi Esami V2 — uso locale
 
-> Nota per questo repository: il testo seguente proviene dal pacchetto Mac
-> originale e descrive anche file (`INSTALLA.command`, `AGGIORNA.command`) che
-> non erano presenti nello ZIP `Sorgenti` ricevuto. Per installare dipendenze e
-> lanciare i test da questa copia usa [README.md](README.md). La verifica
-> originale di 45 test riportata sotto è storica; i risultati attuali sono
-> quelli dei test eseguiti sul codice del repository.
+Questa versione usa la finestra desktop Tkinter e il motore OpenAI già presente.
+La preparazione dei materiali, il monitoraggio, i PDF e Medical Illustrator
+girano sul Mac. Per completare una materia quando il Mac è spento servirebbe
+un servizio cloud, che qui non è stato attivato.
 
-La nuova interfaccia è una finestra desktop Tkinter/ttk. Non apre un browser, non avvia un server HTTP e non richiede un indirizzo IP. Usa direttamente lo stesso motore della V2.
+## Installazione da questi sorgenti
 
-## Aggiornare la V2 già installata
+1. Scarica il repository come ZIP, estrailo in una posizione definitiva e apri
+   `INSTALLA.command` nella cartella estratta.
+2. Se manca Python 3.12 o successivo con Tkinter, installa Python per macOS da
+   python.org e ripeti il passo 1. Lo script crea `.venv` e installa le
+   dipendenze Python elencate in `requirements.txt`.
+3. Apri `APRI.command` nella stessa cartella. La finestra può essere chiusa e
+   riaperta senza perdere i batch già accettati da OpenAI.
 
-1. Estrai `schemi-esami-v2-nativa.zip`.
-2. Apri `AGGIORNA.command` nella cartella estratta. Il programma cerca la V2 già installata sul Desktop o in Download; se necessario ti chiede di selezionarla.
-3. L'aggiornamento copia solo la nuova maschera, il suo launcher, le istruzioni e i test. Conserva materie, input, profili dei modelli, stato degli invii, PDF, dipendenze e job notturno. Archivia gli eventuali file sostituiti in `state/aggiornamenti-nativa/`.
-4. Se il vecchio programma è ancora in esecuzione, chiudilo con Ctrl+C nella sua finestra del Terminale. I batch già inviati restano sul servizio.
-5. Apri `APRI.command` **dentro la V2 già installata**. Comparirà la finestra locale. Il launcher la avvia come processo separato: puoi chiudere il Terminale.
+Se possiedi una cartella V2 già installata con `.venv`, puoi usare
+`AGGIORNA.command` direttamente dalla cartella dei nuovi sorgenti. Seleziona la cartella V2 esistente quando
+viene richiesta. L'aggiornamento copia interfaccia e moduli di questa versione,
+archivia i file sovrascritti in `state/aggiornamenti-nativa/` e conserva
+`esami/`, `config/`, le risposte e i PDF. Non aggiorna automaticamente una
+vecchia app `.app` compilata; per quella serve una build macOS separata.
 
-Se non hai mai installato la V2, il programma completo è nella cartella `programma` di questo pacchetto. Collocala in una posizione definitiva, apri il suo `INSTALLA.command` e poi `APRI.command`.
+## Nuove funzioni
 
-Serve Tkinter, incluso nell'installazione standard di Python da python.org. L'aggiornamento controlla che sia disponibile e non installa nuove dipendenze.
+- **Progetti**: stato delle materie, PDF pronti e invii incerti.
+- **Materiali e domande**: file nelle tre aree, stato di indicizzazione e
+  anteprima locale del testo estratto.
+- **Control Room**: schemi correnti, batch, anomalie, durate locali misurate,
+  report diagnostico con anteprima completa e recupero dei soli PDF locali.
+- **Schemi e PDF**: controllo visivo manuale delle pagine sospette.
+- **Medical Illustrator**: cerca proposte nelle fonti, crea bozze SVG
+  schematiche, le apre per revisione e registra la decisione. Le bozze non
+  entrano automaticamente nei PDF e non sono clinicamente validate.
 
-## Uso
+La generazione del testo continua a usare esclusivamente l'API OpenAI già
+configurata. Aprire Progetti, Control Room, Materiali o Illustrator non invia
+nuove richieste a pagamento. Le operazioni «Avvia» e la rigenerazione esplicita
+continuano a poter usare l'API.
 
-- Crea una materia e scegli Completa o Veloce. Per Veloce indica il massimo totale di pagine.
-- Usa **Aggiungi materiali**, **File delle domande** e **Programma ufficiale** per selezionare più file dal Finder. Le domande si possono anche incollare.
-- Premi Salva, Genera ora oppure Genera stanotte. Salva non effettua richieste API.
-- **Schemi e PDF** mostra i risultati: doppio clic su un PDF pronto per aprirlo con l'applicazione predefinita del Mac. Sono disponibili PDF unico e ZIP.
-- **Stato e batch** mostra fase, identificativi dei batch, stato del servizio, errori e ultime operazioni. Un batch con ID e stato in_progress è stato inviato e sta lavorando; un messaggio generico di avvio, da solo, non prova che l'invio sia stato accettato.
-- **Impostazioni del modello** aggiorna il profilo per le nuove materie. La rigenerazione di una materia esistente è una scelta esplicita e usa l'API.
+## Programmi aggiuntivi
 
-Lascia aperta la finestra dell'app durante Genera ora. Alla chiusura il programma attende che il worker corrente registri lo stato. Gli invii ancora in corso sul servizio vengono ripresi alla riapertura. Il job notturno continua a funzionare come nella V2.
+**Per Medical Illustrator di questa versione non serve installare Inkscape,
+Blender, 3D Slicer, ImageMagick o un modello di immagini.** SVG è prodotto con
+Python standard, senza API grafiche. Inkscape è facoltativo se vuoi modificare
+manualmente le bozze vettoriali. Blender e 3D Slicer servirebbero solo per
+futuri flussi 3D o segmentazioni con dati e licenze appropriati.
 
-La maschera, il corpus, l'OCR disponibile e il rendering sono locali. La generazione e l'analisi semantica usano le API e richiedono Internet. Il renderer PDF usa ancora Chromium senza finestra visibile. Questa versione elimina il browser per l'interfaccia, non il servizio API né il motore di rendering interno.
+Per PDF scansionati e fotografie, l'OCR richiede il helper `mac-ocr` incluso
+in alcune distribuzioni oppure Tesseract con lingua italiana/inglese. Se i
+tuoi PDF contengono già testo selezionabile, non serve installare Tesseract.
+Il renderer PDF usa PyMuPDF Story, incluso nelle dipendenze Python; Chromium
+non è richiesto da questi sorgenti.
 
-## Verifica
-
-45 test automatici passati: i 35 della V2 più 10 per il percorso nativo, compresi salvataggio senza browser/server/API, ripresa degli invii, aggiornamento esplicito del modello, errori di caricamento recuperabili e diagnostica degli identificativi. Nessuna richiesta OpenAI a pagamento nel collaudo. La finestra è stata collaudata in un display Linux reale: creazione, caricamento, salvataggio, riapertura di una materia e impostazioni, senza avviare server HTTP o browser. L'aggiornamento è stato verificato su una V2 temporanea: fonti, configurazione e stato di un batch precedente restano identici. Il primo avvio su macOS resta da verificare sul tuo Mac.
+La suite automatica gira su Linux senza chiamate API reali. La GUI e
+l'installer devono ancora essere provati direttamente su macOS.
