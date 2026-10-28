@@ -16,7 +16,9 @@ un servizio cloud, che qui non è stato attivato.
    riaperta senza perdere i batch già accettati da OpenAI.
 
 Se possiedi una cartella V2 già installata con `.venv`, puoi usare
-`AGGIORNA.command` direttamente dalla cartella dei nuovi sorgenti. Seleziona la cartella V2 esistente quando
+`AGGIORNA.command` direttamente dalla cartella dei nuovi sorgenti dopo aver
+chiuso la finestra V2 e il suo worker locale. Seleziona la cartella V2
+esistente quando
 viene richiesta. L'aggiornamento copia interfaccia e moduli di questa versione,
 archivia i file sovrascritti in `state/aggiornamenti-nativa/` e conserva
 `esami/`, `config/`, le risposte e i PDF. Non aggiorna automaticamente una
