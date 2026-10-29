@@ -55,11 +55,15 @@ class LauncherTests(unittest.TestCase):
                  patch.object(native, "_launchctl", return_value=success), \
                  patch.object(native, "_bootstrap_agent", return_value=success):
                 native.ensure_login_worker(project)
+                other_data = Path(folder) / "separate-data"
+                _, separate = native.worker_agent(other_data, home / "unused.plist")
             path = home / "Library/LaunchAgents/it.schemi-esami.source-worker.plist"
             agent = plistlib.loads(path.read_bytes())
             self.assertEqual(agent["Label"], "it.schemi-esami.source-worker")
             self.assertEqual(agent["ProgramArguments"], [str(python), str(project / "native.py"), "--worker"])
             self.assertEqual(agent["EnvironmentVariables"]["SCHEMI_PROJECT_DIR"], str(project))
+            self.assertEqual(separate["ProgramArguments"][0], str(python))
+            self.assertEqual(separate["EnvironmentVariables"]["SCHEMI_PROJECT_DIR"], str(other_data))
             self.assertEqual(installed_agent.read_text(), "app installata: conservare\n")
 
 

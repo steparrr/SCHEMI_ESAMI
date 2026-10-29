@@ -93,7 +93,7 @@ def worker_agent(project, path):
         arguments = [str(worker_executable(path)), "--worker"]
     else:
         label = "it.schemi-esami.source-worker"
-        python = project / ".venv/bin/python"
+        python = resource_root() / ".venv/bin/python"
         if not python.is_file():
             raise ValueError("Completa INSTALLA.command prima di attivare il worker dei sorgenti.")
         arguments = [str(python), str(resource_root() / "native.py"), "--worker"]
