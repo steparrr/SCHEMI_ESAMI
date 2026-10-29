@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
 from local_app import App
 from project_actions import duplicate_settings, set_archived, set_favorite
-from projects_view import arrange_cards, project_cards
+from projects_view import arrange_cards, pdf_versions, project_cards
 
 
 class ProjectActionsTests(unittest.TestCase):
@@ -78,6 +78,21 @@ class ProjectActionsTests(unittest.TestCase):
         (self.root / "output/pdf/current.pdf").write_bytes(b"fixture")
         cards = project_cards(self.app)
         self.assertEqual((cards[0]["ready"], cards[0]["total"]), (1, 1))
+
+    def test_version_browser_lists_current_and_old_files_without_leaving_pdf_folder(self):
+        current, old, unsafe = "a" * 64, "b" * 64, "c" * 64
+        folder = self.root / "output/pdf/versioni"
+        folder.mkdir(parents=True)
+        (folder / "current.pdf").write_bytes(b"current")
+        (folder / "old.pdf").write_bytes(b"old")
+        (self.project / "outside.pdf").write_bytes(b"private")
+        write_json(self.root / "state/pipeline.json", {"latest": {"1": current}, "jobs": {
+            current: {"kind": "schema", "numero": 1, "title": "Tema", "status": "PDF_OK", "pdf": "output/pdf/versioni/current.pdf"},
+            old: {"kind": "schema", "numero": 1, "title": "Tema vecchio", "status": "SUPERSEDED", "pdf": "output/pdf/versioni/old.pdf"},
+            unsafe: {"kind": "schema", "numero": 1, "title": "Fuori cartella", "status": "PDF_OK", "pdf": "../../outside.pdf"}}})
+        rows = pdf_versions(self.root)
+        self.assertEqual([row["request_hash"] for row in rows], [current[:12], old[:12]])
+        self.assertEqual([row["current"] for row in rows], [True, False])
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ from local_app import App, KINDS, MAX_FILE_BYTES, edit_lock, save_api_key
 from local_recovery import recover_local
 from materials_view import material_detail
 from medical_illustrator import (create_manual as manual_illustration, export_illustrated_pdf, list_opportunities,
-                                 plan as plan_illustrations, preview_svg, revalidate_edited_svg,
+                                 plan as plan_illustrations, preview_svg, revalidate_edited_svg, REVIEW_FIELDS,
                                  set_disabled as disable_illustrations, transition as transition_illustration,
                                  update_proposal as edit_illustration_proposal)
 from ingest import SUPPORTED
@@ -27,7 +27,7 @@ from model_settings import MODEL_KEYS, save_default_profile
 from monitor import batch_lines, overview
 from project_wizard import validate_wizard
 from project_actions import duplicate_settings, set_archived, set_favorite
-from projects_view import arrange_cards, project_cards
+from projects_view import arrange_cards, pdf_versions, project_cards
 from visual_qc import export_visual_report, inspect_visual
 
 
@@ -253,6 +253,7 @@ class NativeWindow:
                                values=("Nome", "Data esame", "PDF pronti"), state="readonly", width=15)
         ordered.pack(side="left", padx=6)
         ordered.bind("<<ComboboxSelected>>", lambda event: self.refresh())
+        ttk.Button(home_filters, text="Versioni PDF", command=self.show_home_pdf_versions).pack(side="right")
         self.project_rows = ttk.Treeview(self.home_tab, columns=("name", "pdf", "phase", "remote"), show="headings", selectmode="browse")
         for key, title, width in (("name", "Materia", 280), ("pdf", "PDF pronti", 95),
                                   ("phase", "Situazione", 290), ("remote", "Ultima verifica OpenAI", 210)):
@@ -707,6 +708,39 @@ class NativeWindow:
             self.notice.set("Seleziona una materia prima di aprire la cartella PDF.")
             return
         self.open_path(self.app.root(selection[0]) / "output/pdf")
+
+    def show_home_pdf_versions(self):
+        selection = self.project_rows.selection()
+        if not selection:
+            self.notice.set("Seleziona una materia prima di vedere le versioni PDF.")
+            return
+        rows = pdf_versions(self.app.root(selection[0]))
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Versioni PDF · " + selection[0])
+        dialog.geometry("960x570")
+        frame = self.ttk.Frame(dialog, padding=12)
+        frame.pack(fill="both", expand=True)
+        self.ttk.Label(frame, text="File già presenti sul disco. 'Corrente' indica lo schema associato all'hash attuale; aprire un file non avvia generazioni.",
+                       wraplength=900).pack(anchor="w", pady=(0, 8))
+        table = self.ttk.Treeview(frame, columns=("number", "title", "version", "state", "bytes"), show="headings", selectmode="browse")
+        for key, label, width in (("number", "Schema", 75), ("title", "Titolo", 310),
+                                  ("version", "Versione", 170), ("state", "Stato", 170), ("bytes", "Byte", 110)):
+            table.heading(key, text=label)
+            table.column(key, width=width, stretch=key == "title")
+        table.pack(fill="both", expand=True)
+        for index, row in enumerate(rows):
+            table.insert("", "end", iid=str(index), values=(row["number"], row["title"],
+                ("Corrente" if row["current"] else "Storica") + " · " + row["request_hash"],
+                row["status"], row["bytes"]))
+        if not rows:
+            self.ttk.Label(frame, text="Nessun PDF versionato è ancora presente per questa materia.").pack(anchor="w", pady=8)
+        def open_selected():
+            chosen = table.selection()
+            if not chosen:
+                self.notice.set("Seleziona una versione PDF dalla lista.")
+                return
+            self.open_path(rows[int(chosen[0])]["path"])
+        self.ttk.Button(frame, text="Apri versione selezionata", command=open_selected).pack(anchor="e", pady=(8, 0))
 
     def toggle_home_favorite(self):
         selection = self.project_rows.selection()
@@ -1167,21 +1201,63 @@ class NativeWindow:
         disabled = disable_illustrations(root, not current)
         self.illustrator_notice.set("Nuove proposte disattivate per questa materia." if disabled else "Nuove proposte riattivate.")
 
-    def illustration_action(self, action):
+    def illustration_action(self, action, review=None):
         selection = self.illustrations.selection()
         if not selection or not self.session.selected:
             self.illustrator_notice.set("Seleziona una tavola.")
             return
-        if action == "approved":
-            from tkinter import messagebox
-            if not messagebox.askyesno("Revisione della tavola", "Hai verificato sulle fonti struttura, lato, vista, alterazione ed etichette? La bozza resta separata dal PDF."):
-                return
+        if action == "approved" and review is None:
+            self.review_illustration()
+            return
         try:
-            row = transition_illustration(self.app.root(self.session.selected), selection[0], action)
+            row = transition_illustration(self.app.root(self.session.selected), selection[0], action, review=review)
             self.illustrator_notice.set(f"{row['concept_title']}: {row['status']}. Nessun PDF modificato.")
             self.refresh()
         except (ValueError, OSError) as error:
             self.illustrator_notice.set(str(error))
+
+    def review_illustration(self):
+        selection = self.illustrations.selection()
+        if not selection or not self.session.selected:
+            return
+        row = next((item for item in list_opportunities(self.app.root(self.session.selected))
+                    if item["opportunity_id"] == selection[0]), None)
+        if not row or row.get("status") != "medical_review_needed":
+            self.illustrator_notice.set("La revisione richiede una bozza SVG corrente da controllare.")
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Lista di controllo · " + row["concept_title"])
+        dialog.geometry("760x540")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        frame = self.ttk.Frame(dialog, padding=16)
+        frame.pack(fill="both", expand=True)
+        self.ttk.Label(frame, text="Apri prima la bozza e confrontala con le fonti. Se non puoi verificare un punto, lascia la tavola in revisione.",
+                       wraplength=700).pack(anchor="w", pady=(0, 12))
+        labels = {
+            "sources": "Ho confrontato la tavola con le fonti indicate.",
+            "anatomy": "Strutture e rapporti anatomici rappresentati sono corretti.",
+            "orientation": "Lato, vista e orientamento sono chiari.",
+            "lesion": "L'alterazione è collocata e descritta correttamente.",
+            "labels_caption": "Etichette e didascalia sono coerenti e leggibili.",
+            "rights": "Non sono stati aggiunti asset esterni senza diritti d'uso.",
+        }
+        checks = {key: self.tk.BooleanVar(value=False) for key in REVIEW_FIELDS}
+        for key in REVIEW_FIELDS:
+            self.ttk.Checkbutton(frame, text=labels[key], variable=checks[key]).pack(anchor="w", pady=8)
+        self.ttk.Label(frame, text="Questo registra un controllo dell'utente; non certifica una validazione clinica specialistica.",
+                       wraplength=700).pack(anchor="w", pady=(18, 5))
+        info = self.tk.StringVar()
+        self.ttk.Label(frame, textvariable=info).pack(anchor="w")
+        def confirm():
+            review = {key: variable.get() for key, variable in checks.items()}
+            if not all(review.values()):
+                info.set("Completa ogni controllo oppure lascia la tavola in revisione.")
+                return
+            dialog.grab_release()
+            dialog.destroy()
+            self.illustration_action("approved", review=review)
+        self.ttk.Button(frame, text="Registra revisione", command=confirm).pack(anchor="e", pady=12)
 
     def open_illustration(self):
         selection = self.illustrations.selection()

@@ -15,6 +15,11 @@ un servizio cloud, che qui non è stato attivato.
 3. Apri `APRI.command` nella stessa cartella. La finestra può essere chiusa e
    riaperta senza perdere i batch già accettati da OpenAI.
 
+Su macOS puoi aprire `VERIFICA-MAC.command` prima di lavorare sulle tue materie.
+La prova crea una materia temporanea, verifica Tkinter e un PDF sintetico e
+apre la finestra con le API bloccate. Chiudendo la finestra i dati di prova
+vengono eliminati; i tuoi esami non sono toccati.
+
 Se possiedi una cartella V2 già installata con `.venv`, puoi usare
 `AGGIORNA.command` direttamente dalla cartella dei nuovi sorgenti dopo aver
 chiuso la finestra V2 e il suo worker locale. Seleziona la cartella V2
@@ -28,7 +33,7 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
 - **Progetti**: stato delle materie, PDF pronti e invii incerti. «Nuova materia
   guidata» accompagna identità, obiettivo, materiali, produzione, grafica e
   riepilogo prima dell'avvio. Puoi cercare, filtrare e ordinare i progetti,
-  segnare i preferiti, aprire la cartella PDF, duplicare le sole impostazioni
+  segnare i preferiti, aprire la cartella e le versioni PDF, duplicare le sole impostazioni
   senza materiali o credenziali e archiviare una materia senza cancellarne i file.
 - **Materiali e domande**: file nelle tre aree, stato di indicizzazione e
   anteprima locale del testo estratto. «Confronta programma» mostra solo
@@ -47,8 +52,11 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   si apre nella finestra del programma senza editor esterni. Se modifichi
   l'SVG, rivalidalo tecnicamente e ripeti la revisione. Dopo l'approvazione
   puoi esportare **una copia PDF separata** con la tavola come appendice, se
-  rispetta il limite di pagine. Il PDF originale e `PDF_OK` non cambiano. Le
-  tavole non sono clinicamente validate da uno specialista.
+  rispetta il limite di pagine. Prima dell'approvazione devi completare una
+  lista di controllo sulle fonti, l'anatomia, la vista, l'alterazione, le
+  etichette e gli eventuali asset esterni. Il PDF originale e `PDF_OK` non
+  cambiano. La lista registra una revisione dell'utente, non una validazione
+  clinica specialistica.
 
 La generazione del testo continua a usare esclusivamente l'API OpenAI già
 configurata. Aprire Progetti, Control Room, Materiali o Illustrator non invia

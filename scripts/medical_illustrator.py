@@ -37,6 +37,7 @@ _EDITABLE = {"concept_title": 120, "learning_goal": 350, "side_or_orientation": 
              "region_of_interest": 160, "view_type": 120, "proposed_caption": 350}
 _TYPES = {"structural", "spatial_relations", "neural", "tissue", "vascular",
           "functional", "developmental", "temporal"}
+REVIEW_FIELDS = ("sources", "anatomy", "orientation", "lesion", "labels_caption", "rights")
 
 
 def _now():
@@ -353,7 +354,12 @@ def revalidate_edited_svg(root, opportunity_id):
         row.update(artifact_hash=current_hash, status="medical_review_needed", updated_at=_now(),
                    editor_revision=int(row.get("editor_revision") or 0) + 1)
         row.pop("reviewed_at", None)
+        row.pop("review_checklist", None)
+        row.pop("review_method", None)
         row.pop("published_pdf", None)
+        row.pop("published_at", None)
+        row.pop("published_source_hash", None)
+        row.pop("published_artifact_hash", None)
         write_json(root / "state/illustrations.json", data)
         return row
 
@@ -440,7 +446,7 @@ def export_illustrated_pdf(root, opportunity_id):
         return path
 
 
-def transition(root, opportunity_id, action):
+def transition(root, opportunity_id, action, review=None):
     """User action. Acceptance creates a local draft; approval only records review."""
     root = Path(root)
     with _lock(root):
@@ -451,14 +457,22 @@ def transition(root, opportunity_id, action):
         if action not in _TRANSITIONS.get(row["status"], set()):
             raise ValueError("Transizione della tavola non valida.")
         if action == "approved":
+            if not isinstance(review, dict) or set(review) != set(REVIEW_FIELDS) or any(review[key] is not True for key in REVIEW_FIELDS):
+                raise ValueError("Completa la lista di controllo prima di segnare revisionata la tavola.")
             _current_job(root, row)
-            artifact = root / row["artifact"]
+            artifact = (root / row["artifact"]).resolve()
+            if not artifact.is_relative_to((root / "diagrams/medical").resolve()):
+                raise ValueError("Percorso della tavola non valido.")
             if not artifact.is_file() or technical_qc(artifact.read_bytes()) or digest(artifact) != row["artifact_hash"]:
                 raise ValueError("Il file SVG è mancante, modificato o non supera il controllo tecnico.")
             row["reviewed_at"] = _now()
+            row["review_checklist"] = {key: True for key in REVIEW_FIELDS}
+            row["review_method"] = "user_self_check_not_specialist_validation"
         row["status"] = action
         if action == "accepted":
             _current_job(root, row)
+            if not re.fullmatch(r"[0-9a-f]{24}", opportunity_id):
+                raise ValueError("Identificativo della tavola non valido.")
             content = _svg(row)
             errors = technical_qc(content)
             if errors:

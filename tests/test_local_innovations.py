@@ -13,12 +13,15 @@ from control_room import snapshot, format_snapshot, summarize_performance
 from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
 from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, preview_svg, revalidate_edited_svg,
+                                 REVIEW_FIELDS,
                                  set_disabled, technical_qc, transition, update_proposal)
 from materials_view import material_detail
 from local_recovery import recover_local
 from projects_view import project_cards
 from telemetry import Telemetry
 from visual_qc import inspect_visual
+
+VALID_REVIEW = {key: True for key in REVIEW_FIELDS}
 
 
 class LocalInnovationsTests(unittest.TestCase):
@@ -109,14 +112,16 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertIn(b"NON VALIDATA CLINICAMENTE", svg)
         self.assertEqual(read_json(self.root / "state/pipeline.json")["jobs"][self.key]["status"], "HTML_OK")
         self.assertEqual(list((self.root / "output/pdf").glob("*.pdf")), [])
-        self.assertEqual(transition(self.root, row["opportunity_id"], "approved")["status"], "approved")
+        approved = transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
+        self.assertEqual(approved["status"], "approved")
+        self.assertEqual(approved["review_method"], "user_self_check_not_specialist_validation")
 
     def test_changed_schema_and_tampered_svg_block_approval(self):
         row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
         artifact = self.root / row["artifact"]
         artifact.write_bytes(artifact.read_bytes().replace(b"Normale (schema)", b"Test errato"))
         with self.assertRaisesRegex(ValueError, "SVG"):
-            transition(self.root, row["opportunity_id"], "approved")
+            transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
         artifact.write_bytes(b"<svg><script>alert(1)</script></svg>")
         self.assertTrue(technical_qc(artifact.read_bytes()))
 
@@ -132,14 +137,15 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertEqual(technical_qc(artifact.read_bytes()), [])
         artifact.write_bytes(artifact.read_bytes().replace(b"#b33f35", b"#ff0000"))
         with self.assertRaisesRegex(ValueError, "modificato"):
-            transition(self.root, row["opportunity_id"], "approved")
+            transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
         revised = revalidate_edited_svg(self.root, row["opportunity_id"])
         self.assertEqual(revised["editor_revision"], 1)
-        self.assertEqual(transition(self.root, row["opportunity_id"], "approved")["status"], "approved")
+        self.assertEqual(transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)["status"], "approved")
         artifact.write_bytes(artifact.read_bytes().replace(b"#ff0000", b"#00aa00"))
         revised = revalidate_edited_svg(self.root, row["opportunity_id"])
         self.assertEqual(revised["status"], "medical_review_needed")
         self.assertNotIn("reviewed_at", revised)
+        self.assertNotIn("review_checklist", revised)
         artifact.write_bytes(b'<svg viewBox="0 0 900 520"><script>alert(1)</script></svg>')
         with self.assertRaisesRegex(ValueError, "Controllo tecnico"):
             revalidate_edited_svg(self.root, row["opportunity_id"])
@@ -151,7 +157,7 @@ class LocalInnovationsTests(unittest.TestCase):
     def test_approved_plate_exports_separate_pdf_without_changing_pipeline(self):
         import fitz
         row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
-        transition(self.root, row["opportunity_id"], "approved")
+        transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
         state = read_json(self.root / "state/pipeline.json")
         job = state["jobs"][self.key]
         job.update(status="PDF_OK", pdf="output/pdf/versioni/one.pdf", public_pdf="output/pdf/one.pdf", page_budget=3)
@@ -176,11 +182,20 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertEqual(read_json(self.root / "state/pipeline.json"), state)
         self.assertEqual(next(item for item in list_opportunities(self.root)
                               if item["opportunity_id"] == row["opportunity_id"])["status"], "published")
+        svg_path = self.root / row["artifact"]
+        svg_path.write_bytes(svg_path.read_bytes().replace(b"#b33f35", b"#ff0000"))
+        revised = revalidate_edited_svg(self.root, row["opportunity_id"])
+        self.assertEqual(revised["status"], "medical_review_needed")
+        for key in ("reviewed_at", "review_checklist", "published_pdf", "published_at",
+                    "published_source_hash", "published_artifact_hash"):
+            self.assertNotIn(key, revised)
+        self.assertTrue(illustrated.is_file())
+        self.assertEqual(original.read_bytes(), before)
 
     def test_plate_export_respects_schema_page_budget(self):
         import fitz
         row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
-        transition(self.root, row["opportunity_id"], "approved")
+        transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
         state = read_json(self.root / "state/pipeline.json")
         job = state["jobs"][self.key]
         job.update(status="PDF_OK", pdf="output/pdf/versioni/one.pdf", public_pdf="output/pdf/one.pdf", page_budget=1)
@@ -197,6 +212,17 @@ class LocalInnovationsTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "limite di pagine"):
                 export_illustrated_pdf(self.root, row["opportunity_id"])
         self.assertEqual(list((self.root / "output/pdf/illustrati").glob("*.pdf")), [])
+
+    def test_approval_requires_all_checks_without_changing_the_draft(self):
+        row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
+        with self.assertRaisesRegex(ValueError, "lista di controllo"):
+            transition(self.root, row["opportunity_id"], "approved")
+        incomplete = dict(VALID_REVIEW, anatomy=False)
+        with self.assertRaisesRegex(ValueError, "lista di controllo"):
+            transition(self.root, row["opportunity_id"], "approved", review=incomplete)
+        current = next(item for item in list_opportunities(self.root) if item["opportunity_id"] == row["opportunity_id"])
+        self.assertEqual(current["status"], "medical_review_needed")
+        self.assertNotIn("reviewed_at", current)
 
     def test_opt_out_and_no_keyword_keep_planner_quiet(self):
         set_disabled(self.root, True)

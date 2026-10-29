@@ -27,7 +27,8 @@ def install_overlay(source, target):
              "scripts/materials_view.py", "scripts/coverage_matrix.py", "scripts/projects_view.py", "scripts/project_wizard.py",
              "scripts/project_actions.py",
              "scripts/local_recovery.py", "scripts/local_app.py", "scripts/ingest.py",
-             "scripts/pipeline.py", "scripts/ocr.py", "APRI.command", "LEGGIMI-NATIVA.md", "tests/test_native.py")
+             "scripts/pipeline.py", "scripts/ocr.py", "scripts/mac_smoke.py", "APRI.command",
+             "VERIFICA-MAC.command", "LEGGIMI-NATIVA.md", "tests/test_native.py")
     for relative in files:
         if not (source / relative).is_file():
             raise ValueError("Pacchetto incompleto: manca " + relative)
@@ -42,6 +43,7 @@ def install_overlay(source, target):
         shutil.copy2(source / relative, temporary)
         temporary.replace(destination)
     (target / "APRI.command").chmod(0o755)
+    (target / "VERIFICA-MAC.command").chmod(0o755)
     return target
 
 

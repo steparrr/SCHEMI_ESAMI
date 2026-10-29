@@ -59,3 +59,29 @@ def arrange_cards(cards, visibility="Tutte", order="Nome"):
     if order == "PDF pronti":
         return sorted(filtered, key=lambda card: (-card["ready"], card["name"].casefold(), card["slug"]))
     return sorted(filtered, key=lambda card: (card["name"].casefold(), card["slug"]))
+
+
+def pdf_versions(root):
+    """Read PDF versions already on disk; never infer that an old version is current."""
+    root = root.resolve()
+    state = read_json(root / "state/pipeline.json", {})
+    latest = state.get("latest") or {}
+    jobs = state.get("jobs") or {}
+    folder = (root / "output/pdf").resolve()
+    rows = []
+    for key, job in jobs.items():
+        if job.get("kind") != "schema" or not isinstance(job.get("numero"), int):
+            continue
+        relative = job.get("pdf")
+        if not isinstance(relative, str) or not relative:
+            continue
+        path = (root / relative).resolve()
+        if not path.is_relative_to(folder) or path.suffix.lower() != ".pdf" or not path.is_file():
+            continue
+        current = latest.get(str(job["numero"])) == key
+        rows.append({"number": job["numero"], "title": str(job.get("title") or "Schema")[:160],
+                     "request_hash": str(key)[:12], "current": current,
+                     "status": job.get("status") or "sconosciuto",
+                     "path": path, "bytes": path.stat().st_size,
+                     "modified_at": path.stat().st_mtime})
+    return sorted(rows, key=lambda row: (row["number"], not row["current"], -row["modified_at"], row["request_hash"]))
