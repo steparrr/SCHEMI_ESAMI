@@ -31,6 +31,21 @@ from projects_view import arrange_cards, pdf_versions, project_cards
 from visual_qc import export_visual_report, inspect_visual, load_visual_reviews, mark_visual_review
 
 
+ILLUSTRATION_STATUS_LABELS = {
+    "proposed": "Proposta",
+    "accepted": "Bozza in preparazione",
+    "technical_qc_failed": "Controllo tecnico fallito",
+    "medical_review_needed": "Da revisionare",
+    "approved": "Revisionata dall'utente",
+    "published": "Copia PDF illustrata esportata",
+    "rejected": "Scartata",
+}
+
+
+def illustration_status_label(status):
+    return ILLUSTRATION_STATUS_LABELS.get(status, str(status))
+
+
 def diagnostics(app, slug):
     root = app.root(slug)
     state = read_json(root / "state/pipeline.json", {})
@@ -941,7 +956,8 @@ class NativeWindow:
                 for row in list_opportunities(self.app.root(self.session.selected)):
                     if current.get(str(row["schema_number"])) == row["request_hash"]:
                         self.illustrations.insert("", "end", iid=row["opportunity_id"],
-                                                  values=(row["schema_number"], row["concept_title"], row["status"]))
+                                                  values=(row["schema_number"], row["concept_title"],
+                                                          illustration_status_label(row["status"])))
             if selected_illustration and self.illustrations.exists(selected_illustration[0]):
                 self.illustrations.selection_set(selected_illustration[0])
             self.show_illustration_details()
@@ -1151,7 +1167,7 @@ class NativeWindow:
         except (ValueError, OSError) as error:
             self.illustrator_notice.set(str(error))
             return
-        self.illustrator_notice.set("SVG verificato tecnicamente. Stato: " + row["status"] + ". Ricontrolla la correttezza medica.")
+        self.illustrator_notice.set("SVG verificato tecnicamente. Stato: " + illustration_status_label(row["status"]) + ". Ricontrolla la correttezza medica.")
         self.refresh()
 
     def export_illustration(self):
@@ -1248,7 +1264,7 @@ class NativeWindow:
             return
         try:
             row = transition_illustration(self.app.root(self.session.selected), selection[0], action, review=review)
-            self.illustrator_notice.set(f"{row['concept_title']}: {row['status']}. Nessun PDF modificato.")
+            self.illustrator_notice.set(f"{row['concept_title']}: {illustration_status_label(row['status'])}. Nessun PDF modificato.")
             self.refresh()
         except (ValueError, OSError) as error:
             self.illustrator_notice.set(str(error))
