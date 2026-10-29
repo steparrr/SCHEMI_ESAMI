@@ -360,6 +360,37 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertTrue((self.root / after["jobs"][self.key]["public_pdf"]).is_file())
         self.assertIn("rerender_local", (self.root / "state/local_recovery.jsonl").read_text())
 
+    def test_local_recovery_republishes_missing_or_damaged_public_pdf(self):
+        state = read_json(self.root / "state/pipeline.json")
+        job = state["jobs"][self.key]
+        job.update(status="PDF_OK", pdf="output/pdf/versioni/schema.pdf",
+                   public_pdf="output/pdf/1 - Tunnel carpale.pdf", render_hash="test-signature",
+                   page_budget=3)
+        write_json(self.root / "state/pipeline.json", state)
+        version = self.root / job["pdf"]
+        version.parent.mkdir(parents=True)
+        version.write_bytes(b"versione locale valida")
+        public = self.root / job["public_pdf"]
+        with patch("local_recovery.inspect_pdf", return_value={"ok": True, "pages": 1}), \
+             patch("remote.OpenAIHTTP", side_effect=AssertionError("Nessuna API")):
+            first = recover_local(self.root, self.project, signature="test-signature")
+            self.assertEqual(first[0]["outcome"], "success")
+            self.assertEqual(public.read_bytes(), version.read_bytes())
+            previous_public = b"file pubblico diverso"
+            public.write_bytes(previous_public)
+            second = recover_local(self.root, self.project, signature="test-signature")
+            self.assertEqual(second[0]["outcome"], "success")
+            self.assertEqual((self.root / second[0]["backup"]).read_bytes(), previous_public)
+            self.assertEqual(public.read_bytes(), version.read_bytes())
+            self.assertEqual(recover_local(self.root, self.project, signature="test-signature"), [])
+            public.unlink()
+            unsafe = recover_local(self.root, self.project, signature="different-renderer")
+            self.assertEqual(unsafe[0]["outcome"], "precondition_failed")
+            self.assertFalse(public.exists())
+        after = read_json(self.root / "state/pipeline.json")
+        self.assertEqual(after["jobs"][self.key]["status"], "PDF_OK")
+        self.assertEqual(after["batches"], state["batches"])
+
     def test_project_home_flags_ambiguous_submission_without_api(self):
         from local_app import App
         app = App(self.project, api_factory=lambda cfg: self.fail("Nessuna API"))

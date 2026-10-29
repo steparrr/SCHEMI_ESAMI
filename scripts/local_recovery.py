@@ -4,10 +4,11 @@ from __future__ import annotations
 import fcntl
 import json
 import os
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from common import PROJECT, load_config
+from common import PROJECT, digest, load_config, pdf_filename
 from exports import publish
 from pipeline import Pipeline, render_job, render_signature
 from qc_pdf import inspect_pdf
@@ -38,15 +39,44 @@ def recover_local(root: Path, project: Path = PROJECT, render=render_job, signat
             job = pipe.jobs.get(key)
             if not job or job.get("kind") != "schema" or job.get("hash") != key:
                 continue
-            if job.get("status") == "PDF_OK" and not job.get("public_pdf"):
-                version = root / job.get("pdf", "__missing__")
-                if (job.get("render_hash") == current_signature and version.is_file()
-                        and inspect_pdf(version)["ok"]):
-                    publish(root, job)
-                    pipe.save()
-                    actions.append({"schema": int(number), "action": "publish_existing_pdf", "outcome": "success"})
-                else:
+            if job.get("status") == "PDF_OK":
+                version = (root / (job.get("pdf") or "__missing__")).resolve()
+                versions_folder = (root / "output/pdf/versioni").resolve()
+                public_relative = Path("output/pdf") / pdf_filename(job["numero"], job["title"])
+                public = root / public_relative
+                safe_version = version.is_relative_to(versions_folder) and version.suffix.lower() == ".pdf" and version.is_file()
+                if public.is_symlink() or (public.exists() and not public.is_file()):
                     actions.append({"schema": int(number), "action": "publish_existing_pdf", "outcome": "precondition_failed"})
+                    continue
+                public_current = (job.get("public_pdf") == str(public_relative) and public.is_file()
+                                  and safe_version and digest(public) == digest(version))
+                if not public_current:
+                    qc = inspect_pdf(version) if safe_version and job.get("render_hash") == current_signature else {"ok": False}
+                    pages = qc.get("pages")
+                    valid_pages = (type(pages) is int and pages >= 1 and
+                                   (not job.get("page_budget") or pages <= job["page_budget"]) and
+                                   (not job.get("page_min") or pages >= job["page_min"]))
+                    if qc.get("ok") and valid_pages:
+                        backup = None
+                        if public.is_file():
+                            previous_hash = digest(public)
+                            if previous_hash != digest(version):
+                                archived = root / "state/local_recovery_backups" / f"schema_{int(number):02d}_{previous_hash[:24]}.pdf"
+                                archived.parent.mkdir(parents=True, exist_ok=True)
+                                if not archived.is_file():
+                                    temporary = archived.with_suffix(".tmp.pdf")
+                                    try:
+                                        shutil.copy2(public, temporary)
+                                        os.replace(temporary, archived)
+                                    finally:
+                                        temporary.unlink(missing_ok=True)
+                                backup = str(archived.relative_to(root))
+                        publish(root, job)
+                        pipe.save()
+                        actions.append({"schema": int(number), "action": "publish_existing_pdf", "outcome": "success",
+                                        "backup": backup})
+                    else:
+                        actions.append({"schema": int(number), "action": "publish_existing_pdf", "outcome": "precondition_failed"})
                 continue
             if job.get("status") != "RENDER_FAILED":
                 continue

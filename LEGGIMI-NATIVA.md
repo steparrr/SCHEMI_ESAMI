@@ -52,9 +52,13 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   conservate per tentativo, compresi i retry successivi all'aggiornamento; per
   i job storici usa l'ultimo consumo salvato. Le nuove risposte sono distinte
   fra Batch e Urgente; quelle storiche senza modalità sono «Non attribuite».
-  Il dato resta parziale e per la
-  spesa reale va consultata la dashboard OpenAI. Attesa OpenAI e revisione del primo PDF non sono stimate;
-  report diagnostico con anteprima completa e recupero dei soli PDF locali.
+  Il dato resta parziale: per la spesa reale va consultata la dashboard
+  OpenAI. Attesa OpenAI e revisione del primo PDF non sono stimate. Sono
+  disponibili un report diagnostico con anteprima completa e il recupero
+  esplicito dei soli PDF locali. Il recupero può ripubblicare una versione
+  corrente valida se il file pubblico manca o è diverso, senza rigenerare con
+  OpenAI. Prima di sostituire un file diverso ne salva una copia in
+  `state/local_recovery_backups/`.
   «Panoramica di tutte le materie» elenca stati e avvisi locali per progetto
   senza eseguire un controllo remoto. «Origine delle impostazioni» mostra i
   valori effettivi e se arrivano dalla materia o dal profilo globale. La
