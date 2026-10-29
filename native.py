@@ -85,19 +85,41 @@ def _bootstrap_agent(path):
     return result
 
 
-def ensure_login_worker(project):
-    """Register the same app executable as a per-user background process."""
-    if not getattr(sys, "frozen", False):
-        return
-    label = "it.schemi-esami.worker"
-    folder = Path.home() / "Library/LaunchAgents"
-    folder.mkdir(parents=True, exist_ok=True)
-    path = folder / (label + ".plist")
-    executable = worker_executable(path)
-    agent = {"Label": label, "ProgramArguments": [str(executable), "--worker"],
+def worker_agent(project, path):
+    """Keep the source checkout's worker separate from an installed app bundle."""
+    project = Path(project).resolve()
+    if getattr(sys, "frozen", False):
+        label = "it.schemi-esami.worker"
+        arguments = [str(worker_executable(path)), "--worker"]
+    else:
+        label = "it.schemi-esami.source-worker"
+        python = project / ".venv/bin/python"
+        if not python.is_file():
+            raise ValueError("Completa INSTALLA.command prima di attivare il worker dei sorgenti.")
+        arguments = [str(python), str(resource_root() / "native.py"), "--worker"]
+    agent = {"Label": label, "ProgramArguments": arguments,
              "RunAtLoad": True, "KeepAlive": True,
              "StandardOutPath": str(project / "state/worker-stdout.log"),
              "StandardErrorPath": str(project / "state/worker-stderr.log")}
+    if not getattr(sys, "frozen", False):
+        agent["WorkingDirectory"] = str(project)
+        agent["EnvironmentVariables"] = {"SCHEMI_PROJECT_DIR": str(project)}
+    return label, agent
+
+
+def ensure_login_worker(project):
+    """Register the existing local worker at login while preserving app installs."""
+    if sys.platform != "darwin":
+        return
+    label = "it.schemi-esami.worker" if getattr(sys, "frozen", False) else "it.schemi-esami.source-worker"
+    folder = Path.home() / "Library/LaunchAgents"
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / (label + ".plist")
+    try:
+        _, agent = worker_agent(project, path)
+    except (OSError, ValueError) as error:
+        (Path(project) / "state/worker-agent-error.txt").write_text(str(error), encoding="utf-8")
+        return
     payload = plistlib.dumps(agent)
     if not path.exists() or path.read_bytes() != payload:
         previous_payload = path.read_bytes() if path.exists() else None

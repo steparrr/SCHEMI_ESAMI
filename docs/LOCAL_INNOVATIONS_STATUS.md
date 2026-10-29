@@ -11,7 +11,7 @@ Ambito deciso dall'utente: app Mac e OpenAI già presenti, senza cloud operativo
 - Recupero L1 esplicito di PDF esistenti o HTML correnti validi, con massimo due tentativi e audit locale; nessuna nuova POST.
 - Medical Illustrator MVP: regole conservative per tunnel carpale, frattura e lussazione; proposte manuali e modificabili collegate a source pack e hash; bozze SVG editabili, anteprima interna, QC tecnico per entrambe le etichette dei pannelli e lista di controllo umana esplicita. Una tavola approvata può essere esportata come appendice in un PDF separato se anche la didascalia entra nella pagina, senza modificare il PDF originale o `PDF_OK`.
 - Controllo visivo locale su PDF selezionati: warning per pagine quasi vuote, testo fuori bordo, riquadri opachi disegnati sopra il testo, immagini grandi con risoluzione apparente sotto 90 dpi e ultima pagina scarsa, con anteprima pagina, annotazioni dell'utente legate all'hash ed esportazione di un report tecnico locale. I warning e le annotazioni non alterano lo stato dei PDF.
-- Script di installazione e aggiornamento dei sorgenti Mac; `VERIFICA-MAC.command` usa una materia temporanea e blocca le API per una prova visuale locale; guida aggiornata sui programmi necessari.
+- Script di installazione e aggiornamento dei sorgenti Mac; `VERIFICA-MAC.command` usa una materia temporanea e blocca le API per una prova visuale locale. L'apertura normale dei sorgenti registra un LaunchAgent distinto dalla `.app` per riusare il worker locale all'accesso, anche a finestra chiusa; il Mac deve rimanere acceso e sveglio. Guida aggiornata sui programmi necessari.
 
 ## Limiti e lavoro successivo
 

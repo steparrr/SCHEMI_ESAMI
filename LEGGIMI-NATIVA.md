@@ -15,6 +15,13 @@ un servizio cloud, che qui non è stato attivato.
 3. Apri `APRI.command` nella stessa cartella. La finestra può essere chiusa e
    riaperta senza perdere i batch già accettati da OpenAI.
 
+L'apertura di `APRI.command` registra un worker locale di accesso per questa
+installazione dai sorgenti. Il worker può proseguire la preparazione, i
+controlli e l'impaginazione dopo la chiusura della finestra, e avviare un esame
+prenotato per la notte se il Mac rimane acceso, sveglio e con l'utente connesso.
+Usa un LaunchAgent separato da quello di un'eventuale app `.app`; non aggiunge
+servizi cloud né provider API. A Mac spento il lavoro locale si ferma.
+
 Su macOS puoi aprire `VERIFICA-MAC.command` prima di lavorare sulle tue materie.
 La prova crea una materia temporanea, verifica Tkinter e un PDF sintetico e
 apre la finestra con le API bloccate. Chiudendo la finestra i dati di prova
@@ -92,4 +99,5 @@ Il renderer PDF usa PyMuPDF Story, incluso nelle dipendenze Python; Chromium
 non è richiesto da questi sorgenti.
 
 La suite automatica gira su Linux senza chiamate API reali. La GUI e
-l'installer devono ancora essere provati direttamente su macOS.
+l'installer, incluso il LaunchAgent dei sorgenti, devono ancora essere provati
+direttamente su macOS.
