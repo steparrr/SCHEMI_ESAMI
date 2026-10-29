@@ -29,6 +29,7 @@ from project_wizard import validate_wizard
 from project_actions import duplicate_settings, set_archived, set_favorite
 from projects_view import arrange_cards, pdf_versions, project_cards
 from visual_qc import export_visual_report, inspect_visual, load_visual_reviews, mark_visual_review
+from ui_theme import COLORS, install_theme, vertical_scroll_area
 
 
 ILLUSTRATION_STATUS_LABELS = {
@@ -184,9 +185,10 @@ class NativeWindow:
         self.session = NativeSession(app)
         self.events = queue.Queue()
         self.local_busy, self.dirty, self.closing = False, False, False
-        self.file_rows, self.pdf_rows = {}, {}
-        root.title("Schemi Esami — finestra locale")
-        root.geometry("1150x820")
+        self.file_rows, self.pdf_rows, self.home_card_data = {}, {}, {}
+        install_theme(root)
+        root.title("Schemi Esami")
+        root.geometry("1280x820")
         root.minsize(880, 650)
         root.protocol("WM_DELETE_WINDOW", self.close)
         self.name = tk.StringVar()
@@ -196,39 +198,54 @@ class NativeWindow:
         self.model = tk.StringVar()
         self.progress = tk.StringVar(value="Materiali salvati")
         self.slugs = []
-        outer = ttk.Frame(root, padding=14)
+        outer = ttk.Frame(root, padding=16, style="App.TFrame")
         outer.pack(fill="both", expand=True)
         outer.columnconfigure(1, weight=1)
         outer.rowconfigure(0, weight=1)
-        sidebar = ttk.Frame(outer, padding=(0, 0, 16, 0))
+        sidebar = ttk.Frame(outer, padding=(18, 22), style="Sidebar.TFrame", width=225)
         sidebar.grid(row=0, column=0, sticky="nsew")
-        ttk.Label(sidebar, text="SCHEMI ESAMI", font=("Helvetica", 17, "bold")).pack(anchor="w", pady=(0, 16))
-        ttk.Button(sidebar, text="+ Nuova materia guidata", command=self.open_wizard).pack(fill="x", pady=(0, 12))
+        sidebar.grid_propagate(False)
+        ttk.Label(sidebar, text="SCHEMI ESAMI", style="SidebarTitle.TLabel").pack(anchor="w", pady=(0, 4))
+        ttk.Label(sidebar, text="STUDIO LOCALE · V2", style="SidebarMuted.TLabel").pack(anchor="w", pady=(0, 22))
+        ttk.Button(sidebar, text="+ Nuova materia", command=self.open_wizard,
+                   style="Sidebar.TButton").pack(fill="x", pady=(0, 20))
         self.home_search = tk.StringVar()
-        ttk.Entry(sidebar, textvariable=self.home_search).pack(fill="x", pady=(0, 6))
-        ttk.Label(sidebar, text="Cerca materie").pack(anchor="w", pady=(0, 7))
-        self.exams = tk.Listbox(sidebar, width=25, exportselection=False, borderwidth=0, font=("Helvetica", 12))
+        ttk.Label(sidebar, text="LE TUE MATERIE", style="SidebarMuted.TLabel").pack(anchor="w", pady=(0, 7))
+        ttk.Entry(sidebar, textvariable=self.home_search).pack(fill="x", pady=(0, 10))
+        self.exams = tk.Listbox(sidebar, width=22, exportselection=False, borderwidth=0,
+                                highlightthickness=0, relief="flat", font=("Helvetica", 11),
+                                background=COLORS["navy"], foreground=COLORS["surface"],
+                                selectbackground=COLORS["teal"], selectforeground=COLORS["surface"],
+                                activestyle="none")
         self.exams.pack(fill="both", expand=True)
         self.exams.bind("<<ListboxSelect>>", self.choose_exam)
-        ttk.Button(sidebar, text="Impostazioni del modello", command=self.settings).pack(fill="x", pady=(14, 4))
-        ttk.Button(sidebar, text="Imposta chiave OpenAI", command=self.set_api_key).pack(fill="x", pady=(0, 4))
-        ttk.Label(sidebar, text="Finestra desktop · V2 nativa").pack(anchor="w", pady=6)
-        main = ttk.Frame(outer)
-        main.grid(row=0, column=1, sticky="nsew")
+        ttk.Button(sidebar, text="Impostazioni modello", command=self.settings,
+                   style="Sidebar.TButton").pack(fill="x", pady=(14, 5))
+        ttk.Button(sidebar, text="Chiave OpenAI", command=self.set_api_key,
+                   style="Sidebar.TButton").pack(fill="x", pady=(0, 5))
+        ttk.Button(sidebar, text="Aiuto · manuale PDF", command=self.open_manual,
+                   style="Sidebar.TButton").pack(fill="x", pady=(0, 5))
+        ttk.Label(sidebar, text="Funziona sul tuo Mac", style="SidebarMuted.TLabel").pack(anchor="w", pady=(12, 0))
+        main = ttk.Frame(outer, padding=(20, 16), style="Main.TFrame")
+        main.grid(row=0, column=1, sticky="nsew", padx=(12, 0))
         main.columnconfigure(0, weight=1)
         main.rowconfigure(2, weight=1)
         header = ttk.Frame(main)
         header.grid(row=0, column=0, sticky="ew", pady=(0, 12))
         header.columnconfigure(0, weight=1)
-        ttk.Label(header, text="Nome della materia").grid(row=0, column=0, sticky="w")
-        ttk.Entry(header, textvariable=self.name).grid(row=1, column=0, sticky="ew", padx=(0, 20), pady=5)
-        ttk.Radiobutton(header, text="Completa", variable=self.mode, value="completa", command=self.show_mode).grid(row=1, column=1)
-        ttk.Radiobutton(header, text="Veloce", variable=self.mode, value="veloce", command=self.show_mode).grid(row=1, column=2, padx=12)
+        ttk.Label(header, text="PROGETTO CORRENTE", style="Eyebrow.TLabel").grid(row=0, column=0, sticky="w")
+        ttk.Label(header, text="Schemi di studio", style="Title.TLabel").grid(row=1, column=0, sticky="w", pady=(1, 10))
+        ttk.Label(header, text="Nome della materia", style="Muted.TLabel").grid(row=2, column=0, sticky="w")
+        ttk.Entry(header, textvariable=self.name).grid(row=3, column=0, sticky="ew", padx=(0, 20), pady=(4, 0))
+        ttk.Label(header, text="Locale · Mac acceso", style="Badge.TLabel").grid(row=0, column=1, columnspan=3, sticky="e")
+        ttk.Radiobutton(header, text="Completa", variable=self.mode, value="completa", command=self.show_mode).grid(row=3, column=1)
+        ttk.Radiobutton(header, text="Sintesi", variable=self.mode, value="veloce", command=self.show_mode).grid(row=3, column=2, padx=12)
         self.page_frame = ttk.Frame(header)
-        self.page_frame.grid(row=0, column=3, rowspan=2)
-        ttk.Label(self.page_frame, text="Massimo pagine totali").pack(anchor="w")
+        self.page_frame.grid(row=2, column=3, rowspan=2)
+        ttk.Label(self.page_frame, text="Massimo pagine", style="Muted.TLabel").pack(anchor="w")
         ttk.Spinbox(self.page_frame, from_=1, to=1000, textvariable=self.pages, width=9).pack(anchor="w", pady=5)
-        ttk.Label(main, textvariable=self.notice, wraplength=820).grid(row=1, column=0, sticky="ew", pady=(0, 10))
+        self.notice_label = ttk.Label(main, textvariable=self.notice, style="Muted.TLabel", wraplength=500)
+        self.notice_label.grid(row=1, column=0, sticky="ew", pady=(0, 10))
         self.tabs = ttk.Notebook(main)
         self.tabs.grid(row=2, column=0, sticky="nsew")
         self.home_tab = ttk.Frame(self.tabs, padding=12)
@@ -237,23 +254,30 @@ class NativeWindow:
         self.status_tab = ttk.Frame(self.tabs, padding=12)
         self.control_tab = ttk.Frame(self.tabs, padding=12)
         self.illustrator_tab = ttk.Frame(self.tabs, padding=12)
-        self.tabs.add(self.home_tab, text="Progetti")
-        self.tabs.add(self.input_tab, text="Materiali e domande")
-        self.tabs.add(self.output_tab, text="Schemi e PDF")
-        self.tabs.add(self.status_tab, text="Stato e batch")
-        self.tabs.add(self.control_tab, text="Control Room")
-        self.tabs.add(self.illustrator_tab, text="Medical Illustrator")
+        self.full_tab_labels = ("Progetti", "Materiali e domande", "Schemi e PDF", "Stato e batch",
+                                "Control Room", "Medical Illustrator")
+        self.compact_tab_labels = ("Progetti", "Input", "PDF", "Stato", "Control", "Tavole")
+        self._compact_tabs = None
+        for tab, label in zip((self.home_tab, self.input_tab, self.output_tab, self.status_tab,
+                               self.control_tab, self.illustrator_tab), self.full_tab_labels):
+            self.tabs.add(tab, text=label)
         home_toolbar = ttk.Frame(self.home_tab)
-        home_toolbar.pack(fill="x", pady=(0, 8))
-        ttk.Label(home_toolbar, text="Materie locali · PDF e stati verificati sui file salvati").pack(anchor="w")
-        home_actions = ttk.Frame(home_toolbar)
-        home_actions.pack(fill="x", pady=(6, 0))
-        ttk.Button(home_actions, text="Apri", command=self.open_home_project).pack(side="right")
-        ttk.Button(home_actions, text="Apri Control Room", command=lambda: self.open_home_project(True)).pack(side="right", padx=8)
-        ttk.Button(home_actions, text="Cartella PDF", command=self.open_home_pdf_folder).pack(side="right", padx=8)
-        ttk.Button(home_actions, text="Archivia / Riattiva", command=self.toggle_home_archive).pack(side="right", padx=8)
-        ttk.Button(home_actions, text="Duplica impostazioni", command=self.duplicate_home_settings).pack(side="right", padx=8)
-        ttk.Button(home_actions, text="★ Preferito", command=self.toggle_home_favorite).pack(side="right", padx=8)
+        home_toolbar.pack(fill="x", pady=(0, 10))
+        ttk.Label(home_toolbar, text="LA TUA BIBLIOTECA", style="Eyebrow.TLabel").pack(anchor="w")
+        ttk.Label(home_toolbar, text="Progetti", style="Section.TLabel").pack(anchor="w", pady=(1, 2))
+        ttk.Label(home_toolbar, text="Materie, schemi e PDF salvati sul tuo Mac.", style="Muted.TLabel").pack(anchor="w")
+        home_primary = ttk.Frame(home_toolbar)
+        home_primary.pack(fill="x", pady=(12, 0))
+        ttk.Button(home_primary, text="Apri materia", command=self.open_home_project,
+                   style="Accent.TButton").pack(side="left")
+        ttk.Button(home_primary, text="Control Room", command=lambda: self.open_home_project(True)).pack(side="left", padx=8)
+        ttk.Button(home_primary, text="Cartella PDF", command=self.open_home_pdf_folder).pack(side="left")
+        home_secondary = ttk.Frame(home_toolbar)
+        home_secondary.pack(fill="x", pady=(8, 0))
+        ttk.Button(home_secondary, text="★ Preferito", command=self.toggle_home_favorite).pack(side="left")
+        ttk.Button(home_secondary, text="Duplica", command=self.duplicate_home_settings).pack(side="left", padx=8)
+        ttk.Button(home_secondary, text="Archivia / Riattiva", command=self.toggle_home_archive).pack(side="left")
+        ttk.Button(home_secondary, text="Versioni PDF", command=self.show_home_pdf_versions).pack(side="left", padx=8)
         home_filters = ttk.Frame(home_toolbar)
         home_filters.pack(fill="x", pady=(7, 0))
         self.home_visibility = tk.StringVar(value="Attive")
@@ -268,74 +292,125 @@ class NativeWindow:
                                values=("Nome", "Data esame", "PDF pronti"), state="readonly", width=15)
         ordered.pack(side="left", padx=6)
         ordered.bind("<<ComboboxSelected>>", lambda event: self.refresh())
-        ttk.Button(home_filters, text="Versioni PDF", command=self.show_home_pdf_versions).pack(side="right")
-        self.project_rows = ttk.Treeview(self.home_tab, columns=("name", "pdf", "phase", "remote"), show="headings", selectmode="browse")
+        selected_card = ttk.Frame(self.home_tab, style="Card.TFrame", padding=(16, 12))
+        selected_card.pack(fill="x", pady=(0, 10))
+        selected_card.columnconfigure(0, weight=1)
+        self.home_card_title = tk.StringVar(value="Scegli una materia")
+        self.home_card_summary = tk.StringVar(value="I dettagli appariranno qui.")
+        self.home_card_phase = tk.StringVar(value="Bozza")
+        ttk.Label(selected_card, textvariable=self.home_card_title, style="CardTitle.TLabel",
+                  wraplength=275).grid(row=0, column=0, sticky="w")
+        self.home_card_badge = ttk.Label(selected_card, textvariable=self.home_card_phase, style="Badge.TLabel")
+        self.home_card_badge.grid(row=0, column=1, sticky="e", padx=(12, 0))
+        self.home_summary_label = ttk.Label(selected_card, textvariable=self.home_card_summary,
+                                            style="CardBody.TLabel", wraplength=500)
+        self.home_summary_label.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 5))
+        self.home_card_progress = ttk.Progressbar(selected_card, mode="determinate")
+        self.home_card_progress.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(2, 0))
+        list_frame = ttk.Frame(self.home_tab)
+        list_frame.pack(fill="both", expand=True)
+        list_frame.columnconfigure(0, weight=1)
+        list_frame.rowconfigure(0, weight=1)
+        self.project_rows = ttk.Treeview(list_frame, columns=("name", "pdf", "phase", "remote"), show="headings", selectmode="browse")
         for key, title, width in (("name", "Materia", 280), ("pdf", "PDF pronti", 95),
                                   ("phase", "Situazione", 290), ("remote", "Ultima verifica OpenAI", 210)):
             self.project_rows.heading(key, text=title)
             self.project_rows.column(key, width=width, stretch=key in {"name", "phase"})
-        self.project_rows.pack(fill="both", expand=True)
+        self.project_rows.grid(row=0, column=0, sticky="nsew")
+        vertical = ttk.Scrollbar(list_frame, orient="vertical", command=self.project_rows.yview)
+        vertical.grid(row=0, column=1, sticky="ns")
+        horizontal = ttk.Scrollbar(list_frame, orient="horizontal", command=self.project_rows.xview)
+        horizontal.grid(row=1, column=0, sticky="ew")
+        self.project_rows.configure(yscrollcommand=vertical.set, xscrollcommand=horizontal.set)
+        self.project_rows.tag_configure("success", foreground=COLORS["teal"])
+        self.project_rows.tag_configure("attention", foreground=COLORS["amber"])
+        self.project_rows.tag_configure("inactive", foreground=COLORS["muted"])
+        self.project_rows.bind("<<TreeviewSelect>>", self.show_home_summary)
         self.project_rows.bind("<Double-1>", lambda event: self.open_home_project())
-        inputs = self.input_tab
+        inputs = vertical_scroll_area(self.input_tab)
         inputs.columnconfigure(0, weight=1)
         inputs.rowconfigure(1, weight=2)
-        inputs.rowconfigure(3, weight=1)
+        inputs.rowconfigure(4, weight=1)
         toolbar = ttk.Frame(inputs)
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        ttk.Label(toolbar, text="LE FONTI DELL'ESAME", style="Eyebrow.TLabel").pack(anchor="w")
+        ttk.Label(toolbar, text="Materiali e domande", style="Section.TLabel").pack(anchor="w", pady=(1, 9))
         file_actions = ttk.Frame(toolbar)
         file_actions.pack(fill="x")
-        for kind, title in [("materiali", "Aggiungi materiali"), ("domande", "File delle domande"), ("programma", "Programma ufficiale")]:
-            ttk.Button(file_actions, text=title, command=lambda k=kind: self.pick_files(k)).pack(side="left", padx=(0, 8))
+        self.material_count_vars = {}
+        for kind, title, description in (("materiali", "Sbobine e appunti", "PDF, Office, immagini"),
+                                         ("domande", "Domande", "File di domande d'esame"),
+                                         ("programma", "Programma", "Argomenti ufficiali")):
+            panel = ttk.Frame(file_actions, style="Card.TFrame", padding=(10, 9))
+            panel.pack(side="left", fill="both", expand=True, padx=(0, 7))
+            ttk.Label(panel, text=title, style="CardTitle.TLabel", wraplength=130).pack(anchor="w")
+            ttk.Label(panel, text=description, style="CardBody.TLabel", wraplength=130).pack(anchor="w", pady=(3, 4))
+            count = tk.StringVar(value="0 file")
+            self.material_count_vars[kind] = count
+            ttk.Label(panel, textvariable=count, style="CardBody.TLabel").pack(anchor="w", pady=(0, 7))
+            ttk.Button(panel, text="Aggiungi file", command=lambda k=kind: self.pick_files(k)).pack(fill="x")
         inspect_actions = ttk.Frame(toolbar)
         inspect_actions.pack(fill="x", pady=(5, 0))
         ttk.Button(inspect_actions, text="Confronta programma", command=self.show_coverage).pack(side="left")
         ttk.Button(inspect_actions, text="Rimuovi selezionato", command=self.remove_file).pack(side="right")
         ttk.Button(inspect_actions, text="Anteprima selezionato", command=self.preview_material).pack(side="right", padx=8)
         self.files = ttk.Treeview(inputs, columns=("area", "name", "size", "state"), show="headings", height=7, selectmode="browse")
-        for key, title, width in [("area", "Area", 95), ("name", "File", 320), ("size", "Byte", 95), ("state", "Stato", 160)]:
+        for key, title, width in [("area", "Area", 70), ("name", "File", 220), ("size", "Byte", 75), ("state", "Stato", 125)]:
             self.files.heading(key, text=title)
             self.files.column(key, width=width, stretch=key == "name")
         self.files.grid(row=1, column=0, sticky="nsew")
-        ttk.Label(inputs, text="Domande incollate (facoltative; lascia vuoto se non ne hai)").grid(row=2, column=0, sticky="w", pady=(12, 5))
+        file_scroll = ttk.Scrollbar(inputs, orient="horizontal", command=self.files.xview)
+        file_scroll.grid(row=2, column=0, sticky="ew")
+        self.files.configure(xscrollcommand=file_scroll.set)
+        ttk.Label(inputs, text="Domande incollate (facoltative; lascia vuoto se non ne hai)").grid(row=3, column=0, sticky="w", pady=(12, 5))
         self.questions = ScrolledText(inputs, height=5, wrap="word", undo=True, font=("Helvetica", 12))
-        self.questions.grid(row=3, column=0, sticky="nsew")
-        ttk.Label(inputs, text="Indicazioni per gli schemi (facoltative)").grid(row=4, column=0, sticky="w", pady=(10, 5))
+        self.questions.grid(row=4, column=0, sticky="nsew")
+        ttk.Label(inputs, text="Indicazioni per gli schemi (facoltative)").grid(row=5, column=0, sticky="w", pady=(10, 5))
         self.instructions = ScrolledText(inputs, height=3, wrap="word", undo=True, font=("Helvetica", 12))
-        self.instructions.grid(row=5, column=0, sticky="ew")
+        self.instructions.grid(row=6, column=0, sticky="ew")
         out = self.output_tab
         out.columnconfigure(0, weight=1)
-        out.rowconfigure(1, weight=1)
-        ttk.Label(out, textvariable=self.progress).grid(row=0, column=0, sticky="w", pady=(0, 12))
+        out.rowconfigure(2, weight=1)
+        ttk.Label(out, text="I TUOI RISULTATI", style="Eyebrow.TLabel").grid(row=0, column=0, sticky="w")
+        ttk.Label(out, textvariable=self.progress, style="Section.TLabel").grid(row=1, column=0, sticky="w", pady=(1, 12))
         self.outputs = ttk.Treeview(out, columns=("name", "state"), show="headings", selectmode="browse")
         self.outputs.heading("name", text="Argomento / risultato")
         self.outputs.heading("state", text="Stato")
-        self.outputs.column("name", width=460)
-        self.outputs.column("state", width=140, stretch=False)
-        self.outputs.grid(row=1, column=0, sticky="nsew")
+        self.outputs.column("name", width=370)
+        self.outputs.column("state", width=130, stretch=False)
+        self.outputs.grid(row=2, column=0, sticky="nsew")
         self.outputs.bind("<Double-1>", lambda event: self.open_result())
         controls = ttk.Frame(out)
-        controls.grid(row=2, column=0, sticky="ew", pady=12)
-        ttk.Button(controls, text="Apri selezionato", command=self.open_result).pack(side="left")
-        ttk.Button(controls, text="Controllo visivo PDF", command=self.visual_check).pack(side="left", padx=10)
-        ttk.Button(controls, text="Apri cartella dei PDF", command=self.open_output_folder).pack(side="left", padx=10)
-        self.upgrade_button = ttk.Button(controls, text="Rigenera con il modello predefinito", command=self.upgrade)
-        self.upgrade_button.pack(side="right")
+        controls.grid(row=3, column=0, sticky="ew", pady=(12, 5))
+        ttk.Button(controls, text="Apri PDF", command=self.open_result).pack(side="left")
+        ttk.Button(controls, text="Controllo visivo", command=self.visual_check).pack(side="left", padx=10)
+        ttk.Button(controls, text="Cartella PDF", command=self.open_output_folder).pack(side="left", padx=10)
+        self.upgrade_button = ttk.Button(out, text="Rigenera con il modello predefinito", command=self.upgrade)
+        self.upgrade_button.grid(row=4, column=0, sticky="w", pady=(0, 7))
         pilot_controls = ttk.Frame(out)
-        pilot_controls.grid(row=3, column=0, sticky="ew", pady=(0, 8))
+        pilot_controls.grid(row=5, column=0, sticky="ew", pady=(0, 8))
         self.pilot_notice = tk.StringVar(value="")
-        ttk.Label(pilot_controls, textvariable=self.pilot_notice, wraplength=650).pack(side="left", fill="x", expand=True)
-        self.pilot_approve_button = ttk.Button(pilot_controls, text="Approva il primo schema", command=self.approve_pilot)
+        self.pilot_notice_label = ttk.Label(pilot_controls, textvariable=self.pilot_notice, wraplength=500)
+        self.pilot_notice_label.pack(anchor="w", fill="x", pady=(0, 5))
+        pilot_actions = ttk.Frame(pilot_controls)
+        pilot_actions.pack(fill="x")
+        self.pilot_approve_button = ttk.Button(pilot_actions, text="Approva il primo schema", command=self.approve_pilot)
         self.pilot_approve_button.pack(side="right", padx=(8, 0))
-        self.pilot_feedback_button = ttk.Button(pilot_controls, text="Descrivi modifiche…", command=self.feedback_pilot)
+        self.pilot_feedback_button = ttk.Button(pilot_actions, text="Descrivi modifiche…", command=self.feedback_pilot)
         self.pilot_feedback_button.pack(side="right", padx=(8, 0))
-        self.pilot_open_button = ttk.Button(pilot_controls, text="Apri il primo PDF", command=self.open_pilot)
+        self.pilot_open_button = ttk.Button(pilot_actions, text="Apri il primo PDF", command=self.open_pilot)
         self.pilot_open_button.pack(side="right", padx=(8, 0))
+        ttk.Label(self.status_tab, text="PERCORSO DEL LAVORO", style="Eyebrow.TLabel").pack(anchor="w")
+        ttk.Label(self.status_tab, text="Stato e batch", style="Section.TLabel").pack(anchor="w", pady=(1, 10))
         monitor = ttk.Frame(self.status_tab)
         monitor.pack(fill="x", pady=(0, 10))
         self.monitor_vars = {key: self.tk.StringVar(value="Scegli una materia") for key in ("local", "server", "finish")}
+        self.monitor_labels = []
         for key, title in (("local", "1 · Sul Mac: preparazione"), ("server", "2 · OpenAI: invio e generazione"), ("finish", "3 · Sul Mac: risultati e PDF")):
-            ttk.Label(monitor, text=title, font=("Helvetica", 11, "bold")).pack(anchor="w", pady=(5, 0))
-            ttk.Label(monitor, textvariable=self.monitor_vars[key], wraplength=970).pack(anchor="w", pady=(0, 3))
+            ttk.Label(monitor, text=title, style="Eyebrow.TLabel").pack(anchor="w", pady=(5, 0))
+            label = ttk.Label(monitor, textvariable=self.monitor_vars[key], wraplength=500)
+            label.pack(anchor="w", pady=(0, 3))
+            self.monitor_labels.append(label)
         monitor_actions = ttk.Frame(monitor)
         monitor_actions.pack(anchor="e", pady=5)
         ttk.Button(monitor_actions, text="Controlla ora lo stato su OpenAI", command=self.refresh_server).pack(side="left", padx=(0, 8))
@@ -343,12 +418,28 @@ class NativeWindow:
         self.rescue_button.pack(side="left")
         self.status_text = ScrolledText(self.status_tab, wrap="word", font=("Courier", 11), state="disabled")
         self.status_text.pack(fill="both", expand=True)
+        ttk.Label(self.control_tab, text="CONTROL ROOM", style="Eyebrow.TLabel").pack(anchor="w")
+        ttk.Label(self.control_tab, text="Stato del lavoro", style="Section.TLabel").pack(anchor="w", pady=(1, 2))
+        ttk.Label(self.control_tab, text="Panoramica letta dai file locali della materia selezionata.",
+                  style="Muted.TLabel").pack(anchor="w", pady=(0, 12))
+        control_summary = ttk.Frame(self.control_tab)
+        control_summary.pack(fill="x", pady=(0, 12))
+        self.control_kpis = {}
+        for key, title in (("pdf", "PDF PRONTI"), ("batch", "BATCH ACCETTATI"), ("incidents", "INCIDENTI")):
+            card = ttk.Frame(control_summary, style="Card.TFrame", padding=(12, 10))
+            card.pack(side="left", fill="x", expand=True, padx=(0, 8) if key != "incidents" else 0)
+            self.control_kpis[key] = self.tk.StringVar(value="—")
+            ttk.Label(card, text=title, style="CardBody.TLabel").pack(anchor="w")
+            ttk.Label(card, textvariable=self.control_kpis[key], style="CardTitle.TLabel").pack(anchor="w", pady=(3, 0))
         control_actions = ttk.Frame(self.control_tab)
         control_actions.pack(fill="x", pady=(0, 8))
-        ttk.Label(control_actions, text="Dati locali osservati · la lettura non invia richieste API").pack(side="left")
-        ttk.Button(control_actions, text="Aggiorna dati locali", command=self.refresh).pack(side="right")
-        ttk.Button(control_actions, text="Anteprima report diagnostico", command=self.diagnostic_preview).pack(side="right", padx=8)
-        ttk.Button(control_actions, text="Recupera solo PDF locali", command=self.recover_local_pdfs).pack(side="right", padx=8)
+        ttk.Label(control_actions, text="Dati osservati · leggere questa pagina non avvia generazioni.",
+                  style="Muted.TLabel").pack(anchor="w", pady=(0, 6))
+        control_buttons = ttk.Frame(control_actions)
+        control_buttons.pack(fill="x")
+        ttk.Button(control_buttons, text="Aggiorna", command=self.refresh).pack(side="left")
+        ttk.Button(control_buttons, text="Anteprima report", command=self.diagnostic_preview).pack(side="left", padx=8)
+        ttk.Button(control_buttons, text="Recupera PDF locali", command=self.recover_local_pdfs).pack(side="left")
         control_views = ttk.Frame(self.control_tab)
         control_views.pack(anchor="w", pady=(0, 8))
         ttk.Button(control_views, text="Panoramica di tutte le materie", command=self.show_global_control).pack(side="left")
@@ -370,6 +461,9 @@ class NativeWindow:
             self.control_job_rows.heading(key, text=label)
             self.control_job_rows.column(key, width=width, stretch=key == "title")
         self.control_job_rows.pack(fill="both", expand=True)
+        job_scroll = ttk.Scrollbar(self.control_jobs, orient="horizontal", command=self.control_job_rows.xview)
+        job_scroll.pack(fill="x")
+        self.control_job_rows.configure(xscrollcommand=job_scroll.set)
         self.control_job_rows.bind("<<TreeviewSelect>>", self.show_control_job)
         self.control_job_detail = ScrolledText(self.control_jobs, height=8, wrap="word", font=("Courier", 10), state="disabled")
         self.control_job_detail.pack(fill="x", pady=(8, 0))
@@ -379,6 +473,9 @@ class NativeWindow:
             self.control_batch_rows.heading(key, text=label)
             self.control_batch_rows.column(key, width=width, stretch=key == "id")
         self.control_batch_rows.pack(fill="both", expand=True)
+        batch_scroll = ttk.Scrollbar(self.control_batches, orient="horizontal", command=self.control_batch_rows.xview)
+        batch_scroll.pack(fill="x")
+        self.control_batch_rows.configure(xscrollcommand=batch_scroll.set)
         self.control_performance_rows = ttk.Treeview(self.control_performance, columns=("stage", "success", "fail", "median", "p90", "p95", "max"), show="headings")
         for key, label, width in (("stage", "Fase locale", 210), ("success", "Riuscite", 80),
                                   ("fail", "Errori", 70), ("median", "Mediana ms", 105),
@@ -387,39 +484,61 @@ class NativeWindow:
             self.control_performance_rows.heading(key, text=label)
             self.control_performance_rows.column(key, width=width, stretch=key == "stage")
         self.control_performance_rows.pack(fill="both", expand=True)
+        performance_scroll = ttk.Scrollbar(self.control_performance, orient="horizontal", command=self.control_performance_rows.xview)
+        performance_scroll.pack(fill="x")
+        self.control_performance_rows.configure(xscrollcommand=performance_scroll.set)
+        ttk.Label(self.illustrator_tab, text="MEDICAL ILLUSTRATOR", style="Eyebrow.TLabel").pack(anchor="w")
+        ttk.Label(self.illustrator_tab, text="Tavole mediche", style="Section.TLabel").pack(anchor="w", pady=(1, 2))
+        self.illustrator_intro = ttk.Label(self.illustrator_tab,
+                                           text="Idee e bozze locali da controllare prima di inserire nei PDF.",
+                                           style="Muted.TLabel", wraplength=500)
+        self.illustrator_intro.pack(anchor="w", pady=(0, 12))
         illustrator_toolbar = ttk.Frame(self.illustrator_tab)
         illustrator_toolbar.pack(fill="x", pady=(0, 8))
         ttk.Button(illustrator_toolbar, text="Cerca tavole utili", command=self.plan_illustrations).pack(side="left")
         ttk.Button(illustrator_toolbar, text="Aggiungi tavola manuale", command=self.add_manual_illustration).pack(side="left", padx=8)
         ttk.Button(illustrator_toolbar, text="Disattiva/riattiva proposte", command=self.toggle_illustrations).pack(side="left", padx=8)
         self.illustrator_notice = tk.StringVar(value="Proposte locali, senza API. Ogni tavola richiede revisione.")
-        ttk.Label(self.illustrator_tab, textvariable=self.illustrator_notice, wraplength=900).pack(anchor="w", pady=(0, 8))
+        self.illustrator_notice_label = ttk.Label(self.illustrator_tab, textvariable=self.illustrator_notice,
+                                                  wraplength=500)
+        self.illustrator_notice_label.pack(anchor="w", pady=(0, 8))
         self.illustrations = ttk.Treeview(self.illustrator_tab, columns=("schema", "concept", "state"), show="headings", selectmode="browse")
         for key, title, width in (("schema", "Schema", 85), ("concept", "Tavola proposta", 510), ("state", "Stato", 200)):
             self.illustrations.heading(key, text=title)
             self.illustrations.column(key, width=width, stretch=key == "concept")
         self.illustrations.pack(fill="both", expand=True)
+        illustration_scroll = ttk.Scrollbar(self.illustrator_tab, orient="horizontal", command=self.illustrations.xview)
+        illustration_scroll.pack(fill="x")
+        self.illustrations.configure(xscrollcommand=illustration_scroll.set)
         self.illustrations.bind("<<TreeviewSelect>>", self.show_illustration_details)
         self.illustration_detail = ScrolledText(self.illustrator_tab, height=8, wrap="word", font=("Helvetica", 11), state="disabled")
         self.illustration_detail.pack(fill="x", pady=(8, 0))
         illustrator_actions = ttk.Frame(self.illustrator_tab)
         illustrator_actions.pack(fill="x", pady=(8, 0))
-        ttk.Button(illustrator_actions, text="Accetta e crea bozza SVG", command=lambda: self.illustration_action("accepted")).pack(side="left")
-        ttk.Button(illustrator_actions, text="Scarta", command=lambda: self.illustration_action("rejected")).pack(side="left", padx=8)
-        ttk.Button(illustrator_actions, text="Modifica proposta", command=self.edit_illustration).pack(side="left", padx=(0, 8))
-        ttk.Button(illustrator_actions, text="Apri bozza", command=self.open_illustration).pack(side="left")
-        ttk.Button(illustrator_actions, text="Valida SVG modificato", command=self.revalidate_illustration).pack(side="left", padx=8)
-        ttk.Button(illustrator_actions, text="Segna revisionata", command=lambda: self.illustration_action("approved")).pack(side="right")
-        ttk.Button(illustrator_actions, text="Esporta PDF con tavola", command=self.export_illustration).pack(side="right", padx=8)
+        illustration_edit = ttk.Frame(illustrator_actions)
+        illustration_edit.pack(fill="x", pady=(0, 7))
+        ttk.Button(illustration_edit, text="Crea bozza SVG", command=lambda: self.illustration_action("accepted"),
+                   style="Accent.TButton").pack(side="left")
+        ttk.Button(illustration_edit, text="Modifica", command=self.edit_illustration).pack(side="left", padx=8)
+        ttk.Button(illustration_edit, text="Apri bozza", command=self.open_illustration).pack(side="left")
+        ttk.Button(illustration_edit, text="Valida SVG", command=self.revalidate_illustration).pack(side="left", padx=8)
+        illustration_review = ttk.Frame(illustrator_actions)
+        illustration_review.pack(fill="x")
+        ttk.Button(illustration_review, text="Scarta", command=lambda: self.illustration_action("rejected")).pack(side="left")
+        ttk.Button(illustration_review, text="Segna revisionata", command=lambda: self.illustration_action("approved")).pack(side="left", padx=8)
+        ttk.Button(illustration_review, text="Esporta PDF con tavola", command=self.export_illustration).pack(side="left")
         footer = ttk.Frame(main)
         footer.grid(row=3, column=0, sticky="ew", pady=(12, 0))
-        ttk.Label(footer, textvariable=self.model).pack(anchor="w", pady=(0, 6))
-        ttk.Label(footer, text="Normale: Batch, costo ridotto e completamento entro 24 ore. Urgente: API diretta a costo standard, recuperabile dopo lo spegnimento; risposta conservata su OpenAI per almeno 30 giorni.", wraplength=840).pack(anchor="w")
+        ttk.Label(footer, textvariable=self.model, style="Eyebrow.TLabel").pack(anchor="w", pady=(0, 6))
+        ttk.Label(footer, text="Normale: Batch a costo ridotto. Urgente: API diretta. Solo le nuove generazioni consumano token OpenAI.",
+                  style="Muted.TLabel", wraplength=840).pack(anchor="w")
         actions = ttk.Frame(footer)
         actions.pack(fill="x", pady=(10, 0))
         self.buttons = [self.rescue_button, self.pilot_feedback_button, self.pilot_approve_button]
-        for title, action in [("Salva", "save"), ("Genera stanotte · Normale", "night"), ("Avvia urgente", "urgent"), ("Avvia normale · Batch", "now")]:
-            button = ttk.Button(actions, text=title, command=lambda a=action: self.save(a))
+        for title, action in [("Salva", "save"), ("Stanotte · Batch", "night"),
+                              ("Avvia urgente", "urgent"), ("Avvia · Batch", "now")]:
+            button = ttk.Button(actions, text=title, command=lambda a=action: self.save(a),
+                                style="Accent.TButton" if action == "now" else "TButton")
             button.pack(side="right", padx=(10, 0))
             self.buttons.append(button)
         for value in (self.name, self.mode, self.pages):
@@ -428,6 +547,7 @@ class NativeWindow:
             widget.bind("<<Modified>>", lambda event: self.text_modified(event.widget))
         self.show_mode()
         self.home_search.trace_add("write", lambda *args: self.refresh())
+        root.bind("<Configure>", self.update_responsive, add="+")
         self.refresh()
         if self.slugs:
             self.exams.selection_set(0)
@@ -438,6 +558,20 @@ class NativeWindow:
             self.notice.set("Scegli una materia oppure creane una nuova.")
             self.refresh()
         self.async_task(self.session.resume, resumed, "Controllo dei lavori già inviati…")
+
+    def update_responsive(self, event=None):
+        if event is not None and event.widget is not self.root:
+            return
+        wrap = max(400, self.root.winfo_width() - 380)
+        for label in (self.notice_label, self.home_summary_label, self.pilot_notice_label, self.illustrator_intro,
+                      self.illustrator_notice_label, *self.monitor_labels):
+            label.configure(wraplength=wrap)
+        compact = self.root.winfo_width() < 1120
+        if compact == self._compact_tabs:
+            return
+        self._compact_tabs = compact
+        for index, label in enumerate(self.compact_tab_labels if compact else self.full_tab_labels):
+            self.tabs.tab(index, text=label)
 
     def mark_dirty(self):
         self.dirty = True
@@ -542,7 +676,9 @@ class NativeWindow:
         from tkinter.scrolledtext import ScrolledText
         dialog = self.tk.Toplevel(self.root)
         dialog.title("Nuova materia · procedura guidata")
-        dialog.geometry("810x630")
+        dialog.geometry("860x660")
+        dialog.minsize(760, 560)
+        dialog.configure(background=COLORS["canvas"])
         dialog.transient(self.root)
         dialog.grab_set()
         values = {"name": self.tk.StringVar(), "short_title": self.tk.StringVar(),
@@ -550,34 +686,45 @@ class NativeWindow:
                   "max_pages": self.tk.StringVar(value="100"), "execution": self.tk.StringVar(value="batch"),
                   "illustrator_enabled": self.tk.BooleanVar(value=False)}
         pending = {kind: [] for kind in KINDS}
+        wizard_header = self.ttk.Frame(dialog, padding=(20, 16), style="Main.TFrame")
+        wizard_header.pack(fill="x", padx=14, pady=(12, 0))
+        self.ttk.Label(wizard_header, text="NUOVO PROGETTO", style="Eyebrow.TLabel").pack(anchor="w")
+        self.ttk.Label(wizard_header, text="Prepara una materia", style="Section.TLabel").pack(anchor="w", pady=(2, 4))
+        self.ttk.Label(wizard_header, text="Sei passaggi per scegliere fonti, obiettivo e produzione.",
+                       style="Muted.TLabel").pack(anchor="w")
         notebook = self.ttk.Notebook(dialog)
-        notebook.pack(fill="both", expand=True, padx=14, pady=12)
+        notebook.pack(fill="both", expand=True, padx=14, pady=(0, 10))
         pages = [self.ttk.Frame(notebook, padding=18) for _ in range(6)]
         for page, title in zip(pages, ("1 Identità", "2 Obiettivo", "3 Materiali", "4 Produzione", "5 Grafica", "6 Riepilogo")):
             notebook.add(page, text=title)
         identity = pages[0]
         identity.columnconfigure(1, weight=1)
+        self.ttk.Label(identity, text="Identità della materia", style="Section.TLabel").grid(
+            row=0, column=0, columnspan=2, sticky="w", pady=(0, 12))
         for index, (label, key) in enumerate((("Nome della materia", "name"), ("Titolo breve (facoltativo)", "short_title"),
                                                ("Data esame AAAA-MM-GG (facoltativa)", "exam_date"))):
-            self.ttk.Label(identity, text=label).grid(row=index, column=0, sticky="w", pady=10)
-            self.ttk.Entry(identity, textvariable=values[key]).grid(row=index, column=1, sticky="ew", padx=12, pady=10)
+            self.ttk.Label(identity, text=label).grid(row=index + 1, column=0, sticky="w", pady=10)
+            self.ttk.Entry(identity, textvariable=values[key]).grid(row=index + 1, column=1, sticky="ew", padx=12, pady=10)
         objective = pages[1]
+        self.ttk.Label(objective, text="Obiettivo di studio", style="Section.TLabel").pack(anchor="w", pady=(0, 4))
         self.ttk.Label(objective, text="Come vuoi studiare questa materia?").pack(anchor="w", pady=(0, 10))
         self.ttk.Radiobutton(objective, text="Completa", variable=values["mode"], value="completa").pack(anchor="w")
-        self.ttk.Radiobutton(objective, text="Veloce · limite di pagine totali", variable=values["mode"], value="veloce").pack(anchor="w", pady=7)
+        self.ttk.Radiobutton(objective, text="Sintesi · limite di pagine totali", variable=values["mode"], value="veloce").pack(anchor="w", pady=7)
         self.ttk.Spinbox(objective, from_=1, to=1000, textvariable=values["max_pages"], width=9).pack(anchor="w", padx=25)
         self.ttk.Label(objective, text="Il limite non garantisce copertura se le fonti sono insufficienti.").pack(anchor="w", pady=(8, 14))
         self.ttk.Label(objective, text="Indicazioni per gli schemi (facoltative)").pack(anchor="w")
         instructions = ScrolledText(objective, height=7, wrap="word")
         instructions.pack(fill="both", expand=True, pady=5)
         materials = pages[2]
+        self.ttk.Label(materials, text="Materiali di partenza", style="Section.TLabel").pack(anchor="w", pady=(0, 4))
         self.ttk.Label(materials, text="Seleziona più file. Puoi anche salvare una bozza e aggiungerli dopo.").pack(anchor="w", pady=(0, 12))
         counts = {}
         for kind, title in (("materiali", "Sbobine e appunti"), ("domande", "Domande d'esame"), ("programma", "Programma ufficiale")):
-            bar = self.ttk.Frame(materials)
+            bar = self.ttk.Frame(materials, style="Card.TFrame", padding=(12, 10))
             bar.pack(fill="x", pady=8)
             counter = self.tk.StringVar(value="0 file")
             counts[kind] = counter
+            self.ttk.Label(bar, text=title, style="CardTitle.TLabel").pack(side="left")
             def choose(k=kind, counter_var=counter):
                 paths = filedialog.askopenfilenames(parent=dialog, title="Seleziona " + k,
                     filetypes=[("File supportati", " ".join("*" + suffix for suffix in sorted(SUPPORTED))), ("Tutti i file", "*")])
@@ -586,13 +733,14 @@ class NativeWindow:
                     if path not in pending[k]:
                         pending[k].append(path)
                 counter_var.set(f"{len(pending[k])} file")
-            self.ttk.Button(bar, text="Aggiungi " + title.lower(), command=choose).pack(side="left")
-            self.ttk.Label(bar, textvariable=counter).pack(side="left", padx=16)
+            self.ttk.Label(bar, textvariable=counter, style="CardBody.TLabel").pack(side="left", padx=16)
             def clear(k=kind, counter_var=counter):
                 pending[k].clear()
                 counter_var.set("0 file")
             self.ttk.Button(bar, text="Svuota", command=clear).pack(side="right")
+            self.ttk.Button(bar, text="Aggiungi file", command=choose).pack(side="right", padx=8)
         production = pages[3]
+        self.ttk.Label(production, text="Produzione degli schemi", style="Section.TLabel").pack(anchor="w", pady=(0, 4))
         self.ttk.Label(production, text="Scegli quando avviare. Salva bozza non invia nulla.").pack(anchor="w", pady=(0, 12))
         for code, label in (("batch", "Normale · Batch OpenAI"), ("urgent", "Urgente · OpenAI a costo standard"),
                             ("night", "Notturna · Batch alle 00:30, Mac acceso")):
@@ -600,6 +748,7 @@ class NativeWindow:
         self.ttk.Label(production, text="Il primo PDF resta in attesa della tua approvazione. Il prezzo API non è stimato qui.",
                        wraplength=690).pack(anchor="w", pady=22)
         graphics = pages[4]
+        self.ttk.Label(graphics, text="Grafica e tavole", style="Section.TLabel").pack(anchor="w", pady=(0, 12))
         self.ttk.Checkbutton(graphics, text="Abilita proposte Medical Illustrator per questa materia",
                              variable=values["illustrator_enabled"]).pack(anchor="w", pady=(0, 16))
         self.ttk.Label(graphics, text="Le bozze SVG sono schematiche, locali e gratuite. Si generano solo quando le chiedi; "
@@ -607,6 +756,7 @@ class NativeWindow:
         self.ttk.Label(graphics, text="Le immagini già presenti nelle fonti continuano a seguire il flusso esistente.",
                        wraplength=690).pack(anchor="w", pady=12)
         review = pages[5]
+        self.ttk.Label(review, text="Controlla prima di iniziare", style="Section.TLabel").pack(anchor="w", pady=(0, 10))
         review_text = ScrolledText(review, wrap="word", state="disabled", height=15)
         review_text.pack(fill="both", expand=True)
         def show_review(_event=None):
@@ -626,7 +776,7 @@ class NativeWindow:
             review_text.insert("1.0", summary)
             review_text.configure(state="disabled")
         notebook.bind("<<NotebookTabChanged>>", show_review)
-        buttons = self.ttk.Frame(dialog, padding=(14, 0, 14, 14))
+        buttons = self.ttk.Frame(dialog, padding=(14, 0, 14, 14), style="App.TFrame")
         buttons.pack(fill="x")
         self.ttk.Button(buttons, text="Indietro", command=lambda: notebook.select(max(0, notebook.index(notebook.select()) - 1))).pack(side="left")
         self.ttk.Button(buttons, text="Avanti", command=lambda: notebook.select(min(5, notebook.index(notebook.select()) + 1))).pack(side="left", padx=8)
@@ -658,7 +808,8 @@ class NativeWindow:
                       else "urgent" if planned["execution"] == "urgent" else "now")
             self.save(action, extra={"short_title": planned["short_title"], "exam_date": planned["exam_date"]},
                       illustrator_enabled=planned["illustrator_enabled"])
-        self.ttk.Button(buttons, text="Avvia dopo il salvataggio", command=lambda: finish(True)).pack(side="right")
+        self.ttk.Button(buttons, text="Avvia dopo il salvataggio", command=lambda: finish(True),
+                        style="Accent.TButton").pack(side="right")
         self.ttk.Button(buttons, text="Salva bozza", command=lambda: finish(False)).pack(side="right", padx=8)
 
     def choose_exam(self, event=None):
@@ -701,6 +852,33 @@ class NativeWindow:
             if self.session.selected != slug:
                 return
         self.tabs.select(self.control_tab if control else self.input_tab)
+
+    def show_home_summary(self, event=None):
+        selection = self.project_rows.selection()
+        card = self.home_card_data.get(selection[0]) if selection else None
+        if not card:
+            self.home_card_title.set("Scegli una materia")
+            self.home_card_phase.set("Nessuna selezione")
+            self.home_card_summary.set("Seleziona una riga per vedere stato e PDF correnti.")
+            self.home_card_badge.configure(style="MutedBadge.TLabel")
+            self.home_card_progress.grid_remove()
+            return
+        phase = card["phase"]
+        attention = phase.startswith("Invio incerto") or phase.startswith("Primo PDF")
+        quiet = card["archived"] or phase.startswith("Bozza")
+        self.home_card_title.set(("★  " if card["favorite"] else "") + card["name"])
+        self.home_card_phase.set(phase)
+        self.home_card_badge.configure(style="AttentionBadge.TLabel" if attention else
+                                       "MutedBadge.TLabel" if quiet else "Badge.TLabel")
+        checked = (card["last_remote_check"] or "mai").replace("T", " ")[:16]
+        count = f"{card['ready']} PDF pronti su {card['total']} schemi" if card["total"] else "Piano degli schemi non ancora creato"
+        date = " · Esame " + card["exam_date"] if card["exam_date"] else ""
+        self.home_card_summary.set(count + date + " · Ultimo controllo OpenAI: " + checked)
+        if card["total"]:
+            self.home_card_progress.configure(maximum=card["total"], value=card["ready"])
+            self.home_card_progress.grid()
+        else:
+            self.home_card_progress.grid_remove()
 
     def duplicate_home_settings(self):
         selection = self.project_rows.selection()
@@ -842,13 +1020,22 @@ class NativeWindow:
                     self.exams.selection_set(index)
             selected_project = self.project_rows.selection()
             self.project_rows.delete(*self.project_rows.get_children())
-            for card in arrange_cards(project_cards(self.app, rows), self.home_visibility.get(), self.home_order.get()):
+            cards = arrange_cards(project_cards(self.app, rows), self.home_visibility.get(), self.home_order.get())
+            self.home_card_data = {card["slug"]: card for card in cards}
+            for card in cards:
+                phase = card["phase"]
+                tag = ("attention" if phase.startswith(("Invio incerto", "Primo PDF")) else
+                       "success" if card["total"] and card["ready"] == card["total"] else "inactive")
                 self.project_rows.insert("", "end", iid=card["slug"],
                                          values=(("★ " if card["favorite"] else "") + card["name"],
                                                  f"{card['ready']}/{card['total']}",
-                                                 card["phase"], card["last_remote_check"] or "mai"))
-            if selected_project and self.project_rows.exists(selected_project[0]):
-                self.project_rows.selection_set(selected_project[0])
+                                                 phase, card["last_remote_check"] or "mai"), tags=(tag,))
+            preferred = selected_project[0] if selected_project else self.session.selected
+            if preferred and self.project_rows.exists(preferred):
+                self.project_rows.selection_set(preferred)
+            elif cards:
+                self.project_rows.selection_set(cards[0]["slug"])
+            self.show_home_summary()
             detail = self.app.detail(self.session.selected) if self.session.selected else None
             status = overview(self.app.root(self.session.selected), detail["busy"]) if detail else None
             for key, variable in self.monitor_vars.items():
@@ -870,6 +1057,9 @@ class NativeWindow:
                 for path in paths:
                     item = self.files.insert("", "end", values=(kind, path.name, path.stat().st_size, "Da caricare"))
                     self.file_rows[item] = (kind, path, True)
+            for kind, variable in self.material_count_vars.items():
+                count = sum(file["kind"] == kind for file in (detail or {}).get("files", [])) + len(self.session.pending[kind])
+                variable.set(f"{count} file")
             if previous_file:
                 for item, value in self.file_rows.items():
                     if value == previous_file:
@@ -923,6 +1113,10 @@ class NativeWindow:
             self.status_text.configure(state="disabled")
             control_view = snapshot(self.app.root(self.session.selected), detail["busy"]) if detail else None
             self.control_view = control_view
+            counts = control_view["counts"] if control_view else None
+            self.control_kpis["pdf"].set(f"{counts['pdf_ok']} / {counts['total']}" if counts else "—")
+            self.control_kpis["batch"].set(str(counts["accepted_batches"]) if counts else "—")
+            self.control_kpis["incidents"].set(str(len(control_view["incidents"])) if control_view else "—")
             control = format_snapshot(control_view) if control_view else "Scegli una materia per consultare la Control Room locale."
             self.control_text.configure(state="normal")
             self.control_text.delete("1.0", "end")
@@ -1375,6 +1569,10 @@ class NativeWindow:
             self.notice.set("Il file non è ancora disponibile.")
             return
         subprocess.Popen((["open"] if sys.platform == "darwin" else ["xdg-open"]) + [str(path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def open_manual(self):
+        resource = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
+        self.open_path(resource / "docs/Manuale_Utente_Schemi_Esami.pdf")
 
     def open_result(self):
         selection = self.outputs.selection()

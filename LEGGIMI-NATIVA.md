@@ -49,6 +49,13 @@ La `.app` cerca anche Tesseract nei percorsi standard di Homebrew. L'avviso
 `OCR_NON_DISPONIBILE` del controllo in una cartella temporanea non dice se
 l'installazione esistente ha già il helper `mac-ocr` nei propri dati.
 
+Il pulsante **Aiuto · manuale PDF** apre il manuale incluso nell'app. Per la
+nuova interfaccia, apri `VERIFICA-MAC.command` dai sorgenti aggiornati prima di
+ricostruire la `.app`: usa dati dimostrativi e non invia richieste OpenAI. La
+barra laterale, i riepiloghi delle materie e della Control Room e le schede
+sono stati ridisegnati. Alle larghezze ridotte le schede hanno nomi brevi;
+la lista dei file può scorrere orizzontalmente.
+
 ## Nuove funzioni
 
 - **Progetti**: stato delle materie, PDF pronti e invii incerti. «Nuova materia

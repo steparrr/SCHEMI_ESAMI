@@ -181,6 +181,10 @@ def main():
         codecs.lookup("utf-8-sig")
         assert sqlite3.sqlite_version
         assert background_worker.main and native_app.main and finalize_pdf.finalize
+        manual = resource_root() / "docs/Manuale_Utente_Schemi_Esami.pdf"
+        assert manual.is_file(), "Manuale utente non incluso nella build"
+        with pymupdf.open(manual) as guide:
+            assert guide.page_count >= 2, "Manuale utente incompleto"
         ocr_available = (project / ".cache/mac-ocr").is_file() or shutil.which("tesseract") is not None
         assert pymupdf.paper_rect("a4").width > 500
         print("SELF_TEST_OK" + ("" if ocr_available else " OCR_NON_DISPONIBILE"), flush=True)

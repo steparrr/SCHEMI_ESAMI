@@ -27,7 +27,8 @@ def install_overlay(source, target):
                   for path in sorted((source / folder).glob("*.py"))) + tuple(map(Path, (
         "native.py", "APRI.command", "INSTALLA.command", "VERIFICA-MAC.command",
         "CREA-APP.command", "LEGGIMI-NATIVA.md", "requirements.txt",
-        "Schemi Esami.spec", "SchemiEsami.icns")))
+        "Schemi Esami.spec", "SchemiEsami.icns",
+        "docs/Manuale_Utente_Schemi_Esami.html", "docs/Manuale_Utente_Schemi_Esami.pdf")))
     for relative in files:
         if not (source / relative).is_file():
             raise ValueError("Pacchetto incompleto: manca " + str(relative))

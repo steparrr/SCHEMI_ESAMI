@@ -4,6 +4,7 @@ from pathlib import Path
 
 spec_root = Path(SPECPATH).resolve()
 datas = [(str(spec_root / folder), folder) for folder in ("scripts", "renderer", "prompts", "config")]
+datas.append((str(spec_root / "docs/Manuale_Utente_Schemi_Esami.pdf"), "docs"))
 mac_ocr = spec_root / ".cache/mac-ocr"
 if mac_ocr.is_file():
     datas.append((str(mac_ocr), ".cache"))

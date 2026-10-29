@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Schemi Esami — Manuale utente</title>
+<style>
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: #142c43; }
+  h1 { font-size: 27pt; color: #142b40; margin: 0 0 12pt; }
+  h2 { font-size: 17pt; color: #087d79; margin: 25pt 0 9pt; border-bottom: 1pt solid #d9e2e6; padding-bottom: 5pt; }
+  h3 { font-size: 12pt; color: #142b40; margin: 15pt 0 5pt; }
+  p { margin: 0 0 9pt; }
+  li { margin: 0 0 5pt; }
+  ul, ol { margin: 5pt 0 12pt; padding-left: 20pt; }
+  strong { color: #142b40; }
+  .eyebrow { color: #087d79; font-size: 9pt; font-weight: bold; letter-spacing: 1pt; margin-bottom: 12pt; }
+  .lead { font-size: 13pt; color: #596f7d; margin-bottom: 19pt; }
+  .callout { background: #ddf2ee; border-left: 3pt solid #087d79; padding: 10pt 12pt; margin: 13pt 0; }
+  .warning { background: #fff0d8; border-left-color: #a76313; }
+  .muted { color: #596f7d; }
+  .map { background: #eaf0f2; padding: 11pt 13pt; margin: 11pt 0 17pt; }
+  .map strong { color: #087d79; }
+  table { border-collapse: collapse; width: 100%; margin: 10pt 0 15pt; font-size: 9pt; }
+  th { color: #142b40; text-align: left; padding: 7pt; border-bottom: 2pt solid #087d79; }
+  td { border-bottom: 1pt solid #d9e2e6; vertical-align: top; padding: 7pt; }
+  .small { font-size: 8.5pt; color: #596f7d; }
+</style>
+</head>
+<body>
+<p class="eyebrow">SCHEMI ESAMI · VERSIONE LOCALE PER MAC</p>
+<h1>Manuale utente</h1>
+<p class="lead">Dai materiali universitari agli schemi PDF, con una vista chiara di ciò che avviene sul Mac e su OpenAI.</p>
+<div class="callout"><strong>In breve.</strong> La preparazione dei file, l'impaginazione e Medical Illustrator funzionano sul Mac. La generazione dei testi usa l'API OpenAI già configurata. Per completare il lavoro locale il Mac deve rimanere acceso e sveglio.</div>
+
+<h2>1. Orientarsi nella finestra</h2>
+<p>La barra laterale mostra le materie e permette di crearne una nuova. La parte centrale contiene le aree di lavoro. Se restringi la finestra, i nomi delle schede diventano più brevi; il contenuto resta lo stesso.</p>
+<div class="map"><strong>Progetti</strong> → <strong>Materiali</strong> → <strong>Schemi e PDF</strong> → <strong>Stato e batch</strong> → <strong>Control Room</strong> → <strong>Medical Illustrator</strong></div>
+<table>
+<tr><th>Area</th><th>A cosa serve</th></tr>
+<tr><td>Progetti</td><td>Trova una materia, consulta i PDF correnti, apri una cartella, duplica solo le impostazioni o archivia una materia.</td></tr>
+<tr><td>Materiali e domande</td><td>Aggiungi sbobine e appunti, domande e programma ufficiale. Controlla l'anteprima del testo estratto.</td></tr>
+<tr><td>Schemi e PDF</td><td>Apri i risultati, il PDF unico, lo ZIP e il controllo visivo delle pagine.</td></tr>
+<tr><td>Stato e batch / Control Room</td><td>Distingui lavoro locale, attesa OpenAI e PDF, poi consulta batch, tentativi e avvisi.</td></tr>
+<tr><td>Medical Illustrator</td><td>Prepara bozze schematiche SVG da rivedere prima di esportare una copia PDF illustrata.</td></tr>
+</table>
+
+<h2>2. Creare una materia</h2>
+<ol>
+<li>Premi <strong>+ Nuova materia</strong> nella barra laterale.</li>
+<li>Indica nome, eventuale titolo breve e data dell'esame. Scegli <strong>Completa</strong> o <strong>Sintesi</strong>; in Sintesi imposta il limite complessivo di pagine.</li>
+<li>Aggiungi almeno un materiale prima di avviare. Domande e programma ufficiale sono facoltativi.</li>
+<li>Controlla le scelte di produzione, grafica e riepilogo. <strong>Salva bozza</strong> conserva i dati senza avviare una generazione.</li>
+</ol>
+<p>Se hai già una materia, selezionala nella barra laterale. La scheda Progetti mostra i PDF pronti rispetto agli schemi correnti; le versioni precedenti restano consultabili da <strong>Versioni PDF</strong>.</p>
+
+<h2>3. Preparare e controllare le fonti</h2>
+<p>Nella scheda <strong>Materiali e domande</strong> usa le tre aree: materiali, domande e programma. Sono supportati PDF, immagini e diversi formati Office moderni. Nella lista vedi se un file è stato soltanto copiato, indicizzato o se l'estrazione ha avuto un problema.</p>
+<p><strong>Anteprima selezionato</strong> mostra un campione del testo estratto e le immagini rilevate. <strong>Confronta programma</strong> offre una corrispondenza lessicale indicativa: sinonimi e abbreviazioni possono far sembrare assente un argomento presente nelle fonti.</p>
+<div class="callout warning"><strong>Scansioni e foto.</strong> Se un PDF non contiene testo selezionabile, serve OCR. Questa versione usa il helper mac-ocr se già presente nei dati dell'app oppure Tesseract con lingua italiana o inglese. Medical Illustrator non richiede Tesseract per creare le proprie bozze SVG.</div>
+
+<h2>4. Avviare la generazione</h2>
+<p><strong>Avvia · Batch</strong> usa la modalità normale a costo ridotto, con tempi che possono arrivare fino a 24 ore. <strong>Avvia urgente</strong> usa richieste dirette a tariffa standard. <strong>Stanotte · Batch</strong> programma la partenza notturna, purché il Mac rimanga acceso, sveglio e con l'utente connesso.</p>
+<p>Il primo schema può richiedere una revisione prima di sbloccare gli altri. Apri il primo PDF, poi scegli se approvarlo o descrivere le modifiche desiderate. Una revisione che genera nuovo testo può consumare altri token OpenAI.</p>
+<div class="callout"><strong>Mac spento.</strong> Un batch già accettato può continuare sui server OpenAI. Il Mac riprenderà il controllo dei risultati e l'impaginazione quando tornerà acceso. GitHub da solo non esegue la pipeline né permette il monitoraggio dal telefono.</div>
+
+<h2>5. Leggere stato, errori e costi</h2>
+<p>In <strong>Stato e batch</strong> trovi tre fasi: preparazione sul Mac, generazione OpenAI e creazione dei PDF sul Mac. «Motore locale attivo» conferma un worker in esecuzione. La Control Room mostra lo stato di ogni schema, gli identificativi remoti, gli avvisi e le misure locali disponibili.</p>
+<p>Un invio indicato come <strong>incerto</strong> non viene ripetuto automaticamente: così si evita di pagare due volte per la stessa richiesta. <strong>Controlla ora lo stato su OpenAI</strong> legge lo stato remoto; <strong>Recupera solo PDF locali</strong> prova a ricostruire artefatti locali esistenti senza una nuova generazione.</p>
+<p>La Control Room mostra i token conservati nei nuovi job, compresi i tentativi successivi. Lo storico può essere incompleto: per la spesa effettiva consulta la dashboard OpenAI. I tempi p90/p95 sono mostrati soltanto dopo abbastanza misure comparabili; non sono una promessa di completamento dell'intera materia.</p>
+
+<h2>6. PDF, controllo visivo e diagnostica</h2>
+<p>In <strong>Schemi e PDF</strong> apri uno schema, il PDF unico o lo ZIP. Il controllo visivo segnala pagine quasi vuote, testo fuori bordo, immagini grandi con bassa risoluzione apparente e riquadri che potrebbero coprire testo. Sono avvisi: verifica la pagina prima di decidere se è un problema reale.</p>
+<p>Puoi annotare «verificata» o «falso positivo». La decisione resta legata al contenuto esatto del PDF e non modifica lo stato tecnico <strong>PDF_OK</strong>. Il report diagnostico viene prima mostrato in anteprima; la sua esportazione è locale e non invia automaticamente dati a Codex.</p>
+
+<h2>7. Medical Illustrator</h2>
+<p>Premi <strong>Cerca tavole utili</strong> per proposte conservative ricavate dalle fonti correnti, oppure <strong>Aggiungi tavola manuale</strong>. Una proposta può essere modificata o scartata. <strong>Accetta e crea bozza SVG</strong> produce una tavola concettuale sul Mac, senza un nuovo provider di immagini o una chiamata API.</p>
+<p>Apri la bozza e confrontala con le fonti. Dopo eventuali modifiche al file SVG usa <strong>Valida SVG modificato</strong>. <strong>Segna revisionata</strong> richiede sei controlli espliciti: fonti, anatomia, orientamento, alterazione, etichette e diritti d'uso. Questa revisione dell'utente <strong>non è una validazione clinica specialistica</strong>.</p>
+<p><strong>Esporta PDF con tavola</strong> crea una copia separata con appendice illustrata, se figura e didascalia rispettano il limite di pagine. Il PDF originale resta intatto. Le forme SVG sono schematiche: non rappresentano un atlante anatomico certificato.</p>
+
+<h2>8. Dati, aggiornamenti e aiuto</h2>
+<p>La `.app` installata conserva materie, fonti e PDF in <strong>~/Library/Application Support/Schemi Esami</strong>. La chiave OpenAI è gestita localmente tramite il Portachiavi macOS. Prima di un aggiornamento conserva una copia della cartella dati e della vecchia `.app`; non aggiornare mentre un esame è in corso.</p>
+<p>Se la finestra mostra un problema, apri <strong>Stato e batch</strong> e <strong>Control Room</strong> per leggere la fase e gli avvisi. Aprire queste schede non avvia nuove richieste generative. Il pulsante <strong>Aiuto</strong> nella barra laterale riapre questo manuale.</p>
+<p class="small">Manuale della versione locale · 29 ottobre 2026. Le funzioni visuali e l'OCR vanno verificate con i propri materiali. Nessun servizio cloud aggiuntivo è necessario per consultare i progetti sul Mac.</p>
+</body>
+</html>

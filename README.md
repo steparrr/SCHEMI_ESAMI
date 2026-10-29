@@ -5,6 +5,13 @@ Questa cartella contiene il codice dell'app macOS importato dallo ZIP
 repository. La GUI desktop usa Tkinter; il motore Python è in `scripts/` e il
 renderer in `renderer/`.
 
+Il [manuale utente in PDF](docs/Manuale_Utente_Schemi_Esami.pdf) è incluso
+anche nella `.app` e si apre dal pulsante **Aiuto · manuale PDF**. L'interfaccia
+usa una palette chiara con barra laterale blu, schede compatte nelle finestre
+strette e riepiloghi ricavati dagli stati locali effettivi. Il PDF può essere
+rigenerato con `python scripts/build_user_manual.py` dopo aver installato le
+dipendenze.
+
 ## Sviluppo e test
 
 Richiede Python 3.12 o superiore. In una directory di sviluppo:
