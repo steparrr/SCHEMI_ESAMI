@@ -72,6 +72,8 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   sotto 90 dpi; uno sfondo dietro il testo non genera l'avviso sui riquadri.
   Puoi segnare una pagina verificata o annotare un falso
   positivo; la decisione è legata all'hash del PDF e non cambia `PDF_OK`.
+  Se il PDF unico o lo ZIP cambia rispetto ai metadati dell'ultimo export,
+  viene ricreato dai PDF correnti senza inviare nuove richieste OpenAI.
 - **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne
   una manualmente, modifica il piano e crea bozze SVG schematiche. L'anteprima
   si apre nella finestra del programma senza editor esterni. Se modifichi

@@ -5,6 +5,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 import fitz
@@ -110,8 +111,20 @@ class AutomaticTests(unittest.TestCase):
         packs = [read_json(path) for path in (self.root / "source_packs").glob("*/source_pack.json")]
         self.assertEqual(sum(len(pack["questions"]) for pack in packs), 2)
         count = api.created
+        combined = self.root / report["exports"]["combined"]
+        archive = self.root / report["exports"]["archive"]
+        unchanged_at = (combined.stat().st_mtime_ns, archive.stat().st_mtime_ns)
         self.engine(api).tick(True)
         self.assertEqual(api.created, count)
+        self.assertEqual((combined.stat().st_mtime_ns, archive.stat().st_mtime_ns), unchanged_at)
+        combined.write_bytes(b"PDF unico modificato")
+        archive.write_bytes(b"ZIP modificato")
+        self.engine(api).tick(True)
+        self.assertEqual(api.created, count)
+        with fitz.open(combined) as restored:
+            self.assertEqual(restored.page_count, 2)
+        with zipfile.ZipFile(archive) as restored:
+            self.assertIn(combined.name, restored.namelist())
 
     def test_missing_unit_in_analysis_is_rejected_with_only_one_retry(self):
         api = PlanningAPI()

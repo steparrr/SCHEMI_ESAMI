@@ -10,6 +10,16 @@ import fitz
 from common import digest, pdf_filename, read_json, safe_title, write_json
 
 
+def _unchanged_export(path, old, prefix):
+    try:
+        stat = path.stat()
+    except OSError:
+        return False
+    return (path.is_file() and not path.is_symlink() and stat.st_size > 0 and
+            old.get(prefix + "_bytes") == stat.st_size and
+            old.get(prefix + "_mtime_ns") == stat.st_mtime_ns)
+
+
 def publish(root, job):
     relative = Path("output/pdf") / pdf_filename(job["numero"], job["title"])
     source, destination = root / job["pdf"], root / relative
@@ -38,7 +48,9 @@ def export_all(root, cfg, jobs, latest):
     final_name = safe_title(cfg["exam_name"]) + " - tutti gli schemi.pdf"
     combined = root / "output/pdf" / final_name
     archive = root / "output/pdf" / (safe_title(cfg["exam_name"]) + " - schemi.zip")
-    if old.get("signature") == signature and combined.is_file() and archive.is_file():
+    if (old.get("signature") == signature and
+            _unchanged_export(combined, old, "combined") and
+            _unchanged_export(archive, old, "archive")):
         return old
     assembled = fitz.open()
     toc = []
@@ -54,8 +66,12 @@ def export_all(root, cfg, jobs, latest):
         assembled.set_metadata({"title": cfg["exam_name"], "creator": "Schemi Esami V2"})
         version = root / "output/pdf/versioni" / ("raccolta_" + signature + ".pdf")
         version.parent.mkdir(parents=True, exist_ok=True)
-        if not version.exists():
-            assembled.save(version, garbage=3, deflate=True)
+        temporary_version = version.with_suffix(".tmp.pdf")
+        try:
+            assembled.save(temporary_version, garbage=3, deflate=True)
+            os.replace(temporary_version, version)
+        finally:
+            temporary_version.unlink(missing_ok=True)
     finally:
         assembled.close()
     temp = combined.with_suffix(".tmp.pdf")
@@ -67,6 +83,9 @@ def export_all(root, cfg, jobs, latest):
             package.write(root / row["file"], Path(row["file"]).name)
         package.write(combined, combined.name)
     os.replace(temp_zip, archive)
-    result.update(signature=signature, combined=str(combined.relative_to(root)), archive=str(archive.relative_to(root)), pages=pages)
+    combined_stat, archive_stat = combined.stat(), archive.stat()
+    result.update(signature=signature, combined=str(combined.relative_to(root)), archive=str(archive.relative_to(root)), pages=pages,
+                  combined_bytes=combined_stat.st_size, combined_mtime_ns=combined_stat.st_mtime_ns,
+                  archive_bytes=archive_stat.st_size, archive_mtime_ns=archive_stat.st_mtime_ns)
     write_json(path, result)
     return result
