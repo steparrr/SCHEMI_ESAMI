@@ -327,7 +327,8 @@ def technical_qc(svg_bytes):
             except (KeyError, ValueError, OverflowError):
                 return ["invalid_geometry"]
     text = " ".join(element.text or "" for element in root.iter() if element.tag.endswith("text"))
-    if "NON VALIDATA CLINICAMENTE" not in text or "Normale (schema)" not in text:
+    if ("NON VALIDATA CLINICAMENTE" not in text or "Normale (schema)" not in text or
+            "Alterazione (schema)" not in text):
         return ["missing_review_labels"]
     return []
 
@@ -426,10 +427,12 @@ def export_illustrated_pdf(root, opportunity_id):
                         page = combined.new_page(width=595, height=842)
                         page.insert_text((36, 62), "Tavola illustrativa - revisione utente", fontsize=16)
                         page.show_pdf_page(fitz.Rect(36, 125, 559, 430), figure, 0)
-                        page.insert_textbox(fitz.Rect(36, 475, 559, 620), row["proposed_caption"], fontsize=11)
-                        page.insert_textbox(fitz.Rect(36, 720, 559, 790),
-                                            "Schema concettuale. Revisione umana registrata; validazione clinica specialistica non attestata.",
-                                            fontsize=9)
+                        if page.insert_textbox(fitz.Rect(36, 475, 559, 620), row["proposed_caption"], fontsize=11) < 0:
+                            raise ValueError("La didascalia non entra nella pagina illustrata; accorciala prima di esportare.")
+                        if page.insert_textbox(fitz.Rect(36, 720, 559, 790),
+                                               "Schema concettuale. Revisione umana registrata; validazione clinica specialistica non attestata.",
+                                               fontsize=9) < 0:
+                            raise ValueError("La nota di revisione non entra nella pagina illustrata.")
                         toc = original.get_toc()
                         toc.append([1, "Tavola illustrativa", combined.page_count])
                         combined.set_toc(toc)

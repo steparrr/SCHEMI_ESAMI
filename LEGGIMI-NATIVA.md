@@ -65,7 +65,8 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   lista di controllo sulle fonti, l'anatomia, la vista, l'alterazione, le
   etichette e gli eventuali asset esterni. Il PDF originale e `PDF_OK` non
   cambiano. La lista registra una revisione dell'utente, non una validazione
-  clinica specialistica.
+  clinica specialistica. L'esportazione si ferma se la didascalia non entra
+  nella pagina illustrata.
 
 La generazione del testo continua a usare esclusivamente l'API OpenAI già
 configurata. Aprire Progetti, Control Room, Materiali o Illustrator non invia

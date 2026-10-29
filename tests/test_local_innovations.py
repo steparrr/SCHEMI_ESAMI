@@ -179,9 +179,12 @@ class LocalInnovationsTests(unittest.TestCase):
     def test_changed_schema_and_tampered_svg_block_approval(self):
         row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
         artifact = self.root / row["artifact"]
-        artifact.write_bytes(artifact.read_bytes().replace(b"Normale (schema)", b"Test errato"))
+        original = artifact.read_bytes()
+        artifact.write_bytes(original.replace(b"Normale (schema)", b"Test errato"))
         with self.assertRaisesRegex(ValueError, "SVG"):
             transition(self.root, row["opportunity_id"], "approved", review=VALID_REVIEW)
+        artifact.write_bytes(original.replace(b"Alterazione (schema)", b"Pannello senza etichetta"))
+        self.assertIn("missing_review_labels", technical_qc(artifact.read_bytes()))
         artifact.write_bytes(b"<svg><script>alert(1)</script></svg>")
         self.assertTrue(technical_qc(artifact.read_bytes()))
 
@@ -270,6 +273,13 @@ class LocalInnovationsTests(unittest.TestCase):
         version.write_bytes(original.read_bytes())
         with patch("medical_illustrator.inspect_pdf", return_value={"ok": True}):
             with self.assertRaisesRegex(ValueError, "limite di pagine"):
+                export_illustrated_pdf(self.root, row["opportunity_id"])
+        self.assertEqual(list((self.root / "output/pdf/illustrati").glob("*.pdf")), [])
+        job["page_budget"] = 3
+        write_json(self.root / "state/pipeline.json", state)
+        with patch("medical_illustrator.inspect_pdf", return_value={"ok": True}), \
+             patch.object(fitz.Page, "insert_textbox", return_value=-1):
+            with self.assertRaisesRegex(ValueError, "didascalia"):
                 export_illustrated_pdf(self.root, row["opportunity_id"])
         self.assertEqual(list((self.root / "output/pdf/illustrati").glob("*.pdf")), [])
 
