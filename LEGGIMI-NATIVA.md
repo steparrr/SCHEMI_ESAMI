@@ -27,12 +27,14 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
 
 - **Progetti**: stato delle materie, PDF pronti e invii incerti. «Nuova materia
   guidata» accompagna identità, obiettivo, materiali, produzione, grafica e
-  riepilogo prima dell'avvio. Puoi duplicare le sole impostazioni, senza
-  materiali o credenziali, e archiviare una materia senza cancellarne i file.
+  riepilogo prima dell'avvio. Puoi cercare, filtrare e ordinare i progetti,
+  segnare i preferiti, aprire la cartella PDF, duplicare le sole impostazioni
+  senza materiali o credenziali e archiviare una materia senza cancellarne i file.
 - **Materiali e domande**: file nelle tre aree, stato di indicizzazione e
   anteprima locale del testo estratto. «Confronta programma» mostra solo
   corrispondenze lessicali indicative nelle fonti già indicizzate.
 - **Control Room**: schemi correnti, batch, avvisi conservativi, durate locali misurate,
+  p90/p95 descrittivi quando esistono almeno 20 misure per fase,
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
 - **Schemi e PDF**: controllo visivo manuale delle pagine sospette.
 - **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne

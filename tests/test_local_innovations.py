@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
-from control_room import snapshot, format_snapshot
+from control_room import snapshot, format_snapshot, summarize_performance
 from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
 from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, revalidate_edited_svg,
@@ -22,6 +22,15 @@ from visual_qc import inspect_visual
 
 
 class LocalInnovationsTests(unittest.TestCase):
+    def test_stage_percentiles_require_enough_real_measurements(self):
+        events = [{"stage": "pdf_render", "status": "success", "duration_ms": value}
+                  for value in range(1, 21)]
+        self.assertIsNone(summarize_performance(events[:1])[0]["p95_ms"])
+        summary = summarize_performance(events + [{"stage": "pdf_render", "status": "failure", "duration_ms": 999}])[0]
+        self.assertEqual((summary["success"], summary["failed"]), (20, 1))
+        self.assertEqual(summary["p90_ms"], 18.1)
+        self.assertEqual(summary["p95_ms"], 19.1)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.project = Path(self.temp.name)

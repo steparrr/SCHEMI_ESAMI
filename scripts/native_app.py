@@ -26,8 +26,8 @@ from ingest import SUPPORTED
 from model_settings import MODEL_KEYS, save_default_profile
 from monitor import batch_lines, overview
 from project_wizard import validate_wizard
-from project_actions import duplicate_settings, set_archived
-from projects_view import project_cards
+from project_actions import duplicate_settings, set_archived, set_favorite
+from projects_view import arrange_cards, project_cards
 from visual_qc import inspect_visual
 
 
@@ -235,8 +235,24 @@ class NativeWindow:
         home_actions.pack(fill="x", pady=(6, 0))
         ttk.Button(home_actions, text="Apri", command=self.open_home_project).pack(side="right")
         ttk.Button(home_actions, text="Apri Control Room", command=lambda: self.open_home_project(True)).pack(side="right", padx=8)
+        ttk.Button(home_actions, text="Cartella PDF", command=self.open_home_pdf_folder).pack(side="right", padx=8)
         ttk.Button(home_actions, text="Archivia / Riattiva", command=self.toggle_home_archive).pack(side="right", padx=8)
         ttk.Button(home_actions, text="Duplica impostazioni", command=self.duplicate_home_settings).pack(side="right", padx=8)
+        ttk.Button(home_actions, text="★ Preferito", command=self.toggle_home_favorite).pack(side="right", padx=8)
+        home_filters = ttk.Frame(home_toolbar)
+        home_filters.pack(fill="x", pady=(7, 0))
+        self.home_visibility = tk.StringVar(value="Attive")
+        self.home_order = tk.StringVar(value="Nome")
+        ttk.Label(home_filters, text="Mostra").pack(side="left")
+        visible = ttk.Combobox(home_filters, textvariable=self.home_visibility,
+                               values=("Attive", "Tutte", "Archiviate", "Preferite"), state="readonly", width=13)
+        visible.pack(side="left", padx=(6, 18))
+        visible.bind("<<ComboboxSelected>>", lambda event: self.refresh())
+        ttk.Label(home_filters, text="Ordina").pack(side="left")
+        ordered = ttk.Combobox(home_filters, textvariable=self.home_order,
+                               values=("Nome", "Data esame", "PDF pronti"), state="readonly", width=15)
+        ordered.pack(side="left", padx=6)
+        ordered.bind("<<ComboboxSelected>>", lambda event: self.refresh())
         self.project_rows = ttk.Treeview(self.home_tab, columns=("name", "pdf", "phase", "remote"), show="headings", selectmode="browse")
         for key, title, width in (("name", "Materia", 280), ("pdf", "PDF pronti", 95),
                                   ("phase", "Situazione", 290), ("remote", "Ultima verifica OpenAI", 210)):
@@ -683,6 +699,28 @@ class NativeWindow:
         if self.project_rows.exists(slug):
             self.project_rows.selection_set(slug)
 
+    def open_home_pdf_folder(self):
+        selection = self.project_rows.selection()
+        if not selection:
+            self.notice.set("Seleziona una materia prima di aprire la cartella PDF.")
+            return
+        self.open_path(self.app.root(selection[0]) / "output/pdf")
+
+    def toggle_home_favorite(self):
+        selection = self.project_rows.selection()
+        if not selection:
+            self.notice.set("Seleziona una materia da aggiungere ai preferiti.")
+            return
+        slug = selection[0]
+        favorite = bool(self.app.detail(slug)["exam"].get("favorite"))
+        try:
+            result = set_favorite(self.app, slug, not favorite)
+        except (ValueError, OSError, BlockingIOError) as error:
+            self.notice.set(str(error))
+            return
+        self.notice.set("Materia aggiunta ai preferiti." if result else "Materia rimossa dai preferiti.")
+        self.refresh()
+
     def toggle_home_archive(self):
         selection = self.project_rows.selection()
         if not selection:
@@ -749,9 +787,10 @@ class NativeWindow:
                     self.exams.selection_set(index)
             selected_project = self.project_rows.selection()
             self.project_rows.delete(*self.project_rows.get_children())
-            for card in project_cards(self.app, rows):
+            for card in arrange_cards(project_cards(self.app, rows), self.home_visibility.get(), self.home_order.get()):
                 self.project_rows.insert("", "end", iid=card["slug"],
-                                         values=(card["name"], f"{card['ready']}/{card['total']}",
+                                         values=(("★ " if card["favorite"] else "") + card["name"],
+                                                 f"{card['ready']}/{card['total']}",
                                                  card["phase"], card["last_remote_check"] or "mai"))
             if selected_project and self.project_rows.exists(selected_project[0]):
                 self.project_rows.selection_set(selected_project[0])

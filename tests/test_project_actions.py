@@ -9,7 +9,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
 from local_app import App
-from project_actions import duplicate_settings, set_archived
+from project_actions import duplicate_settings, set_archived, set_favorite
+from projects_view import arrange_cards, project_cards
 
 
 class ProjectActionsTests(unittest.TestCase):
@@ -57,6 +58,26 @@ class ProjectActionsTests(unittest.TestCase):
             self.app.run(self.slug)
         self.assertFalse(set_archived(self.app, self.slug, False))
         self.assertFalse(read_json(self.root / "esame.json")["attivo"])
+
+    def test_favorite_and_home_filters_are_local_and_reversible(self):
+        self.assertTrue(set_favorite(self.app, self.slug, True))
+        self.assertTrue(self.app.list_exams()[0]["favorite"])
+        cards = project_cards(self.app)
+        self.assertEqual([card["slug"] for card in arrange_cards(cards, "Preferite")], [self.slug])
+        self.assertFalse(set_favorite(self.app, self.slug, False))
+        self.assertEqual(arrange_cards(project_cards(self.app), "Preferite"), [])
+
+    def test_home_counts_only_current_pdf_with_real_file(self):
+        current = "a" * 64
+        old = "b" * 64
+        write_json(self.root / "state/pipeline.json", {"latest": {"1": current},
+            "jobs": {current: {"numero": 1, "status": "PDF_OK", "public_pdf": "output/pdf/current.pdf"},
+                     old: {"numero": 1, "status": "PDF_OK", "public_pdf": "output/pdf/old.pdf"}}})
+        cards = project_cards(self.app)
+        self.assertEqual((cards[0]["ready"], cards[0]["total"]), (0, 1))
+        (self.root / "output/pdf/current.pdf").write_bytes(b"fixture")
+        cards = project_cards(self.app)
+        self.assertEqual((cards[0]["ready"], cards[0]["total"]), (1, 1))
 
 
 if __name__ == "__main__":

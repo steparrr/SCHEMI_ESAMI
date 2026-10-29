@@ -11,16 +11,15 @@ from monitor import overview
 from telemetry import Telemetry
 
 
-def snapshot(root: Path, worker_active=False):
-    root = Path(root)
-    state = read_json(root / "state/pipeline.json", {})
-    exam = read_json(root / "esame.json", {})
-    jobs = state.get("jobs") or {}
-    latest = state.get("latest") or {}
-    current = [jobs[key] for key in latest.values() if key in jobs]
-    current.sort(key=lambda job: int(job.get("numero") or 0))
-    batches = state.get("batches") or []
-    events = Telemetry(root).recent(1000)
+def _percentile(sorted_values, fraction):
+    position = (len(sorted_values) - 1) * fraction
+    lower = int(position)
+    upper = min(lower + 1, len(sorted_values) - 1)
+    return round(sorted_values[lower] + (sorted_values[upper] - sorted_values[lower]) * (position - lower), 1)
+
+
+def summarize_performance(events):
+    """Descriptive local stage timings; percentiles require 20 successes."""
     durations = defaultdict(list)
     failures = Counter()
     for event in events:
@@ -32,9 +31,28 @@ def snapshot(root: Path, worker_active=False):
     performance = []
     for stage in sorted(set(durations) | set(failures)):
         values = sorted(durations[stage])
+        enough = len(values) >= 20
         performance.append({"stage": stage, "success": len(values), "failed": failures[stage],
+                            "mean_ms": round(statistics.mean(values), 1) if values else None,
                             "median_ms": round(statistics.median(values), 1) if values else None,
+                            "p90_ms": _percentile(values, .90) if enough else None,
+                            "p95_ms": _percentile(values, .95) if enough else None,
+                            "min_ms": round(values[0], 1) if values else None,
                             "max_ms": round(values[-1], 1) if values else None})
+    return performance
+
+
+def snapshot(root: Path, worker_active=False):
+    root = Path(root)
+    state = read_json(root / "state/pipeline.json", {})
+    exam = read_json(root / "esame.json", {})
+    jobs = state.get("jobs") or {}
+    latest = state.get("latest") or {}
+    current = [jobs[key] for key in latest.values() if key in jobs]
+    current.sort(key=lambda job: int(job.get("numero") or 0))
+    batches = state.get("batches") or []
+    events = Telemetry(root).recent(1000)
+    performance = summarize_performance(events)
     incidents = []
     for job in current:
         if job.get("error"):
@@ -92,11 +110,13 @@ def format_snapshot(view):
     for b in view["batches"]:
         lines.append(f"{b['mode'] or 'batch'} · {b['id'] or 'ID non confermato'} · locale {b['stage']} · server {b['status'] or 'non noto'}"
                      f" · ultimo controllo {b['checked_at'] or 'mai'}")
-    lines += ["", "Durate locali misurate:" if view["telemetry_available"] else
+    lines += ["", "Durate locali misurate (p90/p95 solo con almeno 20 successi per fase; lavori di dimensioni diverse possono mescolarsi):" if view["telemetry_available"] else
               "Durate: non disponibili per questo progetto storico."]
     for row in view["performance"]:
         lines.append(f"{row['stage']} · riuscite {row['success']} · errori {row['failed']}"
                      f" · mediana {row['median_ms'] if row['median_ms'] is not None else 'n/d'} ms"
+                     f" · p90 {row['p90_ms'] if row['p90_ms'] is not None else 'n/d'} ms"
+                     f" · p95 {row['p95_ms'] if row['p95_ms'] is not None else 'n/d'} ms"
                      f" · massimo {row['max_ms'] if row['max_ms'] is not None else 'n/d'} ms")
     lines += ["", "Anomalie:"]
     lines += [f"{i['kind']} · {i['status']} · {i['detail']}"

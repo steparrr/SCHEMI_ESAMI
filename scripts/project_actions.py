@@ -47,3 +47,12 @@ def set_archived(app, slug, archived):
             exam["attivo"] = False
         write_json(root / "esame.json", exam)
     return exam["archived"]
+
+
+def set_favorite(app, slug, favorite):
+    root = app.root(slug)
+    with edit_lock(root):
+        exam = read_json(root / "esame.json")
+        exam["favorite"] = bool(favorite)
+        write_json(root / "esame.json", exam)
+    return exam["favorite"]

@@ -111,7 +111,7 @@ class App:
             if not (root / "esame.json").is_file():
                 continue
             detail = self.detail(root.name)
-            rows.append({"slug": root.name, "name": detail["exam"]["nome"], "mode": detail["exam"].get("modalita", "completa"), "status": detail["report"].get("input_status"), "ready": sum(row["status"] == "PDF_OK" for row in detail["report"]["rows"]), "total": len(detail["report"]["rows"]), "busy": detail["busy"], "scheduled": detail["exam"].get("attivo", False), "archived": detail["exam"].get("archived", False), "exam_date": detail["exam"].get("data_esame")})
+            rows.append({"slug": root.name, "name": detail["exam"]["nome"], "mode": detail["exam"].get("modalita", "completa"), "status": detail["report"].get("input_status"), "ready": sum(row["status"] == "PDF_OK" for row in detail["report"]["rows"]), "total": len(detail["report"]["rows"]), "busy": detail["busy"], "scheduled": detail["exam"].get("attivo", False), "archived": detail["exam"].get("archived", False), "favorite": detail["exam"].get("favorite", False), "exam_date": detail["exam"].get("data_esame")})
         return rows
 
     def save_exam(self, data):
