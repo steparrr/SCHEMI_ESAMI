@@ -23,7 +23,7 @@ Usa un LaunchAgent separato da quello di un'eventuale app `.app`; non aggiunge
 servizi cloud né provider API. A Mac spento il lavoro locale si ferma.
 
 Su macOS puoi aprire `VERIFICA-MAC.command` prima di lavorare sulle tue materie.
-La prova crea una materia temporanea con un PDF sintetico, una fonte fittizia,
+La prova crea una materia temporanea con un PDF impaginato dal renderer reale, una fonte fittizia,
 due proposte di tavole e una bozza SVG. Verifica Tkinter e apre la finestra con
 le API bloccate: puoi ispezionare Progetti, Schemi e PDF, Control Room e
 Medical Illustrator. Chiudendo la finestra i dati di prova vengono eliminati;
