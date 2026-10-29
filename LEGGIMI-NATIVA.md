@@ -41,7 +41,8 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   opachi disegnati sopra il testo; uno sfondo dietro il testo non genera lo
   stesso avviso.
 - **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne
-  una manualmente, modifica il piano e crea bozze SVG schematiche. Se modifichi
+  una manualmente, modifica il piano e crea bozze SVG schematiche. L'anteprima
+  si apre nella finestra del programma senza editor esterni. Se modifichi
   l'SVG, rivalidalo tecnicamente e ripeti la revisione. Dopo l'approvazione
   puoi esportare **una copia PDF separata** con la tavola come appendice, se
   rispetta il limite di pagine. Il PDF originale e `PDF_OK` non cambiano. Le

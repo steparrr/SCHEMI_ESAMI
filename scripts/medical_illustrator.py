@@ -358,6 +358,27 @@ def revalidate_edited_svg(root, opportunity_id):
         return row
 
 
+def preview_svg(root, opportunity_id, scale=0.8):
+    """Render a technically valid local SVG for in-app review, without approving it."""
+    root = Path(root)
+    row = next((item for item in list_opportunities(root) if item["opportunity_id"] == opportunity_id), None)
+    if not row or not row.get("artifact"):
+        raise ValueError("La tavola non ha ancora una bozza SVG.")
+    path = (root / row["artifact"]).resolve()
+    if not path.is_relative_to((root / "diagrams/medical").resolve()) or not path.is_file():
+        raise ValueError("File della tavola non valido o mancante.")
+    svg = path.read_bytes()
+    errors = technical_qc(svg)
+    if errors:
+        raise ValueError("La bozza non supera il controllo tecnico SVG: " + ", ".join(errors))
+    if not 0.25 <= scale <= 1.5:
+        raise ValueError("Scala di anteprima non valida.")
+    with fitz.open(stream=svg, filetype="svg") as vector:
+        if vector.page_count != 1:
+            raise ValueError("La bozza SVG deve avere una sola pagina.")
+        return vector[0].get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False).tobytes("png")
+
+
 def export_illustrated_pdf(root, opportunity_id):
     """Append an approved plate to a separate PDF; never mutate pipeline artifacts."""
     root = Path(root)

@@ -12,7 +12,7 @@ from common import read_json, write_json
 from control_room import snapshot, format_snapshot, summarize_performance
 from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
-from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, revalidate_edited_svg,
+from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, preview_svg, revalidate_edited_svg,
                                  set_disabled, technical_qc, transition, update_proposal)
 from materials_view import material_detail
 from local_recovery import recover_local
@@ -22,6 +22,15 @@ from visual_qc import inspect_visual
 
 
 class LocalInnovationsTests(unittest.TestCase):
+    def test_illustration_preview_renders_locally_only_after_technical_qc(self):
+        row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
+        png = preview_svg(self.root, row["opportunity_id"])
+        self.assertTrue(png.startswith(b"\x89PNG\r\n\x1a\n"))
+        svg = self.root / row["artifact"]
+        svg.write_bytes(svg.read_bytes().replace(b"</svg>", b"<script>bad</script></svg>"))
+        with self.assertRaisesRegex(ValueError, "controllo tecnico"):
+            preview_svg(self.root, row["opportunity_id"])
+
     def test_stage_percentiles_require_enough_real_measurements(self):
         events = [{"stage": "pdf_render", "status": "success", "duration_ms": value}
                   for value in range(1, 21)]

@@ -9,7 +9,7 @@ Ambito deciso dall'utente: app Mac e OpenAI già presenti, senza cloud operativo
 - Materiali: stato di indicizzazione, anteprima del testo già estratto e confronto lessicale indicativo fra programma ufficiale e fonti, senza nuova OCR all'apertura.
 - Report diagnostico locale con allowlist tecnica, preview completa, ZIP e nessuna trasmissione automatica.
 - Recupero L1 esplicito di PDF esistenti o HTML correnti validi, con massimo due tentativi e audit locale; nessuna nuova POST.
-- Medical Illustrator MVP: regole conservative per tunnel carpale, frattura e lussazione; proposte manuali e modificabili collegate a source pack e hash; bozze SVG editabili, QC tecnico e revisione umana esplicita. Una tavola approvata può essere esportata come appendice in un PDF separato, senza modificare il PDF originale o `PDF_OK`.
+- Medical Illustrator MVP: regole conservative per tunnel carpale, frattura e lussazione; proposte manuali e modificabili collegate a source pack e hash; bozze SVG editabili, anteprima interna, QC tecnico e revisione umana esplicita. Una tavola approvata può essere esportata come appendice in un PDF separato, senza modificare il PDF originale o `PDF_OK`.
 - Controllo visivo locale su PDF selezionati: warning per pagine quasi vuote, testo fuori bordo, riquadri opachi disegnati sopra il testo e ultima pagina scarsa, con anteprima pagina ed esportazione di un report tecnico locale. I warning non alterano lo stato dei PDF.
 - Script di installazione e aggiornamento dei sorgenti Mac; guida aggiornata sui programmi necessari.
 
@@ -24,4 +24,4 @@ Ambito deciso dall'utente: app Mac e OpenAI già presenti, senza cloud operativo
 
 ## Verifica e rollback
 
-Suite: `PYTHONPATH=/workspace/.schemi-deps python -m unittest discover -s tests -q` (96 test verdi il 29 ottobre 2026); `python -m compileall -q scripts native.py`; `git diff --check`. Nessuna chiamata API reale nei test. Le modifiche sono su branch dedicato; gli stati di esame, le risposte e i PDF esistenti non sono stati migrati. L'aggiornamento su una cartella Mac esistente conserva copia dei file sostituiti sotto `state/aggiornamenti-nativa/`.
+Suite: `PYTHONPATH=/workspace/.schemi-deps python -m unittest discover -s tests -q` (97 test verdi il 29 ottobre 2026); `python -m compileall -q scripts native.py`; `git diff --check`. Nessuna chiamata API reale nei test. Le modifiche sono su branch dedicato; gli stati di esame, le risposte e i PDF esistenti non sono stati migrati. L'aggiornamento su una cartella Mac esistente conserva copia dei file sostituiti sotto `state/aggiornamenti-nativa/`.

@@ -19,7 +19,7 @@ from local_app import App, KINDS, MAX_FILE_BYTES, edit_lock, save_api_key
 from local_recovery import recover_local
 from materials_view import material_detail
 from medical_illustrator import (create_manual as manual_illustration, export_illustrated_pdf, list_opportunities,
-                                 plan as plan_illustrations, revalidate_edited_svg,
+                                 plan as plan_illustrations, preview_svg, revalidate_edited_svg,
                                  set_disabled as disable_illustrations, transition as transition_illustration,
                                  update_proposal as edit_illustration_proposal)
 from ingest import SUPPORTED
@@ -1196,7 +1196,23 @@ class NativeWindow:
         path = (root / row["artifact"]).resolve()
         if not path.is_relative_to((root / "diagrams/medical").resolve()):
             raise ValueError("Percorso della tavola non valido.")
-        self.open_path(path)
+        try:
+            png = preview_svg(root, selection[0])
+        except (ValueError, OSError) as error:
+            self.illustrator_notice.set(str(error))
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Anteprima tavola · " + row["concept_title"])
+        dialog.geometry("790x590")
+        frame = self.ttk.Frame(dialog, padding=12)
+        frame.pack(fill="both", expand=True)
+        self.ttk.Label(frame, text="Bozza schematica: verifica anatomia, lato, vista ed etichette sulle fonti.",
+                       wraplength=740).pack(anchor="w", pady=(0, 8))
+        picture = self.tk.PhotoImage(data=base64.b64encode(png).decode("ascii"))
+        preview = self.ttk.Label(frame, image=picture)
+        preview.image = picture
+        preview.pack(fill="both", expand=True)
+        self.ttk.Button(frame, text="Apri file SVG per modificarlo", command=lambda: self.open_path(path)).pack(anchor="e", pady=(8, 0))
 
     def refresh_server(self):
         if not self.session.selected:
