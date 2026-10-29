@@ -28,7 +28,7 @@ from monitor import batch_lines, overview
 from project_wizard import validate_wizard
 from project_actions import duplicate_settings, set_archived, set_favorite
 from projects_view import arrange_cards, project_cards
-from visual_qc import inspect_visual
+from visual_qc import export_visual_report, inspect_visual
 
 
 def diagnostics(app, slug):
@@ -359,9 +359,11 @@ class NativeWindow:
             self.control_batch_rows.heading(key, text=label)
             self.control_batch_rows.column(key, width=width, stretch=key == "id")
         self.control_batch_rows.pack(fill="both", expand=True)
-        self.control_performance_rows = ttk.Treeview(self.control_performance, columns=("stage", "success", "fail", "median", "max"), show="headings")
-        for key, label, width in (("stage", "Fase locale", 230), ("success", "Riuscite", 100),
-                                  ("fail", "Errori", 80), ("median", "Mediana ms", 130), ("max", "Massimo ms", 130)):
+        self.control_performance_rows = ttk.Treeview(self.control_performance, columns=("stage", "success", "fail", "median", "p90", "p95", "max"), show="headings")
+        for key, label, width in (("stage", "Fase locale", 210), ("success", "Riuscite", 80),
+                                  ("fail", "Errori", 70), ("median", "Mediana ms", 105),
+                                  ("p90", "p90 ms", 95), ("p95", "p95 ms", 95),
+                                  ("max", "Massimo ms", 105)):
             self.control_performance_rows.heading(key, text=label)
             self.control_performance_rows.column(key, width=width, stretch=key == "stage")
         self.control_performance_rows.pack(fill="both", expand=True)
@@ -888,6 +890,8 @@ class NativeWindow:
                 for row in control_view["performance"]:
                     self.control_performance_rows.insert("", "end", values=(row["stage"], row["success"], row["failed"],
                                                                             row["median_ms"] if row["median_ms"] is not None else "n/d",
+                                                                            row["p90_ms"] if row["p90_ms"] is not None else "n/d",
+                                                                            row["p95_ms"] if row["p95_ms"] is not None else "n/d",
                                                                             row["max_ms"] if row["max_ms"] is not None else "n/d"))
             if previous_job and self.control_job_rows.exists(previous_job[0]):
                 self.control_job_rows.selection_set(previous_job[0])
@@ -1280,6 +1284,18 @@ class NativeWindow:
         if result["pages"]:
             pages.selection_set(0)
             show()
+        actions = self.ttk.Frame(frame)
+        actions.pack(fill="x", pady=(8, 0))
+        self.ttk.Button(actions, text="Apri PDF originale", command=lambda: self.open_path(path)).pack(side="left")
+        def save_report():
+            try:
+                report = export_visual_report(root, path, result)
+            except (ValueError, OSError) as error:
+                self.notice.set("Report visivo non creato: " + str(error))
+                return
+            self.notice.set("Report visivo salvato: " + report.name)
+            self.open_path(report.parent)
+        self.ttk.Button(actions, text="Esporta report tecnico locale", command=save_report).pack(side="right")
 
     def open_output_folder(self):
         if self.session.selected:

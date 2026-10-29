@@ -36,7 +36,10 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
 - **Control Room**: schemi correnti, batch, avvisi conservativi, durate locali misurate,
   p90/p95 descrittivi quando esistono almeno 20 misure per fase,
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
-- **Schemi e PDF**: controllo visivo manuale delle pagine sospette.
+- **Schemi e PDF**: controllo visivo manuale delle pagine sospette e report
+  tecnico locale in `output/reports/visual/`. Il programma segnala i riquadri
+  opachi disegnati sopra il testo; uno sfondo dietro il testo non genera lo
+  stesso avviso.
 - **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne
   una manualmente, modifica il piano e crea bozze SVG schematiche. Se modifichi
   l'SVG, rivalidalo tecnicamente e ripeti la revisione. Dopo l'approvazione

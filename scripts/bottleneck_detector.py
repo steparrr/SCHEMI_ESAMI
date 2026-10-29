@@ -1,6 +1,7 @@
 """Conservative, read-only incident rules over local state and observed remote checks."""
 from __future__ import annotations
 
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -36,16 +37,21 @@ def detect(root: Path, *, now=None, state=None):
             continue
         status = job.get("status")
         if status in {"HTML_OK", "RENDERING", "RENDER_FAILED"}:
-            html = root / job.get("html", "__missing__")
+            html = root / (job.get("html") or "__missing__")
             if not html.is_file():
                 add("CURRENT_HTML_MISSING", "error", "HTML corrente non trovato sul disco.",
                     "Controlla Search and Rescue sui risultati già salvati; nessun nuovo invio automatico.",
                     number=int(number), request_hash=key)
         if status == "PDF_OK":
-            version = root / job.get("pdf", "__missing__")
+            version = root / (job.get("pdf") or "__missing__")
             if not version.is_file():
                 add("CURRENT_PDF_MISSING", "error", "Il PDF versionato corrente non è sul disco.",
                     "Controlla le copie locali; non usare il solo stato PDF_OK come prova del file.",
+                    number=int(number), request_hash=key)
+            published = root / (job.get("public_pdf") or "__missing__")
+            if not published.is_file():
+                add("CURRENT_PUBLIC_PDF_MISSING", "error", "Il PDF pubblico dello schema corrente non è sul disco.",
+                    "Verifica il PDF versionato e usa solo il recupero locale controllato.",
                     number=int(number), request_hash=key)
         if status == "RENDERING":
             started = _parse_time(job.get("render_started_at"))
@@ -73,6 +79,21 @@ def detect(root: Path, *, now=None, state=None):
     if first.get("status") == "PDF_OK" and pilot and pilot.get("approved_hash") != latest.get("1"):
         add("PILOT_WAITING_FOR_USER", "info", "Il primo PDF attende la revisione dell'utente.",
             "Apri il primo PDF e approva o descrivi le correzioni; non è uno stallo computazionale.", number=1)
+
+    exam = read_json(root / "esame.json", {})
+    heartbeat = read_json(root.parent.parent / "state/worker-heartbeat.json", {})
+    observed = _parse_time(heartbeat.get("checked_at"))
+    if exam.get("attivo") and observed and (current_time - observed).total_seconds() > 1800:
+        add("LOCAL_HEARTBEAT_OLD", "info", "Il worker locale non registra un controllo recente.",
+            "Verifica se il Mac è acceso e il worker è avviato; questo dato da solo non prova uno stallo.")
+    try:
+        free = shutil.disk_usage(root).free
+    except OSError:
+        free = None
+    if free is not None and free < 512 * 1024 * 1024:
+        severity = "critical" if free < 128 * 1024 * 1024 else "warning"
+        add("DISK_SPACE_LOW", severity, "Spazio libero sotto 512 MiB: i salvataggi locali potrebbero fallire.",
+            "Libera spazio sul disco prima di avviare nuovi rendering o esportazioni.")
 
     seen = set()
     unique = []
