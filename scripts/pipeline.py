@@ -248,8 +248,10 @@ class Pipeline:
             items, rows = [], []
             for job in group:
                 cid = f"{self.root.name[:24]}-s{job['numero']:04d}-{job['hash'][:12]}-r{job['retry_count']}"
-                rows.append({"custom_id": cid, "method": "POST", "url": "/v1/responses", "body": read_json(self.root / job["request"])})
-                items.append({"cid": cid, "hash": job["hash"], "attempt": job["retry_count"]})
+                request_body = read_json(self.root / job["request"])
+                rows.append({"custom_id": cid, "method": "POST", "url": "/v1/responses", "body": request_body})
+                items.append({"cid": cid, "hash": job["hash"], "attempt": job["retry_count"],
+                              "model": request_body.get("model")})
                 job["assigned"] = run_id
             temporary = (self.root / path).with_suffix(".tmp")
             with temporary.open("w", encoding="utf-8") as stream:
@@ -305,7 +307,17 @@ class Pipeline:
                 self.failed_job(job, {"status_code": code, "error": error, "response": response}, transient)
                 continue
             body = response.get("body") or {}
-            job["usage"] = body.get("usage")
+            usage = body.get("usage")
+            if isinstance(usage, dict):
+                records = job.setdefault("usage_attempts", {})
+                previous_id = job.get("request_id")
+                if not records and isinstance(job.get("usage"), dict) and isinstance(previous_id, str) and previous_id != response.get("request_id"):
+                    records["legacy:" + previous_id] = {"request_id": previous_id, "usage": job["usage"]}
+                key = str(batch.get("run_id") or batch.get("batch_id") or batch.get("response_id") or "unknown") + ":" + item["cid"]
+                records[key] = {"attempt": item.get("attempt"), "mode": batch.get("mode"),
+                                "model": item.get("model"), "request_id": response.get("request_id"),
+                                "usage": usage}
+            job["usage"] = usage
             job["request_id"] = response.get("request_id")
             write_json((self.root / job["pack"]).with_name(f"response-r{item['attempt']}.json"), row)
             text = response_text(body).strip()

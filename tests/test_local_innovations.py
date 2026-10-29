@@ -100,11 +100,31 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertEqual(view["observed_usage"], {
             "input_tokens": 1225, "output_tokens": 390,
             "cached_input_tokens": 500, "jobs_with_usage": 2,
+            "attempts_with_usage": 2,
+            "by_mode": {"batch": {"input_tokens": 0, "output_tokens": 0, "attempts": 0},
+                        "urgent": {"input_tokens": 0, "output_tokens": 0, "attempts": 0},
+                        "unknown": {"input_tokens": 1225, "output_tokens": 390, "attempts": 2}},
         })
         self.assertEqual(view["observed_usage"], observed_token_usage(state["jobs"]))
         display = format_snapshot(view)
         self.assertIn("input 1,225", display)
+        self.assertIn("Non attribuiti 2 tentativi", display)
         self.assertIn("Dato parziale, non spesa fatturata", display)
+
+    def test_recorded_retry_usage_is_added_without_recounting_latest_usage(self):
+        jobs = {"one": {"usage": {"input_tokens": 20, "output_tokens": 8},
+                        "usage_attempts": {
+                            "first": {"mode": "batch", "usage": {"input_tokens": 10, "output_tokens": 5}},
+                            "retry": {"mode": "urgent", "usage": {"input_tokens": 20, "output_tokens": 8}},
+                        }}}
+        self.assertEqual(observed_token_usage(jobs), {
+            "input_tokens": 30, "output_tokens": 13,
+            "cached_input_tokens": 0, "jobs_with_usage": 1,
+            "attempts_with_usage": 2,
+            "by_mode": {"batch": {"input_tokens": 10, "output_tokens": 5, "attempts": 1},
+                        "urgent": {"input_tokens": 20, "output_tokens": 8, "attempts": 1},
+                        "unknown": {"input_tokens": 0, "output_tokens": 0, "attempts": 0}},
+        })
 
     def test_global_control_room_keeps_project_incidents_separate(self):
         row = {"slug": "neurologia", "name": "Neurologia", "ready": 0, "total": 1,

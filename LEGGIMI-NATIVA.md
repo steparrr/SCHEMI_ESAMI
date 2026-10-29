@@ -42,8 +42,11 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   p90/p95 descrittivi quando esistono almeno 20 misure per fase e stima indicativa
   della sola impaginazione locale quando ci sono almeno 20 rendering comparabili
   della stessa versione. Mostra anche i token input, cache e output delle risposte
-  conservate nei job; il dato è parziale e per la spesa reale va consultata la
-  dashboard OpenAI. Attesa OpenAI e revisione del primo PDF non sono stimate;
+  conservate per tentativo, compresi i retry successivi all'aggiornamento; per
+  i job storici usa l'ultimo consumo salvato. Le nuove risposte sono distinte
+  fra Batch e Urgente; quelle storiche senza modalità sono «Non attribuite».
+  Il dato resta parziale e per la
+  spesa reale va consultata la dashboard OpenAI. Attesa OpenAI e revisione del primo PDF non sono stimate;
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
   «Panoramica di tutte le materie» elenca stati e avvisi locali per progetto
   senza eseguire un controllo remoto.

@@ -207,6 +207,16 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(api.created, 2)
         state = read_json(self.root / "state" / "pipeline.json")
         self.assertEqual(state["jobs"][state["latest"]["1"]]["retry_count"], 1)
+        records = state["jobs"][state["latest"]["1"]]["usage_attempts"]
+        self.assertEqual(len(records), 2)
+        self.assertEqual({row["attempt"] for row in records.values()}, {0, 1})
+        self.assertEqual({row["mode"] for row in records.values()}, {"batch"})
+        self.assertTrue(all(row["model"] for row in records.values()))
+        self.assertEqual(sum(row["usage"]["input_tokens"] for row in records.values()), 200)
+        engine = self.engine(api=api)
+        engine.consume(engine.batches[-1], {"status": "completed"})
+        repeated = read_json(self.root / "state" / "pipeline.json")
+        self.assertEqual(len(repeated["jobs"][repeated["latest"]["1"]]["usage_attempts"]), 2)
 
     def test_schema_numbers_are_not_limited_to_27_or_99(self):
         write_json(self.root / "input" / "schemi.json", [{"numero": 101, "titolo": "Alfa", "keywords": ["alfa"]}])

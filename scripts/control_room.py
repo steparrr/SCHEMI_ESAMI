@@ -45,23 +45,44 @@ def summarize_performance(events):
     return performance
 
 
+def _usage_triplet(usage):
+    if not isinstance(usage, dict):
+        return None
+    input_tokens, output_tokens = usage.get("input_tokens"), usage.get("output_tokens")
+    if type(input_tokens) is not int or type(output_tokens) is not int or input_tokens < 0 or output_tokens < 0:
+        return None
+    details = usage.get("input_tokens_details") or {}
+    cached = details.get("cached_tokens", 0) if isinstance(details, dict) else 0
+    cached = cached if type(cached) is int and 0 <= cached <= input_tokens else 0
+    return input_tokens, output_tokens, cached
+
+
 def observed_token_usage(jobs):
-    """Sum only valid usage fields retained per job; retries may be absent."""
-    totals = {"input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0, "jobs_with_usage": 0}
+    """Sum valid retained attempts; older jobs fall back to their last usage."""
+    totals = {"input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0,
+              "jobs_with_usage": 0, "attempts_with_usage": 0,
+              "by_mode": {mode: {"input_tokens": 0, "output_tokens": 0, "attempts": 0}
+                          for mode in ("batch", "urgent", "unknown")}}
     for job in jobs.values():
-        usage = job.get("usage")
-        if not isinstance(usage, dict):
-            continue
-        input_tokens, output_tokens = usage.get("input_tokens"), usage.get("output_tokens")
-        if type(input_tokens) is not int or type(output_tokens) is not int or input_tokens < 0 or output_tokens < 0:
-            continue
-        details = usage.get("input_tokens_details") or {}
-        cached = details.get("cached_tokens", 0) if isinstance(details, dict) else 0
-        cached = cached if type(cached) is int and 0 <= cached <= input_tokens else 0
-        totals["input_tokens"] += input_tokens
-        totals["output_tokens"] += output_tokens
-        totals["cached_input_tokens"] += cached
-        totals["jobs_with_usage"] += 1
+        attempts = job.get("usage_attempts")
+        rows = attempts.values() if isinstance(attempts, dict) else []
+        valid = [(item, row.get("mode") if row.get("mode") in ("batch", "urgent") else "unknown")
+                 for row in rows if isinstance(row, dict)
+                 if (item := _usage_triplet(row.get("usage"))) is not None]
+        if not valid:
+            fallback = _usage_triplet(job.get("usage"))
+            if fallback is not None:
+                valid.append((fallback, "unknown"))
+        if valid:
+            totals["jobs_with_usage"] += 1
+            totals["attempts_with_usage"] += len(valid)
+            for (input_tokens, output_tokens, cached), mode in valid:
+                totals["input_tokens"] += input_tokens
+                totals["output_tokens"] += output_tokens
+                totals["cached_input_tokens"] += cached
+                totals["by_mode"][mode]["input_tokens"] += input_tokens
+                totals["by_mode"][mode]["output_tokens"] += output_tokens
+                totals["by_mode"][mode]["attempts"] += 1
     return totals
 
 
@@ -163,10 +184,16 @@ def format_snapshot(view):
     lines = [f"{view['name']} · {view['execution_mode']}",
              f"PDF pronti {counts['pdf_ok']}/{counts['total']} · HTML pronti {counts['html_ok']}/{counts['total']}",
              f"Batch accettati {counts['accepted_batches']} · in attesa locale {counts['waiting_batches']}",
-             (f"Token nelle risposte conservate ({usage['jobs_with_usage']} job): input {usage['input_tokens']:,} "
+             (f"Token nelle risposte conservate ({usage['jobs_with_usage']} job, {usage['attempts_with_usage']} tentativi): input {usage['input_tokens']:,} "
               f"(di cui cache {usage['cached_input_tokens']:,}) · output {usage['output_tokens']:,}. "
               "Dato parziale, non spesa fatturata." if usage["jobs_with_usage"] else
               "Token locali: non disponibili; per la spesa reale consulta la dashboard OpenAI."),
+             ("Per modalità: " + " · ".join(
+                 f"{label} {usage['by_mode'][mode]['attempts']} tentativi, "
+                 f"input {usage['by_mode'][mode]['input_tokens']:,}, output {usage['by_mode'][mode]['output_tokens']:,}"
+                 for mode, label in (("batch", "Batch"), ("urgent", "Urgente"), ("unknown", "Non attribuiti"))
+                 if usage["by_mode"][mode]["attempts"])
+              if usage["attempts_with_usage"] else ""),
              "Pilota: " + ("approvato" if view["pilot"]["approved"] else
                            "pronto per revisione" if view["pilot"]["ready_for_review"] else "in attesa"),
              eta_line, "", "Mac → OpenAI → Mac", view["summary"]["local"], view["summary"]["server"],
