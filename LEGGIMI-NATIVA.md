@@ -43,6 +43,11 @@ un controllo senza API sui sorgenti, crea `dist/Schemi Esami.app` e controlla
 anche l'eseguibile con dati temporanei. La build così prodotta va ancora aperta
 e verificata visivamente sul Mac prima di sostituire una versione già usata.
 La build non copia materie, PDF o chiavi API dentro la `.app`.
+Quando la `.app` installata viene sostituita, il launcher registra la nuova
+versione del binario e riavvia il worker locale all'apertura della finestra.
+La `.app` cerca anche Tesseract nei percorsi standard di Homebrew. L'avviso
+`OCR_NON_DISPONIBILE` del controllo in una cartella temporanea non dice se
+l'installazione esistente ha già il helper `mac-ocr` nei propri dati.
 
 ## Nuove funzioni
 

@@ -19,6 +19,15 @@ def data_root():
     return Path.home() / "Library/Application Support/Schemi Esami"
 
 
+def configure_local_tools():
+    """Finder launches apps with a short PATH that often omits Homebrew OCR."""
+    if sys.platform != "darwin":
+        return
+    current = [item for item in os.environ.get("PATH", "").split(os.pathsep) if item]
+    mac_tools = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"]
+    os.environ["PATH"] = os.pathsep.join(dict.fromkeys(current + mac_tools))
+
+
 def bootstrap():
     resource = resource_root()
     project = Path(os.environ.get("SCHEMI_PROJECT_DIR", data_root() if getattr(sys, "frozen", False) else resource))
@@ -94,7 +103,8 @@ def worker_agent(project, path):
     project = Path(project).resolve()
     if getattr(sys, "frozen", False):
         label = "it.schemi-esami.worker"
-        arguments = [str(worker_executable(path)), "--worker"]
+        executable = worker_executable(path)
+        arguments = [str(executable), "--worker"]
     else:
         label = "it.schemi-esami.source-worker"
         python = resource_root() / ".venv/bin/python"
@@ -105,7 +115,12 @@ def worker_agent(project, path):
              "RunAtLoad": True, "KeepAlive": True,
              "StandardOutPath": str(project / "state/worker-stdout.log"),
              "StandardErrorPath": str(project / "state/worker-stderr.log")}
-    if not getattr(sys, "frozen", False):
+    if getattr(sys, "frozen", False):
+        # A replacement at the same path must change the plist so launchd
+        # stops the previous process before the new GUI uses the same data.
+        stat = executable.stat()
+        agent["EnvironmentVariables"] = {"SCHEMI_WORKER_BINARY": f"{stat.st_size}:{stat.st_mtime_ns}"}
+    else:
         agent["WorkingDirectory"] = str(project)
         agent["EnvironmentVariables"] = {"SCHEMI_PROJECT_DIR": str(project)}
     return label, agent
@@ -154,6 +169,7 @@ def ensure_login_worker(project):
 
 
 def main():
+    configure_local_tools()
     project = bootstrap()
     if "--self-test" in sys.argv:
         import codecs
