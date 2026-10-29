@@ -11,7 +11,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "scripts"))
 from common import read_json, write_json
 from local_app import App
-from model_settings import save_default_profile
+from model_settings import effective_profile_sources, format_effective_profile, save_default_profile
 from native_app import NativeSession, diagnostics
 from project_wizard import validate_wizard
 from update_native import install_overlay
@@ -83,6 +83,10 @@ class NativeTests(unittest.TestCase):
         defaults = self.app.defaults()
         save_default_profile(self.base, dict(defaults, model="future-compatible-model"))
         self.assertEqual(self.app.detail(self.session.selected)["exam"]["pipeline"]["model"], original)
+        sources = {row["key"]: row for row in effective_profile_sources(self.app.root(self.session.selected), self.base)}
+        self.assertEqual((sources["model"]["value"], sources["model"]["source"]), (original, "materia"))
+        self.assertEqual(sources["micro_batch_size"]["source"], "globale")
+        self.assertIn("origine: materia", format_effective_profile(list(sources.values())))
         with patch.object(self.app, "run") as run:
             self.session.upgrade()
         run.assert_called_once_with(self.session.selected)

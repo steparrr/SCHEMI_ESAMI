@@ -23,7 +23,7 @@ from medical_illustrator import (create_manual as manual_illustration, export_il
                                  set_disabled as disable_illustrations, transition as transition_illustration,
                                  update_proposal as edit_illustration_proposal)
 from ingest import SUPPORTED
-from model_settings import MODEL_KEYS, save_default_profile
+from model_settings import MODEL_KEYS, effective_profile_sources, format_effective_profile, save_default_profile
 from monitor import batch_lines, overview
 from project_wizard import validate_wizard
 from project_actions import duplicate_settings, set_archived, set_favorite
@@ -334,7 +334,10 @@ class NativeWindow:
         ttk.Button(control_actions, text="Aggiorna dati locali", command=self.refresh).pack(side="right")
         ttk.Button(control_actions, text="Anteprima report diagnostico", command=self.diagnostic_preview).pack(side="right", padx=8)
         ttk.Button(control_actions, text="Recupera solo PDF locali", command=self.recover_local_pdfs).pack(side="right", padx=8)
-        ttk.Button(self.control_tab, text="Panoramica di tutte le materie", command=self.show_global_control).pack(anchor="w", pady=(0, 8))
+        control_views = ttk.Frame(self.control_tab)
+        control_views.pack(anchor="w", pady=(0, 8))
+        ttk.Button(control_views, text="Panoramica di tutte le materie", command=self.show_global_control).pack(side="left")
+        ttk.Button(control_views, text="Origine delle impostazioni", command=self.show_profile_sources).pack(side="left", padx=8)
         self.control_tabs = ttk.Notebook(self.control_tab)
         self.control_tabs.pack(fill="both", expand=True)
         self.control_overview = ttk.Frame(self.control_tabs)
@@ -986,6 +989,24 @@ class NativeWindow:
         area.insert("1.0", body)
         area.configure(state="disabled")
 
+    def show_profile_sources(self):
+        if not self.session.selected:
+            self.notice.set("Scegli una materia per vedere le impostazioni effettive.")
+            return
+        try:
+            rows = effective_profile_sources(self.app.root(self.session.selected), self.app.project)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.notice.set("Impostazioni non disponibili: " + str(error))
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Impostazioni effettive · " + self.session.selected)
+        dialog.geometry("760x610")
+        from tkinter.scrolledtext import ScrolledText
+        area = ScrolledText(dialog, wrap="word", font=("Helvetica", 11))
+        area.pack(fill="both", expand=True, padx=12, pady=12)
+        area.insert("1.0", format_effective_profile(rows))
+        area.configure(state="disabled")
+
     def preview_material(self):
         selection = self.files.selection()
         if not selection or not self.session.selected:
@@ -1510,6 +1531,11 @@ class NativeWindow:
 
     def upgrade(self):
         if not self.session.selected or self.local_busy:
+            return
+        from tkinter import messagebox
+        if not messagebox.askyesno("Rigenerazione con il profilo globale",
+                                   "La materia userà il profilo globale e potrà inviare nuove richieste OpenAI a pagamento. Continuare?",
+                                   parent=self.root):
             return
         self.async_task(self.session.upgrade, lambda value: self.refresh(), "Rigenerazione con il modello predefinito…")
 
