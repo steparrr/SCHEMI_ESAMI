@@ -13,6 +13,8 @@ from common import digest, pdf_filename, read_json, safe_title, write_json
 def publish(root, job):
     relative = Path("output/pdf") / pdf_filename(job["numero"], job["title"])
     source, destination = root / job["pdf"], root / relative
+    if job.get("pdf_sha256") and digest(source) != job["pdf_sha256"]:
+        raise ValueError("La versione PDF corrente non corrisponde all'hash salvato; ripeti l'impaginazione locale.")
     if not destination.exists() or digest(source) != digest(destination):
         temporary = destination.with_suffix(".tmp.pdf")
         shutil.copy2(source, temporary)

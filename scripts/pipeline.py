@@ -519,7 +519,9 @@ class Pipeline:
             if job.get("kind") in {"analysis", "plan"}:
                 continue
             exists = (self.root / job["html"]).exists()
-            needs = job["status"] in {"HTML_OK", "RENDERING", "RENDER_FAILED"} or (job["status"] == "PDF_OK" and (job.get("render_hash") != signature or not (self.root / job["pdf"]).exists()))
+            needs = job["status"] in {"HTML_OK", "RENDERING", "RENDER_FAILED"} or (job["status"] == "PDF_OK" and
+                    (job.get("render_hash") != signature or not (self.root / job["pdf"]).exists() or
+                     bool(job.get("pdf_sha256") and digest(self.root / job["pdf"]) != job["pdf_sha256"])))
             if not needs:
                 if job["status"] == "PDF_OK" and self.latest.get(str(job["numero"])) == job["hash"] and (self.root / job["pdf"]).exists():
                     publish(self.root, job)
@@ -543,7 +545,8 @@ class Pipeline:
                     self.lengthen(job, qc["pages"])
                     self.save()
                     continue
-                job.update(status="PDF_OK", qc=qc, render_hash=signature, completed_at=now())
+                job.update(status="PDF_OK", qc=qc, render_hash=signature,
+                           pdf_sha256=digest(self.root / job["pdf"]), completed_at=now())
                 job.pop("error", None)
                 if self.latest.get(str(job["numero"])) == job["hash"]:
                     publish(self.root, job)

@@ -12,7 +12,7 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 sys.modules["fitz"] = fitz
 sys.path.insert(0, str(PROJECT / "scripts"))
-from common import create_exam, load_config, read_json, write_json
+from common import create_exam, digest, load_config, read_json, write_json
 from pipeline import Pipeline, linearize_tables
 from local_app import App
 
@@ -157,10 +157,17 @@ class PipelineTests(unittest.TestCase):
     def test_repeat_run_does_not_rebill(self):
         api = FakeAPI()
         self.engine(api=api).tick(True)
+        state = read_json(self.root / "state" / "pipeline.json")
+        job = state["jobs"][state["latest"]["1"]]
+        version = self.root / job["pdf"]
+        self.assertEqual(job["pdf_sha256"], digest(version))
+        version.write_bytes(b"versione PDF alterata dopo il rendering")
         self.engine(api=api).tick(True)
         self.assertEqual(api.created, 1)
         state = read_json(self.root / "state" / "pipeline.json")
-        self.assertEqual(state["jobs"][state["latest"]["1"]]["status"], "PDF_OK")
+        job = state["jobs"][state["latest"]["1"]]
+        self.assertEqual(job["status"], "PDF_OK")
+        self.assertEqual(job["pdf_sha256"], digest(version))
 
     def test_render_failure_never_resubmits_api(self):
         api = FakeAPI()

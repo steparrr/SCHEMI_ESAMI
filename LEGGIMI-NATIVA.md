@@ -58,7 +58,9 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   esplicito dei soli PDF locali. Il recupero può ripubblicare una versione
   corrente valida se il file pubblico manca o è diverso, senza rigenerare con
   OpenAI. Prima di sostituire un file diverso ne salva una copia in
-  `state/local_recovery_backups/`.
+  `state/local_recovery_backups/`. I nuovi PDF conservano un hash della versione:
+  se il file versionato cambia, l'app può reimpaginarlo dall'HTML locale;
+  il recupero non lo ripubblica come se fosse l'originale.
   «Panoramica di tutte le materie» elenca stati e avvisi locali per progetto
   senza eseguire un controllo remoto. «Origine delle impostazioni» mostra i
   valori effettivi e se arrivano dalla materia o dal profilo globale. La

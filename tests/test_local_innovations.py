@@ -9,7 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from common import read_json, write_json
+from common import digest, read_json, write_json
 from control_room import (snapshot, format_snapshot, format_global_snapshot, global_snapshot,
                           observed_token_usage, summarize_performance)
 from coverage_matrix import compare as compare_coverage
@@ -370,6 +370,8 @@ class LocalInnovationsTests(unittest.TestCase):
         version = self.root / job["pdf"]
         version.parent.mkdir(parents=True)
         version.write_bytes(b"versione locale valida")
+        job["pdf_sha256"] = digest(version)
+        write_json(self.root / "state/pipeline.json", state)
         public = self.root / job["public_pdf"]
         with patch("local_recovery.inspect_pdf", return_value={"ok": True, "pages": 1}), \
              patch("remote.OpenAIHTTP", side_effect=AssertionError("Nessuna API")):
@@ -384,6 +386,11 @@ class LocalInnovationsTests(unittest.TestCase):
             self.assertEqual(public.read_bytes(), version.read_bytes())
             self.assertEqual(recover_local(self.root, self.project, signature="test-signature"), [])
             public.unlink()
+            version.write_bytes(b"versione modificata")
+            tampered = recover_local(self.root, self.project, signature="test-signature")
+            self.assertEqual(tampered[0]["outcome"], "precondition_failed")
+            self.assertFalse(public.exists())
+            version.write_bytes(b"versione locale valida")
             unsafe = recover_local(self.root, self.project, signature="different-renderer")
             self.assertEqual(unsafe[0]["outcome"], "precondition_failed")
             self.assertFalse(public.exists())

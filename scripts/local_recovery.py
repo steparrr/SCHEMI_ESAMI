@@ -45,13 +45,17 @@ def recover_local(root: Path, project: Path = PROJECT, render=render_job, signat
                 public_relative = Path("output/pdf") / pdf_filename(job["numero"], job["title"])
                 public = root / public_relative
                 safe_version = version.is_relative_to(versions_folder) and version.suffix.lower() == ".pdf" and version.is_file()
+                version_hash = digest(version) if safe_version else None
                 if public.is_symlink() or (public.exists() and not public.is_file()):
                     actions.append({"schema": int(number), "action": "publish_existing_pdf", "outcome": "precondition_failed"})
                     continue
                 public_current = (job.get("public_pdf") == str(public_relative) and public.is_file()
-                                  and safe_version and digest(public) == digest(version))
+                                  and safe_version and digest(public) == version_hash and
+                                  (not job.get("pdf_sha256") or version_hash == job["pdf_sha256"]))
                 if not public_current:
-                    qc = inspect_pdf(version) if safe_version and job.get("render_hash") == current_signature else {"ok": False}
+                    trusted_version = (safe_version and job.get("render_hash") == current_signature and
+                                       (not job.get("pdf_sha256") or version_hash == job["pdf_sha256"]))
+                    qc = inspect_pdf(version) if trusted_version else {"ok": False}
                     pages = qc.get("pages")
                     valid_pages = (type(pages) is int and pages >= 1 and
                                    (not job.get("page_budget") or pages <= job["page_budget"]) and
@@ -60,7 +64,7 @@ def recover_local(root: Path, project: Path = PROJECT, render=render_job, signat
                         backup = None
                         if public.is_file():
                             previous_hash = digest(public)
-                            if previous_hash != digest(version):
+                            if previous_hash != version_hash:
                                 archived = root / "state/local_recovery_backups" / f"schema_{int(number):02d}_{previous_hash[:24]}.pdf"
                                 archived.parent.mkdir(parents=True, exist_ok=True)
                                 if not archived.is_file():
@@ -104,7 +108,8 @@ def recover_local(root: Path, project: Path = PROJECT, render=render_job, signat
                     actions.append({"schema": int(number), "action": "rerender_local", "outcome": "pdf_invalid"})
                     continue
                 temporary.replace(original)
-                job.update(status="PDF_OK", qc=qc, render_hash=current_signature)
+                job.update(status="PDF_OK", qc=qc, render_hash=current_signature,
+                           pdf_sha256=digest(original))
                 job.pop("error", None)
                 publish(root, job)
                 pipe.save()
