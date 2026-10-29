@@ -35,6 +35,13 @@ archivia i file sovrascritti in `state/aggiornamenti-nativa/` e conserva
 `esami/`, `config/`, le risposte e i PDF. Non aggiorna automaticamente una
 vecchia app `.app` compilata; per quella serve una build macOS separata.
 
+Per costruire una nuova `.app` sul Mac, dopo `INSTALLA.command` apri
+`CREA-APP.command`. Lo script installa PyInstaller solo nella `.venv`, esegue
+un controllo senza API sui sorgenti, crea `dist/Schemi Esami.app` e controlla
+anche l'eseguibile con dati temporanei. La build così prodotta va ancora aperta
+e verificata visivamente sul Mac prima di sostituire una versione già usata.
+La build non copia materie, PDF o chiavi API dentro la `.app`.
+
 ## Nuove funzioni
 
 - **Progetti**: stato delle materie, PDF pronti e invii incerti. «Nuova materia
@@ -107,5 +114,5 @@ Il renderer PDF usa PyMuPDF Story, incluso nelle dipendenze Python; Chromium
 non è richiesto da questi sorgenti.
 
 La suite automatica gira su Linux senza chiamate API reali. La GUI e
-l'installer, incluso il LaunchAgent dei sorgenti, devono ancora essere provati
-direttamente su macOS.
+l'installer, incluso il LaunchAgent dei sorgenti e la procedura di build,
+devono ancora essere provati direttamente su macOS.

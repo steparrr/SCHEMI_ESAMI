@@ -23,6 +23,10 @@ Tesseract con i pacchetti linguistici disponibili.
 
 Per installare i sorgenti su Mac sono disponibili `INSTALLA.command` e
 `APRI.command`; per aggiornare una cartella V2 già installata, `AGGIORNA.command`.
+`CREA-APP.command` costruisce una `.app` sul Mac con PyInstaller e verifica
+sia i sorgenti sia il bundle in una cartella temporanea, senza chiamate API.
+PyInstaller viene installato nella `.venv` solo quando lanci quel comando;
+non serve per usare Medical Illustrator dai sorgenti.
 Le funzioni locali aggiunte, i limiti e gli eventuali programmi facoltativi
 per Medical Illustrator sono descritti in [LEGGIMI-NATIVA.md](LEGGIMI-NATIVA.md).
 Medical Illustrator crea bozze SVG senza nuove API o software grafici; non

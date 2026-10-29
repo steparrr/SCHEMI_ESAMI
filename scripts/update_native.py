@@ -1,4 +1,4 @@
-"""Aggiorna soltanto interfaccia e launcher in una V2 esistente."""
+"""Aggiorna il codice locale in una V2 esistente, conservando dati e configurazione."""
 from __future__ import annotations
 
 import datetime
@@ -21,17 +21,16 @@ def install_overlay(source, target):
     if check.returncode:
         raise ValueError("Questo Python non include Tkinter. Usa l'installazione standard da python.org.")
     backup = target / "state/aggiornamenti-nativa" / datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-    files = ("native.py", "scripts/native_app.py", "scripts/telemetry.py", "scripts/control_room.py",
-             "scripts/bottleneck_detector.py", "scripts/local_eta.py",
-             "scripts/medical_illustrator.py", "scripts/diagnostic_report.py", "scripts/visual_qc.py",
-             "scripts/materials_view.py", "scripts/coverage_matrix.py", "scripts/projects_view.py", "scripts/project_wizard.py",
-             "scripts/project_actions.py",
-             "scripts/local_recovery.py", "scripts/local_app.py", "scripts/ingest.py",
-             "scripts/pipeline.py", "scripts/ocr.py", "scripts/mac_smoke.py", "APRI.command",
-             "VERIFICA-MAC.command", "LEGGIMI-NATIVA.md", "tests/test_native.py")
+    # Keep every runtime module at the same version. A hand-maintained list
+    # missed exports.py and model_settings.py in a previous overlay.
+    files = tuple(path.relative_to(source) for folder in ("scripts", "renderer")
+                  for path in sorted((source / folder).glob("*.py"))) + tuple(map(Path, (
+        "native.py", "APRI.command", "INSTALLA.command", "VERIFICA-MAC.command",
+        "CREA-APP.command", "LEGGIMI-NATIVA.md", "requirements.txt",
+        "Schemi Esami.spec", "SchemiEsami.icns")))
     for relative in files:
         if not (source / relative).is_file():
-            raise ValueError("Pacchetto incompleto: manca " + relative)
+            raise ValueError("Pacchetto incompleto: manca " + str(relative))
     for relative in files:
         destination = target / relative
         if destination.is_file() and destination.read_bytes() != (source / relative).read_bytes():
@@ -44,6 +43,8 @@ def install_overlay(source, target):
         temporary.replace(destination)
     (target / "APRI.command").chmod(0o755)
     (target / "VERIFICA-MAC.command").chmod(0o755)
+    (target / "INSTALLA.command").chmod(0o755)
+    (target / "CREA-APP.command").chmod(0o755)
     return target
 
 

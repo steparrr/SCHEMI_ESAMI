@@ -127,6 +127,7 @@ class NativeTests(unittest.TestCase):
         target = self.base
         (target / "scripts").mkdir()
         (target / "scripts/local_app.py").write_text("# Motore esistente\n")
+        (target / "scripts/exports.py").write_text("# Export precedente\n")
         (target / ".venv/bin").mkdir(parents=True)
         (target / ".venv/bin/python").symlink_to(sys.executable)
         (target / "APRI.command").write_text("# Launcher precedente\n")
@@ -139,7 +140,15 @@ class NativeTests(unittest.TestCase):
         install_overlay(PROJECT, target)
         self.assertEqual(before, {path: path.read_bytes() for path in preserve})
         self.assertEqual((target / "scripts/local_app.py").read_bytes(), (PROJECT / "scripts/local_app.py").read_bytes())
+        self.assertEqual((target / "scripts/exports.py").read_bytes(), (PROJECT / "scripts/exports.py").read_bytes())
+        self.assertEqual((target / "scripts/model_settings.py").read_bytes(),
+                         (PROJECT / "scripts/model_settings.py").read_bytes())
+        self.assertEqual((target / "renderer/render_pdf.py").read_bytes(),
+                         (PROJECT / "renderer/render_pdf.py").read_bytes())
         self.assertEqual(len(list((target / "state/aggiornamenti-nativa").rglob("local_app.py"))), 1)
+        archived_exports = list((target / "state/aggiornamenti-nativa").rglob("exports.py"))
+        self.assertEqual(len(archived_exports), 1)
+        self.assertEqual(archived_exports[0].read_text(), "# Export precedente\n")
         self.assertIn("native.py", (target / "APRI.command").read_text())
         archived = list((target / "state/aggiornamenti-nativa").rglob("APRI.command"))
         self.assertEqual(len(archived), 1)
