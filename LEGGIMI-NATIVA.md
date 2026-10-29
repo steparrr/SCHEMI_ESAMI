@@ -49,8 +49,9 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   senza eseguire un controllo remoto.
 - **Schemi e PDF**: controllo visivo manuale delle pagine sospette e report
   tecnico locale in `output/reports/visual/`. Il programma segnala i riquadri
-  opachi disegnati sopra il testo; uno sfondo dietro il testo non genera lo
-  stesso avviso. Puoi segnare una pagina verificata o annotare un falso
+  opachi disegnati sopra il testo e le immagini grandi con risoluzione apparente
+  sotto 90 dpi; uno sfondo dietro il testo non genera l'avviso sui riquadri.
+  Puoi segnare una pagina verificata o annotare un falso
   positivo; la decisione è legata all'hash del PDF e non cambia `PDF_OK`.
 - **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne
   una manualmente, modifica il piano e crea bozze SVG schematiche. L'anteprima

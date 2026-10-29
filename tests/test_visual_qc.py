@@ -5,8 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 import json
+import io
 
 import fitz
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from visual_qc import (export_visual_report, inspect_visual, load_visual_reviews,
@@ -44,6 +46,25 @@ class VisualQualityTests(unittest.TestCase):
     def test_background_and_transparent_highlight_are_not_flagged_as_overlay(self):
         self.make_pdf("before")
         self.assertFalse(any("sopra il testo" in warning for warning in inspect_visual(self.path)["pages"][0]["warnings"]))
+
+    def test_large_low_resolution_image_is_a_warning_only(self):
+        def make_image_pdf(pixels):
+            picture = Image.new("RGB", (pixels, pixels), "#476782")
+            stream = io.BytesIO()
+            picture.save(stream, format="PNG")
+            document = fitz.open()
+            page = document.new_page()
+            page.insert_text((40, 70), "Immagine di esempio sintetica per il controllo locale.")
+            page.insert_image(fitz.Rect(80, 110, 450, 500), stream=stream.getvalue())
+            document.save(self.path)
+            document.close()
+
+        make_image_pdf(64)
+        before = self.path.read_bytes()
+        self.assertTrue(any("sotto 90 dpi" in warning for warning in inspect_visual(self.path)["pages"][0]["warnings"]))
+        self.assertEqual(self.path.read_bytes(), before)
+        make_image_pdf(1200)
+        self.assertFalse(any("sotto 90 dpi" in warning for warning in inspect_visual(self.path)["pages"][0]["warnings"]))
         self.make_pdf("after", opacity=.2)
         self.assertFalse(any("sopra il testo" in warning for warning in inspect_visual(self.path)["pages"][0]["warnings"]))
 

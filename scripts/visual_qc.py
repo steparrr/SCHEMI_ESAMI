@@ -28,6 +28,13 @@ def inspect_visual(path: Path, max_pages=250):
             drawings = page.get_drawings()
             if len(text.strip()) < 30 and not page.get_images(full=True):
                 warnings.append("Pagina con pochissimo testo e senza immagini: verifica se è vuota.")
+            for image in page.get_image_info():
+                box = fitz.Rect(image["bbox"])
+                if (box.width >= 144 and box.height >= 144 and
+                    box.get_area() >= page.rect.get_area() * .10 and
+                    (image["width"] * 72 / box.width < 90 or image["height"] * 72 / box.height < 90)):
+                    warnings.append("Immagine grande con risoluzione apparente sotto 90 dpi: verifica la leggibilità.")
+                    break
             bounds = page.rect
             if any(rect.x0 < bounds.x0 - 2 or rect.y0 < bounds.y0 - 2 or
                    rect.x1 > bounds.x1 + 2 or rect.y1 > bounds.y1 + 2 for rect in blocks):
