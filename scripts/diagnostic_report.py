@@ -11,6 +11,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
+from bottleneck_detector import detect
 from common import digest, read_json
 from telemetry import Telemetry
 
@@ -74,6 +75,9 @@ def build_sections(root: Path, event_limit=500):
             durations.setdefault(event["stage"], []).append(event["duration_ms"])
     metrics = {stage: {"count": len(values), "min_ms": min(values), "max_ms": max(values),
                        "mean_ms": round(sum(values) / len(values), 2)} for stage, values in durations.items()}
+    incidents = [{"code": item["code"], "severity": item["severity"], "schema_number": item["number"],
+                  "detail": item["detail"], "suggestion": item["suggestion"]}
+                 for item in detect(root, state=state)]
     warnings = ["Il report usa solo campi tecnici permessi; controlla comunque la preview prima di condividerlo.",
                 "Non include documenti, domande, PDF, risposte API, log liberi o segreti.",
                 "Le durate remote rappresentano osservazioni locali, non il tempo interno del server."]
@@ -81,9 +85,10 @@ def build_sections(root: Path, event_limit=500):
         warnings.append("Telemetria assente: le durate storiche non sono disponibili.")
     body = {
         "report.md": ("# Diagnostica locale\n\n" + f"Schemi correnti: {len(current)}; PDF pronti: {summary['pdf_ok']}.\n"
-                      + f"Batch ambigui: {summary['ambiguous_batches']}.\n\n"
+                      + f"Batch ambigui: {summary['ambiguous_batches']}; avvisi: {len(incidents)}.\n\n"
                       + "Nessun nuovo invio API è stato eseguito per creare questo report.\n"),
         "state-summary.json": _json(summary),
+        "incidents.json": _json(incidents),
         "metrics.json": _json(metrics),
         "telemetry.jsonl": "".join(json.dumps(e, ensure_ascii=False, sort_keys=True) + "\n" for e in clean_events),
         "environment.json": _json({"platform": platform.system(), "python": sys.version_info[:3],

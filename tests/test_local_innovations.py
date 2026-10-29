@@ -10,8 +10,10 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
 from control_room import snapshot, format_snapshot
+from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
-from medical_illustrator import list_opportunities, plan, set_disabled, technical_qc, transition
+from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, revalidate_edited_svg,
+                                 set_disabled, technical_qc, transition, update_proposal)
 from materials_view import material_detail
 from local_recovery import recover_local
 from projects_view import project_cards
@@ -52,7 +54,7 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertEqual(view["counts"]["accepted_batches"], 1)
         self.assertEqual(view["counts"]["pdf_ok"], 0)
         self.assertEqual(view["batches"][1]["id"], None)
-        self.assertTrue(any(row["kind"] == "remote_uncertain" for row in view["incidents"]))
+        self.assertTrue(any(row["kind"] == "REMOTE_ACCEPTANCE_UNCERTAIN" for row in view["incidents"]))
         self.assertIn("ID non confermato", format_snapshot(view))
         self.assertFalse(view["telemetry_available"])
         Telemetry(self.root).record("pdf_render_completed", "pdf_render", status="success", duration_ms=25)
@@ -81,6 +83,84 @@ class LocalInnovationsTests(unittest.TestCase):
             transition(self.root, row["opportunity_id"], "approved")
         artifact.write_bytes(b"<svg><script>alert(1)</script></svg>")
         self.assertTrue(technical_qc(artifact.read_bytes()))
+
+    def test_manual_figure_edit_requires_fresh_medical_review(self):
+        row = create_manual(self.root, 1, "Vasculite arteriosa", "vascular",
+                            "Confrontare una situazione normale e una patologica.")
+        self.assertTrue(row["requested_by_user"])
+        self.assertEqual(row["lesion_types"], ["vascular"])
+        row = update_proposal(self.root, row["opportunity_id"], {"view_type": "sezione schematica"})
+        self.assertEqual(row["view_type"], "sezione schematica")
+        row = transition(self.root, row["opportunity_id"], "accepted")
+        artifact = self.root / row["artifact"]
+        self.assertEqual(technical_qc(artifact.read_bytes()), [])
+        artifact.write_bytes(artifact.read_bytes().replace(b"#b33f35", b"#ff0000"))
+        with self.assertRaisesRegex(ValueError, "modificato"):
+            transition(self.root, row["opportunity_id"], "approved")
+        revised = revalidate_edited_svg(self.root, row["opportunity_id"])
+        self.assertEqual(revised["editor_revision"], 1)
+        self.assertEqual(transition(self.root, row["opportunity_id"], "approved")["status"], "approved")
+        artifact.write_bytes(artifact.read_bytes().replace(b"#ff0000", b"#00aa00"))
+        revised = revalidate_edited_svg(self.root, row["opportunity_id"])
+        self.assertEqual(revised["status"], "medical_review_needed")
+        self.assertNotIn("reviewed_at", revised)
+        artifact.write_bytes(b'<svg viewBox="0 0 900 520"><script>alert(1)</script></svg>')
+        with self.assertRaisesRegex(ValueError, "Controllo tecnico"):
+            revalidate_edited_svg(self.root, row["opportunity_id"])
+        artifact.write_bytes(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">'
+                             b'<rect x="899" y="0" width="20" height="20"/>'
+                             b'<text x="1" y="20" font-size="12">Normale (schema) NON VALIDATA CLINICAMENTE</text></svg>')
+        self.assertIn("element_outside_canvas", technical_qc(artifact.read_bytes()))
+
+    def test_approved_plate_exports_separate_pdf_without_changing_pipeline(self):
+        import fitz
+        row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
+        transition(self.root, row["opportunity_id"], "approved")
+        state = read_json(self.root / "state/pipeline.json")
+        job = state["jobs"][self.key]
+        job.update(status="PDF_OK", pdf="output/pdf/versioni/one.pdf", public_pdf="output/pdf/one.pdf", page_budget=3)
+        write_json(self.root / "state/pipeline.json", state)
+        original = self.root / job["public_pdf"]
+        version = self.root / job["pdf"]
+        original.parent.mkdir(parents=True)
+        version.parent.mkdir(parents=True)
+        document = fitz.open()
+        page = document.new_page()
+        page.insert_text((72, 72), "Schema di prova con testo originale.")
+        document.save(original)
+        version.write_bytes(original.read_bytes())
+        before = original.read_bytes()
+        with patch("medical_illustrator.inspect_pdf", return_value={"ok": True}):
+            illustrated = export_illustrated_pdf(self.root, row["opportunity_id"])
+            self.assertEqual(export_illustrated_pdf(self.root, row["opportunity_id"]), illustrated)
+        with fitz.open(illustrated) as output:
+            self.assertEqual(output.page_count, 2)
+            self.assertIn("Tavola illustrativa", output.get_toc()[-1][1])
+        self.assertEqual(original.read_bytes(), before)
+        self.assertEqual(read_json(self.root / "state/pipeline.json"), state)
+        self.assertEqual(next(item for item in list_opportunities(self.root)
+                              if item["opportunity_id"] == row["opportunity_id"])["status"], "published")
+
+    def test_plate_export_respects_schema_page_budget(self):
+        import fitz
+        row = transition(self.root, plan(self.root)[0]["opportunity_id"], "accepted")
+        transition(self.root, row["opportunity_id"], "approved")
+        state = read_json(self.root / "state/pipeline.json")
+        job = state["jobs"][self.key]
+        job.update(status="PDF_OK", pdf="output/pdf/versioni/one.pdf", public_pdf="output/pdf/one.pdf", page_budget=1)
+        write_json(self.root / "state/pipeline.json", state)
+        original = self.root / job["public_pdf"]
+        version = self.root / job["pdf"]
+        original.parent.mkdir(parents=True)
+        version.parent.mkdir(parents=True)
+        document = fitz.open()
+        document.new_page()
+        document.save(original)
+        version.write_bytes(original.read_bytes())
+        with patch("medical_illustrator.inspect_pdf", return_value={"ok": True}):
+            with self.assertRaisesRegex(ValueError, "limite di pagine"):
+                export_illustrated_pdf(self.root, row["opportunity_id"])
+        self.assertEqual(list((self.root / "output/pdf/illustrati").glob("*.pdf")), [])
 
     def test_opt_out_and_no_keyword_keep_planner_quiet(self):
         set_disabled(self.root, True)
@@ -178,6 +258,33 @@ class LocalInnovationsTests(unittest.TestCase):
         after = material_detail(self.root, "materiali", "Fonte.txt")
         self.assertEqual(after["status"], "processed")
         self.assertIn("Estratto verificabile", after["text_preview"])
+
+    def test_program_comparison_is_labelled_estimate_and_uses_existing_index(self):
+        import sqlite3
+        from ingest_helpers import create_empty_db
+        db_file = self.root / "corpus/corpus.db"
+        db_file.parent.mkdir(parents=True)
+        create_empty_db(db_file)
+        with sqlite3.connect(db_file) as db:
+            for doc_id, name, kind in (("DOC_1", "Programma.txt", "programma"), ("DOC_2", "Sbobina.txt", "sbobina")):
+                db.execute("INSERT INTO documents VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (doc_id, name, "input/" + name, "txt", kind, 100, "a" * 64,
+                            None, 1, 0, "processed", "2026-10-29T00:00:00Z"))
+            db.execute("INSERT INTO chunks VALUES (?,?,?,?,?,?,?,?,?,?)",
+                       ("CH_1", "DOC_1", "Programma.txt", None, None, "Programma",
+                        "1. Tumori ovarici\n2. Fisiologia renale", 8, "b" * 64, 1))
+            db.execute("INSERT INTO chunks VALUES (?,?,?,?,?,?,?,?,?,?)",
+                       ("CH_2", "DOC_2", "Sbobina.txt", None, None, "Tumori",
+                        "I tumori ovarici hanno caratteristiche diverse.", 8, "c" * 64, 1))
+            db.execute("INSERT INTO questions VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                       ("Q_1", "Quali sono i tumori ovarici?", "", "Domande.txt", "DOC_3",
+                        "", "", "", 1, "", "d" * 64, "txt"))
+        result = compare_coverage(self.root)
+        self.assertEqual(result["status"], "estimated")
+        self.assertIn("non prova", result["message"].casefold())
+        self.assertEqual(result["rows"][0]["source_count"], 1)
+        self.assertEqual(result["rows"][0]["question_count"], 1)
+        self.assertEqual(result["rows"][1]["source_count"], 0)
 
 
 if __name__ == "__main__":

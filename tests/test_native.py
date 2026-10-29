@@ -13,6 +13,7 @@ from common import read_json, write_json
 from local_app import App
 from model_settings import save_default_profile
 from native_app import NativeSession, diagnostics
+from project_wizard import validate_wizard
 from update_native import install_overlay
 
 
@@ -129,14 +130,49 @@ class NativeTests(unittest.TestCase):
         self.session.save(self.data)
         exam = self.app.root(self.session.selected)
         write_json(exam / "state/pipeline.json", {"batches": [{"batch_id": "batch_existing", "stage": "submitted"}]})
-        preserve = [target / "config/pipeline.json", target / "scripts/local_app.py", exam / "esame.json", exam / "input/sbobine/Fonte.txt", exam / "state/pipeline.json"]
+        preserve = [target / "config/pipeline.json", exam / "esame.json", exam / "input/sbobine/Fonte.txt", exam / "state/pipeline.json"]
         before = {path: path.read_bytes() for path in preserve}
         install_overlay(PROJECT, target)
         self.assertEqual(before, {path: path.read_bytes() for path in preserve})
+        self.assertEqual((target / "scripts/local_app.py").read_bytes(), (PROJECT / "scripts/local_app.py").read_bytes())
+        self.assertEqual(len(list((target / "state/aggiornamenti-nativa").rglob("local_app.py"))), 1)
         self.assertIn("native.py", (target / "APRI.command").read_text())
         archived = list((target / "state/aggiornamenti-nativa").rglob("APRI.command"))
         self.assertEqual(len(archived), 1)
         self.assertEqual(archived[0].read_text(), "# Launcher precedente\n")
+
+    def test_wizard_validates_before_create_and_persists_optional_identity(self):
+        values = {"name": "Ginecologia sintesi", "short_title": "Ginecologia", "exam_date": "2027-01-15",
+                  "mode": "veloce", "max_pages": "100", "execution": "batch", "illustrator_enabled": False}
+        with self.assertRaisesRegex(ValueError, "Aggiungi almeno"):
+            validate_wizard(values, {}, start=True)
+        self.assertEqual(self.app.list_exams(), [])
+        self.add()
+        planned, paths = validate_wizard(values, self.session.pending, start=True)
+        self.assertEqual(paths["materiali"], [self.file.resolve()])
+        with patch.object(self.app, "run") as run:
+            detail = self.session.save(dict(planned, questions_text=""), "save")
+        run.assert_not_called()
+        self.assertEqual(detail["exam"]["data_esame"], "2027-01-15")
+        self.assertEqual(detail["exam"]["titolo_breve"], "Ginecologia")
+        self.assertEqual(detail["exam"]["max_pagine"], 100)
+
+    def test_invalid_exam_date_and_duplicate_material_names_do_not_create_project(self):
+        values = {"name": "Materia nuova", "exam_date": "2027-02-30", "mode": "completa", "execution": "batch"}
+        with self.assertRaisesRegex(ValueError, "data dell'esame"):
+            validate_wizard(values, {})
+        with self.assertRaisesRegex(ValueError, "data dell'esame"):
+            self.app.save_exam(dict(values, exam_date="2027-02-30"))
+        with self.assertRaisesRegex(ValueError, "AAAA-MM-GG"):
+            validate_wizard(dict(values, exam_date="20270228"), {})
+        self.assertEqual(self.app.list_exams(), [])
+        values["exam_date"] = "2027-02-28"
+        second = self.base / "altra" / self.file.name
+        second.parent.mkdir()
+        second.write_text("Un'altra fonte", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "stesso nome"):
+            validate_wizard(values, {"materiali": [self.file, second]})
+        self.assertEqual(self.app.list_exams(), [])
 
 
 if __name__ == "__main__":

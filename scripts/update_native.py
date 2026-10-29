@@ -22,8 +22,11 @@ def install_overlay(source, target):
         raise ValueError("Questo Python non include Tkinter. Usa l'installazione standard da python.org.")
     backup = target / "state/aggiornamenti-nativa" / datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     files = ("native.py", "scripts/native_app.py", "scripts/telemetry.py", "scripts/control_room.py",
+             "scripts/bottleneck_detector.py",
              "scripts/medical_illustrator.py", "scripts/diagnostic_report.py", "scripts/visual_qc.py",
-             "scripts/materials_view.py", "scripts/projects_view.py", "scripts/local_recovery.py", "scripts/ingest.py",
+             "scripts/materials_view.py", "scripts/coverage_matrix.py", "scripts/projects_view.py", "scripts/project_wizard.py",
+             "scripts/project_actions.py",
+             "scripts/local_recovery.py", "scripts/local_app.py", "scripts/ingest.py",
              "scripts/pipeline.py", "scripts/ocr.py", "APRI.command", "LEGGIMI-NATIVA.md", "tests/test_native.py")
     for relative in files:
         if not (source / relative).is_file():

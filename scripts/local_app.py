@@ -7,6 +7,7 @@ import getpass
 import json
 import mimetypes
 import os
+import re
 import secrets
 import shutil
 import subprocess
@@ -15,7 +16,7 @@ import time
 import urllib.parse
 import urllib.request
 import webbrowser
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -110,7 +111,7 @@ class App:
             if not (root / "esame.json").is_file():
                 continue
             detail = self.detail(root.name)
-            rows.append({"slug": root.name, "name": detail["exam"]["nome"], "mode": detail["exam"].get("modalita", "completa"), "status": detail["report"].get("input_status"), "ready": sum(row["status"] == "PDF_OK" for row in detail["report"]["rows"]), "total": len(detail["report"]["rows"]), "busy": detail["busy"], "scheduled": detail["exam"].get("attivo", False)})
+            rows.append({"slug": root.name, "name": detail["exam"]["nome"], "mode": detail["exam"].get("modalita", "completa"), "status": detail["report"].get("input_status"), "ready": sum(row["status"] == "PDF_OK" for row in detail["report"]["rows"]), "total": len(detail["report"]["rows"]), "busy": detail["busy"], "scheduled": detail["exam"].get("attivo", False), "archived": detail["exam"].get("archived", False), "exam_date": detail["exam"].get("data_esame")})
         return rows
 
     def save_exam(self, data):
@@ -121,11 +122,32 @@ class App:
         pages = int(data.get("max_pages") or 0) if mode == "veloce" else None
         if mode not in {"completa", "veloce"} or (mode == "veloce" and not 1 <= pages <= 1000):
             raise ValueError("Nella modalità veloce indica un massimo di pagine fra 1 e 1000.")
+        short = None
+        if "short_title" in data:
+            short = str(data["short_title"] or "").strip()
+            if len(short) > 80:
+                raise ValueError("Il titolo breve non può superare 80 caratteri.")
+        raw_date = None
+        if "exam_date" in data:
+            raw_date = str(data["exam_date"] or "").strip()
+            if raw_date:
+                try:
+                    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw_date):
+                        raise ValueError("Formato non valido")
+                    date.fromisoformat(raw_date)
+                except ValueError as error:
+                    raise ValueError("La data dell'esame deve essere nel formato AAAA-MM-GG.") from error
         root = self.root(data["slug"]) if data.get("slug") else create_exam(name, self.project)
         with edit_lock(root):
             exam = read_json(root / "esame.json")
-            before = {key: exam.get(key) for key in ("nome", "modalita", "max_pagine", "istruzioni", "execution_mode", "start_policy")}
+            before = {key: exam.get(key) for key in ("nome", "titolo_breve", "data_esame", "modalita", "max_pagine", "istruzioni", "execution_mode", "start_policy")}
+            if exam.get("archived") and data.get("active"):
+                raise ValueError("La materia è archiviata. Riattivala prima di avviare la produzione.")
             exam.update(nome=name, modalita=mode, max_pagine=pages, attivo=bool(data.get("active", False)), istruzioni=str(data.get("instructions", ""))[:20000])
+            if "short_title" in data:
+                exam["titolo_breve"] = short
+            if "exam_date" in data:
+                exam["data_esame"] = raw_date or None
             if data.get("execution_mode") is not None:
                 if data["execution_mode"] not in {"batch", "urgent"}:
                     raise ValueError("Tipo di invio non valido.")
@@ -199,6 +221,8 @@ class App:
 
     def run(self, slug):
         root = self.root(slug)
+        if read_json(root / "esame.json").get("archived"):
+            raise ValueError("La materia è archiviata. Riattivala prima di avviare la produzione.")
         cfg = load_config(root, self.project)
         api = self.api_factory(cfg)  # La chiave è controllata prima di avviare il worker.
         with self.mutex:

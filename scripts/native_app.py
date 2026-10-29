@@ -12,15 +12,21 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from common import PROJECT, read_json, write_json
+from coverage_matrix import compare as compare_coverage
 from control_room import format_snapshot, snapshot
 from diagnostic_report import build_sections, export as export_diagnostic, preview as preview_diagnostic
 from local_app import App, KINDS, MAX_FILE_BYTES, edit_lock, save_api_key
 from local_recovery import recover_local
 from materials_view import material_detail
-from medical_illustrator import list_opportunities, plan as plan_illustrations, set_disabled as disable_illustrations, transition as transition_illustration
+from medical_illustrator import (create_manual as manual_illustration, export_illustrated_pdf, list_opportunities,
+                                 plan as plan_illustrations, revalidate_edited_svg,
+                                 set_disabled as disable_illustrations, transition as transition_illustration,
+                                 update_proposal as edit_illustration_proposal)
 from ingest import SUPPORTED
 from model_settings import MODEL_KEYS, save_default_profile
 from monitor import batch_lines, overview
+from project_wizard import validate_wizard
+from project_actions import duplicate_settings, set_archived
 from projects_view import project_cards
 from visual_qc import inspect_visual
 
@@ -85,6 +91,8 @@ class NativeSession:
     def save(self, data, action="save"):
         if action not in {"save", "now", "urgent", "night"}:
             raise ValueError("Operazione non valida.")
+        if self.selected and action != "save" and read_json(self.app.root(self.selected) / "esame.json").get("archived"):
+            raise ValueError("La materia è archiviata. Riattivala prima di avviare la produzione.")
         previous_active = (read_json(self.app.root(self.selected) / "esame.json").get("attivo", False)
                            if self.selected else False)
         data = dict(data, slug=self.selected, active=previous_active)
@@ -129,6 +137,8 @@ class NativeSession:
         root = self.app.root(self.selected)
         with edit_lock(root):
             exam = read_json(root / "esame.json")
+            if exam.get("archived"):
+                raise ValueError("Riattiva la materia prima di rigenerarla.")
             exam["pipeline"].update(self.app.defaults())
             exam["attivo"] = True
             exam["revision"] = exam.get("revision", 0) + 1
@@ -178,7 +188,7 @@ class NativeWindow:
         sidebar = ttk.Frame(outer, padding=(0, 0, 16, 0))
         sidebar.grid(row=0, column=0, sticky="nsew")
         ttk.Label(sidebar, text="SCHEMI ESAMI", font=("Helvetica", 17, "bold")).pack(anchor="w", pady=(0, 16))
-        ttk.Button(sidebar, text="+ Nuova materia", command=self.new_exam).pack(fill="x", pady=(0, 12))
+        ttk.Button(sidebar, text="+ Nuova materia guidata", command=self.open_wizard).pack(fill="x", pady=(0, 12))
         self.home_search = tk.StringVar()
         ttk.Entry(sidebar, textvariable=self.home_search).pack(fill="x", pady=(0, 6))
         ttk.Label(sidebar, text="Cerca materie").pack(anchor="w", pady=(0, 7))
@@ -220,9 +230,13 @@ class NativeWindow:
         self.tabs.add(self.illustrator_tab, text="Medical Illustrator")
         home_toolbar = ttk.Frame(self.home_tab)
         home_toolbar.pack(fill="x", pady=(0, 8))
-        ttk.Label(home_toolbar, text="Materie locali · PDF e stati verificati sui file salvati").pack(side="left")
-        ttk.Button(home_toolbar, text="Apri", command=self.open_home_project).pack(side="right")
-        ttk.Button(home_toolbar, text="Apri Control Room", command=lambda: self.open_home_project(True)).pack(side="right", padx=8)
+        ttk.Label(home_toolbar, text="Materie locali · PDF e stati verificati sui file salvati").pack(anchor="w")
+        home_actions = ttk.Frame(home_toolbar)
+        home_actions.pack(fill="x", pady=(6, 0))
+        ttk.Button(home_actions, text="Apri", command=self.open_home_project).pack(side="right")
+        ttk.Button(home_actions, text="Apri Control Room", command=lambda: self.open_home_project(True)).pack(side="right", padx=8)
+        ttk.Button(home_actions, text="Archivia / Riattiva", command=self.toggle_home_archive).pack(side="right", padx=8)
+        ttk.Button(home_actions, text="Duplica impostazioni", command=self.duplicate_home_settings).pack(side="right", padx=8)
         self.project_rows = ttk.Treeview(self.home_tab, columns=("name", "pdf", "phase", "remote"), show="headings", selectmode="browse")
         for key, title, width in (("name", "Materia", 280), ("pdf", "PDF pronti", 95),
                                   ("phase", "Situazione", 290), ("remote", "Ultima verifica OpenAI", 210)):
@@ -236,10 +250,15 @@ class NativeWindow:
         inputs.rowconfigure(3, weight=1)
         toolbar = ttk.Frame(inputs)
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        file_actions = ttk.Frame(toolbar)
+        file_actions.pack(fill="x")
         for kind, title in [("materiali", "Aggiungi materiali"), ("domande", "File delle domande"), ("programma", "Programma ufficiale")]:
-            ttk.Button(toolbar, text=title, command=lambda k=kind: self.pick_files(k)).pack(side="left", padx=(0, 8))
-        ttk.Button(toolbar, text="Rimuovi selezionato", command=self.remove_file).pack(side="right")
-        ttk.Button(toolbar, text="Anteprima selezionato", command=self.preview_material).pack(side="right", padx=8)
+            ttk.Button(file_actions, text=title, command=lambda k=kind: self.pick_files(k)).pack(side="left", padx=(0, 8))
+        inspect_actions = ttk.Frame(toolbar)
+        inspect_actions.pack(fill="x", pady=(5, 0))
+        ttk.Button(inspect_actions, text="Confronta programma", command=self.show_coverage).pack(side="left")
+        ttk.Button(inspect_actions, text="Rimuovi selezionato", command=self.remove_file).pack(side="right")
+        ttk.Button(inspect_actions, text="Anteprima selezionato", command=self.preview_material).pack(side="right", padx=8)
         self.files = ttk.Treeview(inputs, columns=("area", "name", "size", "state"), show="headings", height=7, selectmode="browse")
         for key, title, width in [("area", "Area", 95), ("name", "File", 320), ("size", "Byte", 95), ("state", "Stato", 160)]:
             self.files.heading(key, text=title)
@@ -333,6 +352,7 @@ class NativeWindow:
         illustrator_toolbar = ttk.Frame(self.illustrator_tab)
         illustrator_toolbar.pack(fill="x", pady=(0, 8))
         ttk.Button(illustrator_toolbar, text="Cerca tavole utili", command=self.plan_illustrations).pack(side="left")
+        ttk.Button(illustrator_toolbar, text="Aggiungi tavola manuale", command=self.add_manual_illustration).pack(side="left", padx=8)
         ttk.Button(illustrator_toolbar, text="Disattiva/riattiva proposte", command=self.toggle_illustrations).pack(side="left", padx=8)
         self.illustrator_notice = tk.StringVar(value="Proposte locali, senza API. Ogni tavola richiede revisione.")
         ttk.Label(self.illustrator_tab, textvariable=self.illustrator_notice, wraplength=900).pack(anchor="w", pady=(0, 8))
@@ -341,12 +361,18 @@ class NativeWindow:
             self.illustrations.heading(key, text=title)
             self.illustrations.column(key, width=width, stretch=key == "concept")
         self.illustrations.pack(fill="both", expand=True)
+        self.illustrations.bind("<<TreeviewSelect>>", self.show_illustration_details)
+        self.illustration_detail = ScrolledText(self.illustrator_tab, height=8, wrap="word", font=("Helvetica", 11), state="disabled")
+        self.illustration_detail.pack(fill="x", pady=(8, 0))
         illustrator_actions = ttk.Frame(self.illustrator_tab)
         illustrator_actions.pack(fill="x", pady=(8, 0))
         ttk.Button(illustrator_actions, text="Accetta e crea bozza SVG", command=lambda: self.illustration_action("accepted")).pack(side="left")
         ttk.Button(illustrator_actions, text="Scarta", command=lambda: self.illustration_action("rejected")).pack(side="left", padx=8)
+        ttk.Button(illustrator_actions, text="Modifica proposta", command=self.edit_illustration).pack(side="left", padx=(0, 8))
         ttk.Button(illustrator_actions, text="Apri bozza", command=self.open_illustration).pack(side="left")
+        ttk.Button(illustrator_actions, text="Valida SVG modificato", command=self.revalidate_illustration).pack(side="left", padx=8)
         ttk.Button(illustrator_actions, text="Segna revisionata", command=lambda: self.illustration_action("approved")).pack(side="right")
+        ttk.Button(illustrator_actions, text="Esporta PDF con tavola", command=self.export_illustration).pack(side="right", padx=8)
         footer = ttk.Frame(main)
         footer.grid(row=3, column=0, sticky="ew", pady=(12, 0))
         ttk.Label(footer, textvariable=self.model).pack(anchor="w", pady=(0, 6))
@@ -428,11 +454,19 @@ class NativeWindow:
                 "questions_text": self.questions.get("1.0", "end-1c"),
                 "instructions": self.instructions.get("1.0", "end-1c")}
 
-    def save(self, action="save"):
-        data = self.data()
+    def save(self, action="save", extra=None, illustrator_enabled=None):
+        visible_data = self.data()
+        data = dict(visible_data, **(extra or {}))
         def done(detail):
-            self.dirty = self.data() != data
-            self.notice.set({"save": "Materia salvata.", "night": "Materia prenotata per il job delle 00:30. Il Mac deve essere acceso e sveglio.",
+            preference_error = None
+            if illustrator_enabled is not None:
+                try:
+                    disable_illustrations(self.app.root(detail["slug"]), not illustrator_enabled)
+                except (OSError, ValueError) as error:
+                    preference_error = str(error)
+            self.dirty = self.data() != visible_data
+            self.notice.set("Materia salvata, ma preferenza Illustrator non registrata: " + preference_error if preference_error else
+                            {"save": "Materia salvata.", "night": "Materia prenotata per il job delle 00:30. Il Mac deve essere acceso e sveglio.",
                              "now": "Preparazione normale avviata. L'ID del batch confermerà l'accettazione su OpenAI.",
                              "urgent": "Preparazione urgente avviata. L'ID della risposta confermerà l'accettazione su OpenAI."}[action])
             self.refresh()
@@ -450,7 +484,7 @@ class NativeWindow:
 
     def new_exam(self):
         if not self.permit_switch():
-            return
+            return False
         self.session.selected = None
         self.session.pending = {kind: [] for kind in KINDS}
         self.name.set("")
@@ -463,6 +497,131 @@ class NativeWindow:
         self.show_mode()
         self.notice.set("Inserisci la nuova materia e aggiungi i materiali.")
         self.refresh()
+        return True
+
+    def open_wizard(self):
+        from tkinter import filedialog, messagebox
+        from tkinter.scrolledtext import ScrolledText
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Nuova materia · procedura guidata")
+        dialog.geometry("810x630")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        values = {"name": self.tk.StringVar(), "short_title": self.tk.StringVar(),
+                  "exam_date": self.tk.StringVar(), "mode": self.tk.StringVar(value="completa"),
+                  "max_pages": self.tk.StringVar(value="100"), "execution": self.tk.StringVar(value="batch"),
+                  "illustrator_enabled": self.tk.BooleanVar(value=False)}
+        pending = {kind: [] for kind in KINDS}
+        notebook = self.ttk.Notebook(dialog)
+        notebook.pack(fill="both", expand=True, padx=14, pady=12)
+        pages = [self.ttk.Frame(notebook, padding=18) for _ in range(6)]
+        for page, title in zip(pages, ("1 Identità", "2 Obiettivo", "3 Materiali", "4 Produzione", "5 Grafica", "6 Riepilogo")):
+            notebook.add(page, text=title)
+        identity = pages[0]
+        identity.columnconfigure(1, weight=1)
+        for index, (label, key) in enumerate((("Nome della materia", "name"), ("Titolo breve (facoltativo)", "short_title"),
+                                               ("Data esame AAAA-MM-GG (facoltativa)", "exam_date"))):
+            self.ttk.Label(identity, text=label).grid(row=index, column=0, sticky="w", pady=10)
+            self.ttk.Entry(identity, textvariable=values[key]).grid(row=index, column=1, sticky="ew", padx=12, pady=10)
+        objective = pages[1]
+        self.ttk.Label(objective, text="Come vuoi studiare questa materia?").pack(anchor="w", pady=(0, 10))
+        self.ttk.Radiobutton(objective, text="Completa", variable=values["mode"], value="completa").pack(anchor="w")
+        self.ttk.Radiobutton(objective, text="Veloce · limite di pagine totali", variable=values["mode"], value="veloce").pack(anchor="w", pady=7)
+        self.ttk.Spinbox(objective, from_=1, to=1000, textvariable=values["max_pages"], width=9).pack(anchor="w", padx=25)
+        self.ttk.Label(objective, text="Il limite non garantisce copertura se le fonti sono insufficienti.").pack(anchor="w", pady=(8, 14))
+        self.ttk.Label(objective, text="Indicazioni per gli schemi (facoltative)").pack(anchor="w")
+        instructions = ScrolledText(objective, height=7, wrap="word")
+        instructions.pack(fill="both", expand=True, pady=5)
+        materials = pages[2]
+        self.ttk.Label(materials, text="Seleziona più file. Puoi anche salvare una bozza e aggiungerli dopo.").pack(anchor="w", pady=(0, 12))
+        counts = {}
+        for kind, title in (("materiali", "Sbobine e appunti"), ("domande", "Domande d'esame"), ("programma", "Programma ufficiale")):
+            bar = self.ttk.Frame(materials)
+            bar.pack(fill="x", pady=8)
+            counter = self.tk.StringVar(value="0 file")
+            counts[kind] = counter
+            def choose(k=kind, counter_var=counter):
+                paths = filedialog.askopenfilenames(parent=dialog, title="Seleziona " + k,
+                    filetypes=[("File supportati", " ".join("*" + suffix for suffix in sorted(SUPPORTED))), ("Tutti i file", "*")])
+                for raw in paths:
+                    path = Path(raw).resolve()
+                    if path not in pending[k]:
+                        pending[k].append(path)
+                counter_var.set(f"{len(pending[k])} file")
+            self.ttk.Button(bar, text="Aggiungi " + title.lower(), command=choose).pack(side="left")
+            self.ttk.Label(bar, textvariable=counter).pack(side="left", padx=16)
+            def clear(k=kind, counter_var=counter):
+                pending[k].clear()
+                counter_var.set("0 file")
+            self.ttk.Button(bar, text="Svuota", command=clear).pack(side="right")
+        production = pages[3]
+        self.ttk.Label(production, text="Scegli quando avviare. Salva bozza non invia nulla.").pack(anchor="w", pady=(0, 12))
+        for code, label in (("batch", "Normale · Batch OpenAI"), ("urgent", "Urgente · OpenAI a costo standard"),
+                            ("night", "Notturna · Batch alle 00:30, Mac acceso")):
+            self.ttk.Radiobutton(production, text=label, variable=values["execution"], value=code).pack(anchor="w", pady=7)
+        self.ttk.Label(production, text="Il primo PDF resta in attesa della tua approvazione. Il prezzo API non è stimato qui.",
+                       wraplength=690).pack(anchor="w", pady=22)
+        graphics = pages[4]
+        self.ttk.Checkbutton(graphics, text="Abilita proposte Medical Illustrator per questa materia",
+                             variable=values["illustrator_enabled"]).pack(anchor="w", pady=(0, 16))
+        self.ttk.Label(graphics, text="Le bozze SVG sono schematiche, locali e gratuite. Si generano solo quando le chiedi; "
+                       "richiedono revisione umana e non entrano automaticamente nel PDF.", wraplength=690).pack(anchor="w")
+        self.ttk.Label(graphics, text="Le immagini già presenti nelle fonti continuano a seguire il flusso esistente.",
+                       wraplength=690).pack(anchor="w", pady=12)
+        review = pages[5]
+        review_text = ScrolledText(review, wrap="word", state="disabled", height=15)
+        review_text.pack(fill="both", expand=True)
+        def show_review(_event=None):
+            if notebook.index(notebook.select()) != 5:
+                return
+            summary = (f"Materia: {values['name'].get().strip() or 'da inserire'}\n"
+                       f"Titolo breve: {values['short_title'].get().strip() or '—'}\n"
+                       f"Data esame: {values['exam_date'].get().strip() or '—'}\n"
+                       f"Obiettivo: {values['mode'].get()}"
+                       + (f" · massimo {values['max_pages'].get()} pagine" if values['mode'].get() == 'veloce' else "")
+                       + "\n" + "\n".join(f"{kind}: {len(paths)} file" for kind, paths in pending.items())
+                       + f"\nProduzione se avviata: {values['execution'].get()}\n"
+                       f"Medical Illustrator: {'abilitato' if values['illustrator_enabled'].get() else 'disattivato'}\n"
+                       "\nSalva bozza non chiama OpenAI. Avvia usa soltanto l'API OpenAI esistente.")
+            review_text.configure(state="normal")
+            review_text.delete("1.0", "end")
+            review_text.insert("1.0", summary)
+            review_text.configure(state="disabled")
+        notebook.bind("<<NotebookTabChanged>>", show_review)
+        buttons = self.ttk.Frame(dialog, padding=(14, 0, 14, 14))
+        buttons.pack(fill="x")
+        self.ttk.Button(buttons, text="Indietro", command=lambda: notebook.select(max(0, notebook.index(notebook.select()) - 1))).pack(side="left")
+        self.ttk.Button(buttons, text="Avanti", command=lambda: notebook.select(min(5, notebook.index(notebook.select()) + 1))).pack(side="left", padx=8)
+        def finish(start):
+            if start and notebook.index(notebook.select()) != 5:
+                notebook.select(5)
+                return
+            raw = {key: value.get() for key, value in values.items()}
+            raw["instructions"] = instructions.get("1.0", "end-1c")
+            try:
+                planned, files = validate_wizard(raw, pending, start=start)
+            except ValueError as error:
+                messagebox.showerror("Controlla il progetto", str(error), parent=dialog)
+                return
+            dialog.grab_release()
+            if not self.new_exam():
+                dialog.grab_set()
+                return
+            self.name.set(planned["name"])
+            self.mode.set(planned["mode"])
+            self.pages.set(str(planned["max_pages"] or 100))
+            self.instructions.insert("1.0", planned["instructions"])
+            self.show_mode()
+            for kind, paths in files.items():
+                self.session.add_files(kind, paths)
+            self.dirty = True
+            dialog.destroy()
+            action = ("save" if not start else "night" if planned["execution"] == "night"
+                      else "urgent" if planned["execution"] == "urgent" else "now")
+            self.save(action, extra={"short_title": planned["short_title"], "exam_date": planned["exam_date"]},
+                      illustrator_enabled=planned["illustrator_enabled"])
+        self.ttk.Button(buttons, text="Avvia dopo il salvataggio", command=lambda: finish(True)).pack(side="right")
+        self.ttk.Button(buttons, text="Salva bozza", command=lambda: finish(False)).pack(side="right", padx=8)
 
     def choose_exam(self, event=None):
         selection = self.exams.curselection()
@@ -504,6 +663,45 @@ class NativeWindow:
             if self.session.selected != slug:
                 return
         self.tabs.select(self.control_tab if control else self.input_tab)
+
+    def duplicate_home_settings(self):
+        selection = self.project_rows.selection()
+        if not selection:
+            self.notice.set("Seleziona una materia da cui copiare le impostazioni.")
+            return
+        from tkinter import simpledialog
+        name = simpledialog.askstring("Duplica impostazioni", "Nome della nuova materia (senza file né domande):", parent=self.root)
+        if name is None:
+            return
+        try:
+            slug = duplicate_settings(self.app, selection[0], name)
+        except (ValueError, OSError) as error:
+            self.notice.set(str(error))
+            return
+        self.notice.set("Nuova materia creata con sole impostazioni: " + slug + ". Aggiungi i materiali prima di avviare.")
+        self.refresh()
+        if self.project_rows.exists(slug):
+            self.project_rows.selection_set(slug)
+
+    def toggle_home_archive(self):
+        selection = self.project_rows.selection()
+        if not selection:
+            self.notice.set("Seleziona una materia da archiviare o riattivare.")
+            return
+        slug = selection[0]
+        archived = bool(self.app.detail(slug)["exam"].get("archived"))
+        from tkinter import messagebox
+        prompt = ("Riattivare questa materia? Non partiranno invii finché non premi Avvia."
+                  if archived else "Archiviare questa materia? I file restano sul disco e potrai riattivarla.")
+        if not messagebox.askyesno("Stato della materia", prompt, parent=self.root):
+            return
+        try:
+            result = set_archived(self.app, slug, not archived)
+        except (ValueError, OSError, BlockingIOError) as error:
+            self.notice.set(str(error))
+            return
+        self.notice.set("Materia archiviata e recuperabile." if result else "Materia riattivata come bozza; nessun invio avviato.")
+        self.refresh()
 
     def pick_files(self, kind):
         if self.local_busy:
@@ -665,6 +863,7 @@ class NativeWindow:
                                                   values=(row["schema_number"], row["concept_title"], row["status"]))
             if selected_illustration and self.illustrations.exists(selected_illustration[0]):
                 self.illustrations.selection_set(selected_illustration[0])
+            self.show_illustration_details()
         except Exception as error:
             self.notice.set("Errore: " + str(error))
 
@@ -717,6 +916,31 @@ class NativeWindow:
         area.insert("1.0", info)
         area.configure(state="disabled")
 
+    def show_coverage(self):
+        if not self.session.selected:
+            self.notice.set("Scegli una materia prima di confrontare il programma.")
+            return
+        try:
+            result = compare_coverage(self.app.root(self.session.selected))
+        except Exception as error:
+            self.notice.set("Confronto non disponibile: " + str(error))
+            return
+        lines = [result["message"], ""]
+        for row in result["rows"]:
+            lines.append(f"{row['topic']} · {row['hint']} · {row['source_count']} file materiali · {row['question_count']} domande")
+            if row["source_names"]:
+                lines.append("  Fonti nominate: " + "; ".join(row["source_names"]))
+        if not result["rows"]:
+            lines.append("Nessuna riga confrontabile al momento.")
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Programma e fonti · stima lessicale")
+        dialog.geometry("900x620")
+        from tkinter.scrolledtext import ScrolledText
+        area = ScrolledText(dialog, wrap="word", font=("Helvetica", 11))
+        area.pack(fill="both", expand=True, padx=12, pady=12)
+        area.insert("1.0", "\n".join(lines))
+        area.configure(state="disabled")
+
     def plan_illustrations(self):
         if not self.session.selected:
             self.illustrator_notice.set("Scegli una materia prima di cercare tavole.")
@@ -724,6 +948,134 @@ class NativeWindow:
         rows = plan_illustrations(self.app.root(self.session.selected))
         self.illustrator_notice.set(f"{len(rows)} proposte registrate. Le bozze sono schematiche e non entrano nei PDF automaticamente.")
         self.refresh()
+
+    def add_manual_illustration(self):
+        if not self.session.selected:
+            self.illustrator_notice.set("Scegli una materia prima di aggiungere una tavola.")
+            return
+        root = self.app.root(self.session.selected)
+        state = read_json(root / "state/pipeline.json", {})
+        jobs = state.get("jobs") or {}
+        options = {f"{number} · {jobs[key].get('title', 'Schema')}": int(number)
+                   for number, key in sorted((state.get("latest") or {}).items(), key=lambda pair: int(pair[0])) if key in jobs}
+        if not options:
+            self.illustrator_notice.set("Crea prima il piano degli schemi e i source pack.")
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Nuova tavola concettuale")
+        dialog.geometry("650x350")
+        frame = self.ttk.Frame(dialog, padding=16)
+        frame.pack(fill="both", expand=True)
+        schema = self.tk.StringVar(value=next(iter(options)))
+        title = self.tk.StringVar()
+        kind = self.tk.StringVar(value="structural")
+        goal = self.tk.StringVar()
+        for label, variable, widget in (("Schema", schema, "combo"), ("Titolo della tavola", title, "entry"),
+                                        ("Tipo di alterazione", kind, "type"), ("Obiettivo didattico", goal, "entry")):
+            self.ttk.Label(frame, text=label).pack(anchor="w", pady=(8, 2))
+            if widget == "combo":
+                self.ttk.Combobox(frame, textvariable=variable, values=list(options), state="readonly").pack(fill="x")
+            elif widget == "type":
+                self.ttk.Combobox(frame, textvariable=variable,
+                    values=("structural", "spatial_relations", "neural", "tissue", "vascular", "functional", "developmental", "temporal"),
+                    state="readonly").pack(fill="x")
+            else:
+                self.ttk.Entry(frame, textvariable=variable).pack(fill="x")
+        def save_manual():
+            try:
+                row = manual_illustration(root, options[schema.get()], title.get(), kind.get(), goal.get())
+            except (ValueError, OSError) as error:
+                self.illustrator_notice.set(str(error))
+                return
+            dialog.destroy()
+            self.illustrator_notice.set("Tavola proposta: " + row["concept_title"] + ". Accettala per creare la bozza SVG.")
+            self.refresh()
+            self.illustrations.selection_set(row["opportunity_id"])
+        self.ttk.Button(frame, text="Salva proposta locale", command=save_manual).pack(anchor="e", pady=14)
+
+    def edit_illustration(self):
+        selection = self.illustrations.selection()
+        if not selection or not self.session.selected:
+            self.illustrator_notice.set("Seleziona una proposta.")
+            return
+        root = self.app.root(self.session.selected)
+        row = next((item for item in list_opportunities(root) if item["opportunity_id"] == selection[0]), None)
+        if not row or row["status"] != "proposed":
+            self.illustrator_notice.set("La modifica è disponibile prima di accettare la proposta.")
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Modifica proposta")
+        dialog.geometry("680x440")
+        frame = self.ttk.Frame(dialog, padding=16)
+        frame.pack(fill="both", expand=True)
+        fields = {}
+        for key, label in (("concept_title", "Titolo"), ("learning_goal", "Obiettivo"),
+                           ("side_or_orientation", "Lato / orientamento"), ("region_of_interest", "Regione"),
+                           ("view_type", "Vista"), ("proposed_caption", "Didascalia proposta")):
+            value = self.tk.StringVar(value=row.get(key, ""))
+            fields[key] = value
+            self.ttk.Label(frame, text=label).pack(anchor="w", pady=(4, 0))
+            self.ttk.Entry(frame, textvariable=value).pack(fill="x")
+        def save_changes():
+            try:
+                edit_illustration_proposal(root, row["opportunity_id"], {key: variable.get() for key, variable in fields.items()})
+            except (ValueError, OSError) as error:
+                self.illustrator_notice.set(str(error))
+                return
+            dialog.destroy()
+            self.illustrator_notice.set("Proposta aggiornata. Accetta solo dopo aver verificato contenuto e fonti.")
+            self.refresh()
+        self.ttk.Button(frame, text="Salva modifiche", command=save_changes).pack(anchor="e", pady=12)
+
+    def revalidate_illustration(self):
+        selection = self.illustrations.selection()
+        if not selection or not self.session.selected:
+            self.illustrator_notice.set("Seleziona una bozza SVG.")
+            return
+        try:
+            row = revalidate_edited_svg(self.app.root(self.session.selected), selection[0])
+        except (ValueError, OSError) as error:
+            self.illustrator_notice.set(str(error))
+            return
+        self.illustrator_notice.set("SVG verificato tecnicamente. Stato: " + row["status"] + ". Ricontrolla la correttezza medica.")
+        self.refresh()
+
+    def export_illustration(self):
+        selection = self.illustrations.selection()
+        if not selection or not self.session.selected:
+            self.illustrator_notice.set("Seleziona una tavola approvata.")
+            return
+        try:
+            path = export_illustrated_pdf(self.app.root(self.session.selected), selection[0])
+        except Exception as error:
+            self.illustrator_notice.set(str(error))
+            return
+        self.illustrator_notice.set("PDF illustrato separato creato: " + path.name + ". Il PDF originale non è cambiato.")
+        self.refresh()
+        self.open_path(path)
+
+    def show_illustration_details(self, event=None):
+        selection = self.illustrations.selection()
+        row = None
+        if selection and self.session.selected:
+            row = next((item for item in list_opportunities(self.app.root(self.session.selected))
+                        if item["opportunity_id"] == selection[0]), None)
+        if row:
+            sources = "; ".join(f"{item.get('document') or 'fonte'} p. {item.get('page_start') or 'n/d'}"
+                                for item in row.get("source_references", [])) or "fonti da verificare"
+            content = (f"Obiettivo: {row['learning_goal']}\nTipi: {', '.join(row['lesion_types'])}\n"
+                       f"Vista: {row['view_type']} · {row['side_or_orientation']}\n"
+                       f"Regione: {row['region_of_interest']}\nFonti: {sources}\n"
+                       f"Motivo: {row['confidence_explanation']}\n"
+                       f"Costo aggiuntivo: {row['estimated_cost']} · {row['uncertainty']}\n"
+                       f"Licenza: {row.get('license_status', 'da verificare')}\n"
+                       f"Didascalia: {row['proposed_caption']}")
+        else:
+            content = "Seleziona una proposta per vedere motivazione, fonti, vista e revisione richiesta."
+        self.illustration_detail.configure(state="normal")
+        self.illustration_detail.delete("1.0", "end")
+        self.illustration_detail.insert("1.0", content)
+        self.illustration_detail.configure(state="disabled")
 
     def diagnostic_preview(self):
         if not self.session.selected:

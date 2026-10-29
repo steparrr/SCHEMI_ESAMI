@@ -5,6 +5,7 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from bottleneck_detector import detect
 from common import read_json
 from monitor import overview
 from telemetry import Telemetry
@@ -40,12 +41,13 @@ def snapshot(root: Path, worker_active=False):
             incidents.append({"kind": "schema", "number": job.get("numero"),
                               "status": job.get("status"), "detail": str(job["error"])[:300]})
     for batch in batches:
-        if batch.get("stage") in {"creating", "uncertain"} and not (batch.get("batch_id") or batch.get("response_id")):
-            incidents.append({"kind": "remote_uncertain", "status": batch.get("stage"),
-                              "detail": "Accettazione remota incerta: riconciliare, senza nuovo invio."})
-        elif batch.get("error"):
+        if batch.get("error"):
             incidents.append({"kind": "batch", "status": batch.get("status"),
                               "detail": str(batch["error"])[:300]})
+    for item in detect(root, state=state):
+        incidents.append({"kind": item["code"], "status": item["severity"],
+                          "detail": item["detail"], "suggestion": item["suggestion"],
+                          "number": item["number"]})
     pilot = state.get("pilot_review") or {}
     approved = bool(pilot.get("approved_hash") and pilot.get("approved_hash") == latest.get("1"))
     ready = bool(current and current[0].get("numero") == 1 and current[0].get("status") == "PDF_OK")
@@ -97,7 +99,9 @@ def format_snapshot(view):
                      f" · mediana {row['median_ms'] if row['median_ms'] is not None else 'n/d'} ms"
                      f" · massimo {row['max_ms'] if row['max_ms'] is not None else 'n/d'} ms")
     lines += ["", "Anomalie:"]
-    lines += [f"{i['kind']} · {i['status']} · {i['detail']}" for i in view["incidents"][:10]] or ["Nessuna anomalia registrata."]
+    lines += [f"{i['kind']} · {i['status']} · {i['detail']}"
+              + (" Azione: " + i["suggestion"] if i.get("suggestion") else "")
+              for i in view["incidents"][:10]] or ["Nessuna anomalia registrata."]
     lines += ["", "Ultimi eventi locali:"]
     lines += [f"{e['at']} · {e['stage']} · {e['name']} · {e['status'] or '—'} · "
               f"{e['duration_ms'] if e['duration_ms'] is not None else 'n/d'} ms"

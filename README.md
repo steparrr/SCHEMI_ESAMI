@@ -26,7 +26,8 @@ Per installare i sorgenti su Mac sono disponibili `INSTALLA.command` e
 Le funzioni locali aggiunte, i limiti e gli eventuali programmi facoltativi
 per Medical Illustrator sono descritti in [LEGGIMI-NATIVA.md](LEGGIMI-NATIVA.md).
 Medical Illustrator crea bozze SVG senza nuove API o software grafici; non
-inserisce automaticamente immagini nei PDF.
+inserisce automaticamente immagini nei PDF. Dopo una revisione esplicita può
+esportare una copia PDF separata con la tavola come appendice.
 
 ## Funzioni cloud
 

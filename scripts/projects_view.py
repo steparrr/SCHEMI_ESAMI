@@ -14,7 +14,9 @@ def project_cards(app, rows=None):
         jobs = state.get("jobs") or {}
         latest = state.get("latest") or {}
         pilot = state.get("pilot_review") or {}
-        if any(b.get("stage") in {"creating", "uncertain"} and not (b.get("batch_id") or b.get("response_id")) for b in batches):
+        if row.get("archived"):
+            phase = "Archiviata · riattivabile"
+        elif any(b.get("stage") in {"creating", "uncertain"} and not (b.get("batch_id") or b.get("response_id")) for b in batches):
             phase = "Invio incerto · riconciliare"
         elif any((b.get("batch_id") or b.get("response_id")) and not b.get("processed") for b in batches):
             phase = "OpenAI · stato osservato"
@@ -31,6 +33,7 @@ def project_cards(app, rows=None):
         checked = max((b.get("remote_checked_at") for b in batches if b.get("remote_checked_at")), default=None)
         cards.append({"slug": row["slug"], "name": row["name"], "ready": row["ready"],
                       "total": row["total"], "phase": phase, "last_remote_check": checked,
+                      "archived": row.get("archived", False), "exam_date": row.get("exam_date"),
                       "pilot_approved": bool(pilot.get("approved_hash") == latest.get("1") and latest.get("1")),
                       "active_batches": sum(bool(b.get("batch_id") or b.get("response_id")) and not b.get("processed") for b in batches)})
     return cards

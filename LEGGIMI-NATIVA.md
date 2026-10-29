@@ -18,23 +18,29 @@ un servizio cloud, che qui non è stato attivato.
 Se possiedi una cartella V2 già installata con `.venv`, puoi usare
 `AGGIORNA.command` direttamente dalla cartella dei nuovi sorgenti dopo aver
 chiuso la finestra V2 e il suo worker locale. Seleziona la cartella V2
-esistente quando
-viene richiesta. L'aggiornamento copia interfaccia e moduli di questa versione,
+esistente quando viene richiesta. L'aggiornamento copia interfaccia e moduli di questa versione,
 archivia i file sovrascritti in `state/aggiornamenti-nativa/` e conserva
 `esami/`, `config/`, le risposte e i PDF. Non aggiorna automaticamente una
 vecchia app `.app` compilata; per quella serve una build macOS separata.
 
 ## Nuove funzioni
 
-- **Progetti**: stato delle materie, PDF pronti e invii incerti.
+- **Progetti**: stato delle materie, PDF pronti e invii incerti. «Nuova materia
+  guidata» accompagna identità, obiettivo, materiali, produzione, grafica e
+  riepilogo prima dell'avvio. Puoi duplicare le sole impostazioni, senza
+  materiali o credenziali, e archiviare una materia senza cancellarne i file.
 - **Materiali e domande**: file nelle tre aree, stato di indicizzazione e
-  anteprima locale del testo estratto.
-- **Control Room**: schemi correnti, batch, anomalie, durate locali misurate,
+  anteprima locale del testo estratto. «Confronta programma» mostra solo
+  corrispondenze lessicali indicative nelle fonti già indicizzate.
+- **Control Room**: schemi correnti, batch, avvisi conservativi, durate locali misurate,
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
 - **Schemi e PDF**: controllo visivo manuale delle pagine sospette.
-- **Medical Illustrator**: cerca proposte nelle fonti, crea bozze SVG
-  schematiche, le apre per revisione e registra la decisione. Le bozze non
-  entrano automaticamente nei PDF e non sono clinicamente validate.
+- **Medical Illustrator**: cerca proposte nelle fonti o permette di aggiungerne
+  una manualmente, modifica il piano e crea bozze SVG schematiche. Se modifichi
+  l'SVG, rivalidalo tecnicamente e ripeti la revisione. Dopo l'approvazione
+  puoi esportare **una copia PDF separata** con la tavola come appendice, se
+  rispetta il limite di pagine. Il PDF originale e `PDF_OK` non cambiano. Le
+  tavole non sono clinicamente validate da uno specialista.
 
 La generazione del testo continua a usare esclusivamente l'API OpenAI già
 configurata. Aprire Progetti, Control Room, Materiali o Illustrator non invia
@@ -46,7 +52,8 @@ continuano a poter usare l'API.
 **Per Medical Illustrator di questa versione non serve installare Inkscape,
 Blender, 3D Slicer, ImageMagick o un modello di immagini.** SVG è prodotto con
 Python standard, senza API grafiche. Inkscape è facoltativo se vuoi modificare
-manualmente le bozze vettoriali. Blender e 3D Slicer servirebbero solo per
+manualmente le bozze vettoriali; il file modificato deve poi superare i
+controlli SVG del programma. Blender e 3D Slicer servirebbero solo per
 futuri flussi 3D o segmentazioni con dati e licenze appropriati.
 
 Per PDF scansionati e fotografie, l'OCR richiede il helper `mac-ocr` incluso
