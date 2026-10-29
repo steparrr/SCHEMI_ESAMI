@@ -1371,7 +1371,8 @@ class NativeWindow:
         dialog.geometry("1000x760")
         frame = self.ttk.Frame(dialog, padding=12)
         frame.pack(fill="both", expand=True)
-        self.ttk.Label(frame, text="Avvisi da verificare a vista; non modificano il PDF né lo stato PDF_OK.").pack(anchor="w")
+        self.ttk.Label(frame, text="Avvisi da verificare a vista; non modificano il PDF né lo stato PDF_OK. Per leggere i dettagli apri il PDF originale.",
+                       wraplength=920).pack(anchor="w")
         pages = self.tk.Listbox(frame, height=7, exportselection=False)
         pages.pack(fill="x", pady=8)
         def page_label(item):
@@ -1392,9 +1393,21 @@ class NativeWindow:
             review_state.set("Revisione visiva: " + (saved.get("decision") or "non registrata")
                              + (" · " + saved["note"] if saved.get("note") else ""))
             import fitz
-            with fitz.open(path) as document:
-                pixmap = document[choice[0]].get_pixmap(matrix=fitz.Matrix(0.8, 0.8), alpha=False)
-                data = base64.b64encode(pixmap.tobytes("png")).decode("ascii")
+            try:
+                stat = path.stat()
+                if (stat.st_size, stat.st_mtime_ns) != (result["file_size"], result["file_mtime_ns"]):
+                    raise ValueError("Il PDF è cambiato; chiudi e ripeti il controllo visivo.")
+                with fitz.open(path) as document:
+                    page = document[choice[0]]
+                    if page.rect.width <= 0 or page.rect.height <= 0:
+                        raise ValueError("Dimensioni della pagina non valide.")
+                    scale = min(1.0, 900 / page.rect.width, 400 / page.rect.height)
+                    pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
+                    data = base64.b64encode(pixmap.tobytes("png")).decode("ascii")
+            except (OSError, RuntimeError, ValueError, IndexError) as error:
+                preview.configure(image="", text="Anteprima non disponibile: " + str(error))
+                preview.image = None
+                return
             image = self.tk.PhotoImage(data=data)
             preview.configure(image=image, text="")
             preview.image = image
