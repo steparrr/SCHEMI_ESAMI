@@ -7,6 +7,60 @@ import tempfile
 from pathlib import Path
 
 
+def prepare_demo(project: Path):
+    """Create a disposable exam with visible PDF and illustration states."""
+    import fitz
+    from common import read_json, write_json
+    from local_app import App
+    from medical_illustrator import plan, transition
+
+    def blocked_api(_config):
+        raise RuntimeError("Verifica Mac: nessuna chiamata API consentita.")
+
+    app = App(project, api_factory=blocked_api)
+    slug = app.save_exam({"name": "Materia dimostrativa", "mode": "completa", "active": False})
+    exam = app.root(slug)
+    source = exam / "input/sbobine/Fonte dimostrativa.txt"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("Tunnel carpale e nervo mediano. Frattura ossea: confronto schematico di prova.\n",
+                      encoding="utf-8")
+    sample = exam / "output/pdf/verifica.pdf"
+    sample.parent.mkdir(parents=True, exist_ok=True)
+    with fitz.open() as document:
+        page = document.new_page()
+        page.insert_text((72, 90), "Prova locale: testo PDF leggibile.")
+        document.save(sample)
+    with fitz.open(sample) as saved:
+        if saved.page_count != 1 or "Prova locale" not in saved[0].get_text():
+            raise RuntimeError("PyMuPDF non riesce a rileggere il PDF di prova.")
+
+    key = "a" * 64
+    pack = exam / "source_packs/dimostrazione.json"
+    write_json(pack, {"scheme": {"numero": 1, "titolo": "Tunnel carpale e frattura",
+                                 "keywords": ["tunnel carpale", "frattura"]},
+                      "chunks": [{"text": "Tunnel carpale e nervo mediano.",
+                                  "document_name": source.name, "page_start": 1, "page_end": 1},
+                                 {"text": "Frattura ossea: schema di prova.",
+                                  "document_name": source.name, "page_start": 1, "page_end": 1}]})
+    write_json(exam / "state/pipeline.json", {
+        "version": 1, "jobs": {key: {"hash": key, "kind": "schema", "numero": 1,
+                                    "title": "Tunnel carpale e frattura", "status": "PDF_OK",
+                                    "pack": str(pack.relative_to(exam)), "retry_count": 0,
+                                    "pdf": str(sample.relative_to(exam)),
+                                    "public_pdf": str(sample.relative_to(exam))}},
+        "latest": {"1": key}, "batches": []})
+    write_json(exam / "output/reports/pipeline_report.json", {
+        "revision": read_json(exam / "esame.json").get("revision", 0),
+        "input_status": "PROVA LOCALE · nessuna API", "planning": [], "exports": {},
+        "rows": [{"numero": 1, "title": "Tunnel carpale e frattura", "status": "PDF_OK",
+                  "public_pdf": str(sample.relative_to(exam))}]})
+    proposals = plan(exam)
+    if len(proposals) != 2:
+        raise RuntimeError("La prova non ha preparato le due tavole schematiche attese.")
+    transition(exam, proposals[0]["opportunity_id"], "accepted")
+    return app
+
+
 def main():
     if sys.platform != "darwin":
         raise RuntimeError("La verifica della finestra richiede macOS.")
@@ -14,8 +68,6 @@ def main():
         raise RuntimeError("Serve Python 3.12 o successivo.")
 
     import tkinter as tk
-    import fitz
-    from local_app import App
     from native_app import NativeWindow
 
     source = Path(__file__).resolve().parents[1]
@@ -25,20 +77,7 @@ def main():
         (project / "esami").mkdir()
         (project / "state").mkdir()
 
-        def blocked_api(_config):
-            raise RuntimeError("Verifica Mac: nessuna chiamata API consentita.")
-
-        app = App(project, api_factory=blocked_api)
-        app.save_exam({"name": "Materia dimostrativa", "mode": "completa", "active": False})
-        sample = project / "esami/materia-dimostrativa/output/pdf/verifica.pdf"
-        document = fitz.open()
-        page = document.new_page()
-        page.insert_text((72, 90), "Prova locale: testo PDF leggibile.")
-        document.save(sample)
-        document.close()
-        with fitz.open(sample) as saved:
-            if saved.page_count != 1 or "Prova locale" not in saved[0].get_text():
-                raise RuntimeError("PyMuPDF non riesce a rileggere il PDF di prova.")
+        app = prepare_demo(project)
 
         class SmokeWindow(NativeWindow):
             def set_api_key(self):

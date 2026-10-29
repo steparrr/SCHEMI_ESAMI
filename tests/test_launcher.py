@@ -37,6 +37,28 @@ class LauncherTests(unittest.TestCase):
             with patch.object(Path, "home", return_value=home), patch.object(sys, "executable", str(current)):
                 self.assertEqual(native.worker_executable(home / "missing.plist"), current.resolve())
 
+    def test_system_app_is_kept_when_opening_a_preview_build(self):
+        with tempfile.TemporaryDirectory() as folder:
+            home = Path(folder) / "home"
+            system_apps = Path(folder) / "system-Applications"
+            installed = system_apps / "Schemi Esami.app/Contents/MacOS/Schemi Esami"
+            preview = Path(folder) / "dist/Schemi Esami.app/Contents/MacOS/Schemi Esami"
+            installed.parent.mkdir(parents=True)
+            preview.parent.mkdir(parents=True)
+            installed.touch()
+            preview.touch()
+            agent = home / "Library/LaunchAgents/it.schemi-esami.worker.plist"
+            agent.parent.mkdir(parents=True)
+            agent.write_bytes(plistlib.dumps({"ProgramArguments": [str(installed), "--worker"]}))
+            with patch.object(Path, "home", return_value=home), \
+                 patch.object(native, "application_roots", return_value=(home / "Applications", system_apps)), \
+                 patch.object(sys, "executable", str(preview)):
+                self.assertEqual(native.worker_executable(agent), installed.resolve())
+                agent.unlink()
+                self.assertEqual(native.worker_executable(agent), installed.resolve())
+                with patch.object(sys, "executable", str(installed)):
+                    self.assertEqual(native.worker_executable(agent), installed.resolve())
+
     def test_source_launch_agent_uses_venv_and_a_separate_label(self):
         with tempfile.TemporaryDirectory() as folder:
             home = Path(folder) / "home"

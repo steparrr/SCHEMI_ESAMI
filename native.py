@@ -49,24 +49,28 @@ def bootstrap():
     return project
 
 
+def application_roots():
+    return (Path.home() / "Applications", Path("/Applications"))
+
+
 def worker_executable(agent_path):
     """Keep the login item attached to an installed app, not a ZIP preview."""
     current = Path(sys.executable).resolve()
-    applications = (Path.home() / "Applications").resolve()
-    if current.is_relative_to(applications):
+    applications = tuple(root.resolve() for root in application_roots())
+    if any(current.is_relative_to(root) for root in applications):
         return current
     if agent_path.is_file():
         try:
             previous = Path(plistlib.loads(agent_path.read_bytes())["ProgramArguments"][0]).resolve()
-            if previous.is_file() and previous.is_relative_to(applications):
+            if previous.is_file() and any(previous.is_relative_to(root) for root in applications):
                 return previous
         except (KeyError, IndexError, OSError, ValueError, TypeError):
             pass
-    installed = sorted(applications.glob("Schemi Esami*.app"), reverse=True)
-    for bundle in installed:
-        candidate = bundle / "Contents/MacOS/Schemi Esami"
-        if candidate.is_file():
-            return candidate.resolve()
+    for root in applications:
+        for bundle in sorted(root.glob("Schemi Esami*.app"), reverse=True):
+            candidate = bundle / "Contents/MacOS/Schemi Esami"
+            if candidate.is_file():
+                return candidate.resolve()
     return current
 
 

@@ -11,6 +11,8 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / "scripts"))
 from common import read_json, write_json
 from local_app import App
+from mac_smoke import prepare_demo
+from medical_illustrator import list_opportunities
 from model_settings import effective_profile_sources, format_effective_profile, save_default_profile
 from native_app import NativeSession, diagnostics
 from project_wizard import validate_wizard
@@ -153,6 +155,25 @@ class NativeTests(unittest.TestCase):
         archived = list((target / "state/aggiornamenti-nativa").rglob("APRI.command"))
         self.assertEqual(len(archived), 1)
         self.assertEqual(archived[0].read_text(), "# Launcher precedente\n")
+
+    def test_mac_demo_exposes_local_pdf_and_illustrator_without_api(self):
+        project = self.base / "demo"
+        shutil.copytree(PROJECT / "config", project / "config")
+        app = prepare_demo(project)
+        try:
+            slug = app.list_exams()[0]["slug"]
+            root = app.root(slug)
+            self.assertFalse(app.detail(slug)["exam"]["attivo"])
+            self.assertEqual(app.list_exams()[0]["ready"], 1)
+            self.assertTrue((root / "output/pdf/verifica.pdf").is_file())
+            rows = list_opportunities(root)
+            self.assertEqual({row["status"] for row in rows}, {"proposed", "medical_review_needed"})
+            draft = next(row for row in rows if row["status"] == "medical_review_needed")
+            self.assertTrue((root / draft["artifact"]).is_file())
+            with self.assertRaisesRegex(RuntimeError, "nessuna chiamata API"):
+                app.api_factory({})
+        finally:
+            app.stop.set()
 
     def test_wizard_validates_before_create_and_persists_optional_identity(self):
         values = {"name": "Ginecologia sintesi", "short_title": "Ginecologia", "exam_date": "2027-01-15",
