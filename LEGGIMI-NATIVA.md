@@ -45,6 +45,8 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   conservate nei job; il dato è parziale e per la spesa reale va consultata la
   dashboard OpenAI. Attesa OpenAI e revisione del primo PDF non sono stimate;
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
+  «Panoramica di tutte le materie» elenca stati e avvisi locali per progetto
+  senza eseguire un controllo remoto.
 - **Schemi e PDF**: controllo visivo manuale delle pagine sospette e report
   tecnico locale in `output/reports/visual/`. Il programma segnala i riquadri
   opachi disegnati sopra il testo; uno sfondo dietro il testo non genera lo

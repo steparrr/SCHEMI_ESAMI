@@ -5,11 +5,13 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
-from control_room import snapshot, format_snapshot, observed_token_usage, summarize_performance
+from control_room import (snapshot, format_snapshot, format_global_snapshot, global_snapshot,
+                          observed_token_usage, summarize_performance)
 from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
 from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, preview_svg, revalidate_edited_svg,
@@ -103,6 +105,21 @@ class LocalInnovationsTests(unittest.TestCase):
         display = format_snapshot(view)
         self.assertIn("input 1,225", display)
         self.assertIn("Dato parziale, non spesa fatturata", display)
+
+    def test_global_control_room_keeps_project_incidents_separate(self):
+        row = {"slug": "neurologia", "name": "Neurologia", "ready": 0, "total": 1,
+               "busy": False, "scheduled": False, "archived": False,
+               "favorite": False, "exam_date": None, "mode": "completa"}
+        app = SimpleNamespace(list_exams=lambda: [row], root=lambda slug: self.root)
+        projects = global_snapshot(app)
+        self.assertEqual(len(projects), 1)
+        self.assertEqual((projects[0]["ready"], projects[0]["total"]), (0, 1))
+        self.assertTrue(any(item["code"] == "REMOTE_ACCEPTANCE_UNCERTAIN"
+                            for item in projects[0]["incidents"]))
+        display = format_global_snapshot(projects)
+        self.assertIn("Neurologia · PDF 0/1", display)
+        self.assertIn("nessun controllo OpenAI eseguito", display)
+        self.assertIn("REMOTE_ACCEPTANCE_UNCERTAIN", display)
 
     def test_control_room_eta_uses_only_existing_local_html_and_comparable_events(self):
         state = read_json(self.root / "state/pipeline.json")

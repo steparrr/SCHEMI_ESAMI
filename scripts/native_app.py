@@ -13,7 +13,7 @@ from pathlib import Path
 
 from common import PROJECT, read_json, write_json
 from coverage_matrix import compare as compare_coverage
-from control_room import format_snapshot, snapshot
+from control_room import format_global_snapshot, format_snapshot, global_snapshot, snapshot
 from diagnostic_report import build_sections, export as export_diagnostic, preview as preview_diagnostic
 from local_app import App, KINDS, MAX_FILE_BYTES, edit_lock, save_api_key
 from local_recovery import recover_local
@@ -334,6 +334,7 @@ class NativeWindow:
         ttk.Button(control_actions, text="Aggiorna dati locali", command=self.refresh).pack(side="right")
         ttk.Button(control_actions, text="Anteprima report diagnostico", command=self.diagnostic_preview).pack(side="right", padx=8)
         ttk.Button(control_actions, text="Recupera solo PDF locali", command=self.recover_local_pdfs).pack(side="right", padx=8)
+        ttk.Button(self.control_tab, text="Panoramica di tutte le materie", command=self.show_global_control).pack(anchor="w", pady=(0, 8))
         self.control_tabs = ttk.Notebook(self.control_tab)
         self.control_tabs.pack(fill="both", expand=True)
         self.control_overview = ttk.Frame(self.control_tabs)
@@ -969,6 +970,21 @@ class NativeWindow:
         self.control_job_detail.delete("1.0", "end")
         self.control_job_detail.insert("1.0", "\n".join(lines))
         self.control_job_detail.configure(state="disabled")
+
+    def show_global_control(self):
+        try:
+            body = format_global_snapshot(global_snapshot(self.app))
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.notice.set("Panoramica non disponibile: " + str(error))
+            return
+        dialog = self.tk.Toplevel(self.root)
+        dialog.title("Control Room · tutte le materie")
+        dialog.geometry("880x620")
+        from tkinter.scrolledtext import ScrolledText
+        area = ScrolledText(dialog, wrap="word", font=("Helvetica", 11))
+        area.pack(fill="both", expand=True, padx=12, pady=12)
+        area.insert("1.0", body)
+        area.configure(state="disabled")
 
     def preview_material(self):
         selection = self.files.selection()

@@ -10,6 +10,7 @@ from common import read_json
 from local_eta import estimate_local_rendering
 from monitor import overview
 from pipeline import render_signature
+from projects_view import project_cards
 from telemetry import Telemetry
 
 
@@ -62,6 +63,32 @@ def observed_token_usage(jobs):
         totals["cached_input_tokens"] += cached
         totals["jobs_with_usage"] += 1
     return totals
+
+
+def global_snapshot(app):
+    """Read all local projects and conservative incidents without remote checks."""
+    projects = []
+    for card in project_cards(app):
+        incidents = detect(app.root(card["slug"]))
+        projects.append({"slug": card["slug"], "name": card["name"],
+                         "phase": card["phase"], "ready": card["ready"],
+                         "total": card["total"], "last_remote_check": card["last_remote_check"],
+                         "incidents": incidents})
+    return projects
+
+
+def format_global_snapshot(projects):
+    lines = [f"Materie locali: {len(projects)}", "Stati e avvisi letti dal disco; nessun controllo OpenAI eseguito.", ""]
+    for project in projects:
+        lines.append(f"{project['name']} · PDF {project['ready']}/{project['total']} · {project['phase']}")
+        lines.append("  Ultimo controllo remoto registrato: " + (project["last_remote_check"] or "mai"))
+        if project["incidents"]:
+            lines.extend(f"  {item['severity']} · {item['code']} · {item['detail']}"
+                         for item in project["incidents"])
+        else:
+            lines.append("  Nessun avviso rilevato.")
+        lines.append("")
+    return "\n".join(lines).rstrip()
 
 
 def snapshot(root: Path, worker_active=False):
