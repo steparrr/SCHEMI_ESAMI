@@ -78,6 +78,24 @@ class LocalInnovationsTests(unittest.TestCase):
         Telemetry(self.root).record("pdf_render_completed", "pdf_render", status="success", duration_ms=25)
         self.assertEqual(snapshot(self.root)["performance"][0]["median_ms"], 25)
 
+    def test_control_room_eta_uses_only_existing_local_html_and_comparable_events(self):
+        state = read_json(self.root / "state/pipeline.json")
+        state["batches"] = []
+        state["jobs"][self.key].update(page_budget=28, html="output/raw/current.html")
+        write_json(self.root / "state/pipeline.json", state)
+        for index in range(20):
+            Telemetry(self.root).record("pdf_render_completed", "pdf_render", status="success",
+                                        duration_ms=1000 * (index + 1),
+                                        metrics={"pages": 28, "renderer_signature": "b" * 64})
+        with patch("control_room.render_signature", return_value="b" * 64):
+            self.assertEqual(snapshot(self.root)["local_eta"]["status"], "unavailable")
+            html = self.root / "output/raw/current.html"
+            html.parent.mkdir(parents=True)
+            html.write_text("<article>test</article>")
+            view = snapshot(self.root)
+        self.assertEqual(view["local_eta"]["status"], "estimated")
+        self.assertIn("Impaginazione locale stimata", format_snapshot(view))
+
     def test_illustration_remains_optional_and_requires_review(self):
         rows = plan(self.root)
         self.assertEqual(len(rows), 1)

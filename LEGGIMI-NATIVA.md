@@ -34,7 +34,9 @@ vecchia app `.app` compilata; per quella serve una build macOS separata.
   anteprima locale del testo estratto. «Confronta programma» mostra solo
   corrispondenze lessicali indicative nelle fonti già indicizzate.
 - **Control Room**: schemi correnti, batch, avvisi conservativi, durate locali misurate,
-  p90/p95 descrittivi quando esistono almeno 20 misure per fase,
+  p90/p95 descrittivi quando esistono almeno 20 misure per fase e stima indicativa
+  della sola impaginazione locale quando ci sono almeno 20 rendering comparabili
+  della stessa versione. Attesa OpenAI e revisione del primo PDF non sono stimate,
   report diagnostico con anteprima completa e recupero dei soli PDF locali.
 - **Schemi e PDF**: controllo visivo manuale delle pagine sospette e report
   tecnico locale in `output/reports/visual/`. Il programma segnala i riquadri

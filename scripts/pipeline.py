@@ -519,8 +519,10 @@ class Pipeline:
                 (self.root / job["pdf"]).parent.mkdir(parents=True, exist_ok=True)
                 job.update(status="RENDERING", render_started_at=now())
                 self.save()
-                with self.telemetry.span("pdf_render", request_hash=job["hash"]):
+                render_metrics = {"renderer_signature": signature}
+                with self.telemetry.span("pdf_render", request_hash=job["hash"], metrics=render_metrics):
                     qc = self.render(self.root, job, self.cfg, self.project)
+                    render_metrics["pages"] = qc["pages"]
                 if job.get("page_budget") and qc["pages"] > job["page_budget"]:
                     self.shorten(job, qc["pages"])
                     self.save()

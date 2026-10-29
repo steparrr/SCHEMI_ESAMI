@@ -33,6 +33,19 @@ class TelemetryTests(unittest.TestCase):
                     raise RuntimeError("renderer failed")
             self.assertEqual(telemetry.recent()[0]["status"], "failure")
 
+    def test_completed_render_records_actual_pages_and_only_valid_renderer_hash(self):
+        with tempfile.TemporaryDirectory() as temp:
+            telemetry = Telemetry(Path(temp) / "materia")
+            metrics = {"renderer_signature": "a" * 64, "unsafe": "not logged"}
+            with telemetry.span("pdf_render", metrics=metrics):
+                metrics["pages"] = 28
+            completed, started = telemetry.recent()
+            self.assertEqual(json.loads(started["metrics_json"]), {"renderer_signature": "a" * 64})
+            self.assertEqual(json.loads(completed["metrics_json"]),
+                             {"renderer_signature": "a" * 64, "pages": 28})
+            self.assertTrue(telemetry.record("test_completed", "test", metrics={"renderer_signature": "not-a-hash"}))
+            self.assertEqual(json.loads(telemetry.recent()[0]["metrics_json"]), {})
+
     def test_unavailable_database_does_not_interrupt_work(self):
         with tempfile.TemporaryDirectory() as temp:
             telemetry = Telemetry(Path(temp) / "materia")

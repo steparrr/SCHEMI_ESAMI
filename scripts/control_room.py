@@ -7,7 +7,9 @@ from pathlib import Path
 
 from bottleneck_detector import detect
 from common import read_json
+from local_eta import estimate_local_rendering
 from monitor import overview
+from pipeline import render_signature
 from telemetry import Telemetry
 
 
@@ -53,6 +55,13 @@ def snapshot(root: Path, worker_active=False):
     batches = state.get("batches") or []
     events = Telemetry(root).recent(1000)
     performance = summarize_performance(events)
+    signature = None
+    if any(job.get("status") == "HTML_OK" for job in current):
+        try:
+            signature = render_signature(root.parent.parent)
+        except (OSError, ValueError):
+            pass
+    eta = estimate_local_rendering(current, batches, latest, state.get("pilot_review") or {}, events, signature, root=root)
     incidents = []
     for job in current:
         if job.get("error"):
@@ -87,7 +96,7 @@ def snapshot(root: Path, worker_active=False):
                      "stage": batch.get("stage"), "status": batch.get("status"),
                      "counts": batch.get("request_counts") or {}, "checked_at": batch.get("remote_checked_at")}
                     for batch in batches],
-        "performance": performance, "incidents": incidents,
+        "performance": performance, "incidents": incidents, "local_eta": eta,
         "events": [{"at": e["recorded_at_utc"], "stage": e["stage"], "name": e["event_name"],
                     "status": e["status"], "duration_ms": e["duration_ms"],
                     "hash": (e["request_hash"] or "")[:12]} for e in events[:100]],
@@ -97,12 +106,17 @@ def snapshot(root: Path, worker_active=False):
 
 def format_snapshot(view):
     counts = view["counts"]
+    eta = view["local_eta"]
+    eta_line = (f"Impaginazione locale stimata: {max(1, round(eta['low_ms'] / 1000))}–"
+                f"{max(1, round(eta['high_ms'] / 1000))} secondi per gli schemi restanti "
+                f"(almeno {eta['samples_min']} misure comparabili). {eta['reason']}"
+                if eta["status"] == "estimated" else "Impaginazione locale: " + eta["reason"])
     lines = [f"{view['name']} · {view['execution_mode']}",
              f"PDF pronti {counts['pdf_ok']}/{counts['total']} · HTML pronti {counts['html_ok']}/{counts['total']}",
              f"Batch accettati {counts['accepted_batches']} · in attesa locale {counts['waiting_batches']}",
              "Pilota: " + ("approvato" if view["pilot"]["approved"] else
                            "pronto per revisione" if view["pilot"]["ready_for_review"] else "in attesa"),
-             "", "Mac → OpenAI → Mac", view["summary"]["local"], view["summary"]["server"],
+             eta_line, "", "Mac → OpenAI → Mac", view["summary"]["local"], view["summary"]["server"],
              view["summary"]["finish"], "", "Schemi correnti:"]
     lines += [f"{j['number']:02d} · {j['title']} · {j['status']} · hash {j['hash']} · retry {j['retry']}"
               for j in view["jobs"] if isinstance(j["number"], int)]

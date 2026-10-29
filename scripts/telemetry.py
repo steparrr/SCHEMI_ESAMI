@@ -19,6 +19,7 @@ SCHEMA_VERSION = 1
 _NAME = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 _HASH = re.compile(r"^[0-9a-f]{64}$")
 _METRICS = {"bytes", "pages", "images", "requests", "completed", "failed", "pdfs"}
+_HASH_METRICS = {"renderer_signature"}
 
 
 def _utc_now():
@@ -68,6 +69,8 @@ class Telemetry:
             return False
         safe_metrics = {key: value for key, value in (metrics or {}).items()
                         if key in _METRICS and type(value) in (int, float) and math.isfinite(value) and value >= 0}
+        safe_metrics.update({key: value for key, value in (metrics or {}).items()
+                             if key in _HASH_METRICS and isinstance(value, str) and _HASH.fullmatch(value)})
         try:
             db = self._connect()
             try:
