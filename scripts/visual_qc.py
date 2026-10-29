@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 
 import fitz
 
-from common import write_json
+from common import read_json, write_json
 
 
 def inspect_visual(path: Path, max_pages=250):
@@ -53,8 +54,7 @@ def inspect_visual(path: Path, max_pages=250):
     return result
 
 
-def export_visual_report(root: Path, path: Path, result: dict):
-    """Save a local technical report with no source text or PDF alteration."""
+def _fingerprint(root: Path, path: Path, result: dict):
     root, path = Path(root).resolve(), Path(path).resolve()
     if not path.is_relative_to((root / "output/pdf").resolve()) or path.suffix.lower() != ".pdf":
         raise ValueError("Seleziona un PDF della materia.")
@@ -68,10 +68,51 @@ def export_visual_report(root: Path, path: Path, result: dict):
     after = path.stat()
     if (after.st_size, after.st_mtime_ns) != (before.st_size, before.st_mtime_ns):
         raise ValueError("Il PDF è cambiato prima di esportare il report.")
-    report = {"version": 1, "pdf": str(path.relative_to(root)), "pdf_sha256": hasher.hexdigest(),
+    return root, path, hasher.hexdigest()
+
+
+def export_visual_report(root: Path, path: Path, result: dict):
+    """Save a local technical report with no source text or PDF alteration."""
+    root, path, pdf_hash = _fingerprint(root, path, result)
+    report = {"version": 1, "pdf": str(path.relative_to(root)), "pdf_sha256": pdf_hash,
               "pages_checked": len(result["pages"]), "truncated": result["truncated"],
               "pages": result["pages"]}
     folder = root / "output/reports/visual"
-    destination = folder / f"visual_{hasher.hexdigest()[:16]}_{len(result['pages'])}.json"
+    destination = folder / f"visual_{pdf_hash[:16]}_{len(result['pages'])}.json"
     write_json(destination, report)
     return destination
+
+
+def load_visual_reviews(root: Path, path: Path, result: dict):
+    root, path, pdf_hash = _fingerprint(root, path, result)
+    saved = read_json(root / "output/reports/visual" / f"review_{pdf_hash}.json", {})
+    return saved["pages"] if isinstance(saved, dict) and saved.get("pdf_sha256") == pdf_hash and isinstance(saved.get("pages"), dict) else {}
+
+
+def mark_visual_review(root: Path, path: Path, result: dict, page_number: int,
+                       decision: str, note: str = ""):
+    """Record a user observation for this exact PDF; never change pipeline state."""
+    if decision not in {"verified", "false_positive"}:
+        raise ValueError("Decisione di revisione visiva non valida.")
+    if type(page_number) is not int or not 1 <= page_number <= len(result.get("pages") or []):
+        raise ValueError("Pagina da revisionare non valida.")
+    page = result["pages"][page_number - 1]
+    if page.get("page") != page_number:
+        raise ValueError("La numerazione delle pagine non corrisponde.")
+    note = str(note).strip()
+    if len(note) > 500 or (decision == "false_positive" and (not page.get("warnings") or len(note) < 5)):
+        raise ValueError("Per un falso positivo indica il motivo (5–500 caratteri) e seleziona una pagina con avvisi.")
+    root, path, pdf_hash = _fingerprint(root, path, result)
+    destination = root / "output/reports/visual" / f"review_{pdf_hash}.json"
+    saved = read_json(destination, {})
+    if not isinstance(saved, dict):
+        raise ValueError("Il file di revisione visiva locale non è valido.")
+    if saved and (saved.get("pdf_sha256") != pdf_hash or not isinstance(saved.get("pages"), dict)):
+        raise ValueError("La revisione salvata non corrisponde al PDF corrente.")
+    saved = saved or {"version": 1, "pdf": str(path.relative_to(root)),
+                      "pdf_sha256": pdf_hash, "pages": {}}
+    saved["pages"][str(page_number)] = {"decision": decision, "note": note,
+                                         "warnings": list(page.get("warnings") or []),
+                                         "reviewed_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    write_json(destination, saved)
+    return saved["pages"][str(page_number)]

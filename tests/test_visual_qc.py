@@ -9,7 +9,8 @@ import json
 import fitz
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from visual_qc import export_visual_report, inspect_visual
+from visual_qc import (export_visual_report, inspect_visual, load_visual_reviews,
+                       mark_visual_review)
 
 
 class VisualQualityTests(unittest.TestCase):
@@ -64,6 +65,26 @@ class VisualQualityTests(unittest.TestCase):
         target.write_bytes(before + b"changed")
         with self.assertRaisesRegex(ValueError, "cambiato"):
             export_visual_report(root, target, result)
+
+    def test_visual_decisions_are_version_bound_and_never_modify_the_pdf(self):
+        root = Path(self.temp.name) / "project"
+        target = root / "output/pdf/sample.pdf"
+        target.parent.mkdir(parents=True)
+        target.write_bytes(self.make_pdf("after"))
+        before = target.read_bytes()
+        result = inspect_visual(target)
+        self.assertEqual(load_visual_reviews(root, target, result), {})
+        with self.assertRaisesRegex(ValueError, "motivo"):
+            mark_visual_review(root, target, result, 1, "false_positive", "")
+        reviewed = mark_visual_review(root, target, result, 1, "verified")
+        self.assertEqual(reviewed["decision"], "verified")
+        ignored = mark_visual_review(root, target, result, 1, "false_positive", "Il riquadro è intenzionale.")
+        self.assertEqual(ignored["decision"], "false_positive")
+        self.assertEqual(load_visual_reviews(root, target, result)["1"]["decision"], "false_positive")
+        self.assertEqual(target.read_bytes(), before)
+        target.write_bytes(before + b"modified")
+        with self.assertRaisesRegex(ValueError, "cambiato"):
+            mark_visual_review(root, target, result, 1, "verified")
 
 
 if __name__ == "__main__":

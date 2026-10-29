@@ -28,7 +28,7 @@ from monitor import batch_lines, overview
 from project_wizard import validate_wizard
 from project_actions import duplicate_settings, set_archived, set_favorite
 from projects_view import arrange_cards, pdf_versions, project_cards
-from visual_qc import export_visual_report, inspect_visual
+from visual_qc import export_visual_report, inspect_visual, load_visual_reviews, mark_visual_review
 
 
 def diagnostics(app, slug):
@@ -1346,6 +1346,7 @@ class NativeWindow:
             return
         try:
             result = inspect_visual(path)
+            reviews = load_visual_reviews(root, path, result)
         except Exception as error:
             self.notice.set("Controllo visivo non riuscito: " + str(error))
             return
@@ -1357,14 +1358,23 @@ class NativeWindow:
         self.ttk.Label(frame, text="Avvisi da verificare a vista; non modificano il PDF né lo stato PDF_OK.").pack(anchor="w")
         pages = self.tk.Listbox(frame, height=7, exportselection=False)
         pages.pack(fill="x", pady=8)
+        def page_label(item):
+            decision = (reviews.get(str(item["page"])) or {}).get("decision")
+            marker = " [verificata]" if decision == "verified" else " [falso positivo annotato]" if decision == "false_positive" else ""
+            return f"Pagina {item['page']}{marker} · " + ("; ".join(item["warnings"]) if item["warnings"] else "Nessun avviso")
         for item in result["pages"]:
-            pages.insert("end", f"Pagina {item['page']} · " + ("; ".join(item["warnings"]) if item["warnings"] else "Nessun avviso"))
+            pages.insert("end", page_label(item))
         preview = self.ttk.Label(frame, text="Seleziona una pagina per vedere l'anteprima.")
         preview.pack(fill="both", expand=True)
+        review_state = self.tk.StringVar(value="Nessuna pagina selezionata.")
+        self.ttk.Label(frame, textvariable=review_state).pack(anchor="w")
         def show(_event=None):
             choice = pages.curselection()
             if not choice:
                 return
+            saved = reviews.get(str(choice[0] + 1)) or {}
+            review_state.set("Revisione visiva: " + (saved.get("decision") or "non registrata")
+                             + (" · " + saved["note"] if saved.get("note") else ""))
             import fitz
             with fitz.open(path) as document:
                 pixmap = document[choice[0]].get_pixmap(matrix=fitz.Matrix(0.8, 0.8), alpha=False)
@@ -1379,6 +1389,31 @@ class NativeWindow:
         actions = self.ttk.Frame(frame)
         actions.pack(fill="x", pady=(8, 0))
         self.ttk.Button(actions, text="Apri PDF originale", command=lambda: self.open_path(path)).pack(side="left")
+        def mark(decision):
+            choice = pages.curselection()
+            if not choice:
+                self.notice.set("Seleziona una pagina da controllare.")
+                return
+            note = ""
+            if decision == "false_positive":
+                from tkinter import simpledialog
+                note = simpledialog.askstring("Falso positivo", "Perché l'avviso non indica un difetto?", parent=dialog)
+                if note is None:
+                    return
+            item = result["pages"][choice[0]]
+            try:
+                saved = mark_visual_review(root, path, result, item["page"], decision, note)
+            except (ValueError, OSError) as error:
+                self.notice.set("Revisione visiva non registrata: " + str(error))
+                return
+            reviews[str(item["page"])] = saved
+            pages.delete(choice[0])
+            pages.insert(choice[0], page_label(item))
+            pages.selection_set(choice[0])
+            show()
+            self.notice.set("Revisione visiva locale salvata; il PDF e PDF_OK non sono cambiati.")
+        self.ttk.Button(actions, text="Segna verificata", command=lambda: mark("verified")).pack(side="left", padx=8)
+        self.ttk.Button(actions, text="Annota falso positivo", command=lambda: mark("false_positive")).pack(side="left")
         def save_report():
             try:
                 report = export_visual_report(root, path, result)
