@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import read_json, write_json
-from control_room import snapshot, format_snapshot, summarize_performance
+from control_room import snapshot, format_snapshot, observed_token_usage, summarize_performance
 from coverage_matrix import compare as compare_coverage
 from diagnostic_report import build_sections, export, preview
 from medical_illustrator import (create_manual, export_illustrated_pdf, list_opportunities, plan, preview_svg, revalidate_edited_svg,
@@ -80,6 +80,29 @@ class LocalInnovationsTests(unittest.TestCase):
         self.assertFalse(view["telemetry_available"])
         Telemetry(self.root).record("pdf_render_completed", "pdf_render", status="success", duration_ms=25)
         self.assertEqual(snapshot(self.root)["performance"][0]["median_ms"], 25)
+
+    def test_control_room_reports_only_recorded_tokens_without_claiming_a_bill(self):
+        state = read_json(self.root / "state/pipeline.json")
+        state["jobs"][self.key]["usage"] = {
+            "input_tokens": 1200, "output_tokens": 350,
+            "input_tokens_details": {"cached_tokens": 500},
+        }
+        state["jobs"]["invalid"] = {"usage": {"input_tokens": True, "output_tokens": 60}}
+        state["jobs"]["incomplete"] = {"usage": {"input_tokens": 100}}
+        state["jobs"]["valid_without_cache"] = {
+            "usage": {"input_tokens": 25, "output_tokens": 40,
+                      "input_tokens_details": {"cached_tokens": 50}},
+        }
+        write_json(self.root / "state/pipeline.json", state)
+        view = snapshot(self.root)
+        self.assertEqual(view["observed_usage"], {
+            "input_tokens": 1225, "output_tokens": 390,
+            "cached_input_tokens": 500, "jobs_with_usage": 2,
+        })
+        self.assertEqual(view["observed_usage"], observed_token_usage(state["jobs"]))
+        display = format_snapshot(view)
+        self.assertIn("input 1,225", display)
+        self.assertIn("Dato parziale, non spesa fatturata", display)
 
     def test_control_room_eta_uses_only_existing_local_html_and_comparable_events(self):
         state = read_json(self.root / "state/pipeline.json")

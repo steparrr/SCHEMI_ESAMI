@@ -44,6 +44,26 @@ def summarize_performance(events):
     return performance
 
 
+def observed_token_usage(jobs):
+    """Sum only valid usage fields retained per job; retries may be absent."""
+    totals = {"input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0, "jobs_with_usage": 0}
+    for job in jobs.values():
+        usage = job.get("usage")
+        if not isinstance(usage, dict):
+            continue
+        input_tokens, output_tokens = usage.get("input_tokens"), usage.get("output_tokens")
+        if type(input_tokens) is not int or type(output_tokens) is not int or input_tokens < 0 or output_tokens < 0:
+            continue
+        details = usage.get("input_tokens_details") or {}
+        cached = details.get("cached_tokens", 0) if isinstance(details, dict) else 0
+        cached = cached if type(cached) is int and 0 <= cached <= input_tokens else 0
+        totals["input_tokens"] += input_tokens
+        totals["output_tokens"] += output_tokens
+        totals["cached_input_tokens"] += cached
+        totals["jobs_with_usage"] += 1
+    return totals
+
+
 def snapshot(root: Path, worker_active=False):
     root = Path(root)
     state = read_json(root / "state/pipeline.json", {})
@@ -97,6 +117,7 @@ def snapshot(root: Path, worker_active=False):
                      "counts": batch.get("request_counts") or {}, "checked_at": batch.get("remote_checked_at")}
                     for batch in batches],
         "performance": performance, "incidents": incidents, "local_eta": eta,
+        "observed_usage": observed_token_usage(jobs),
         "events": [{"at": e["recorded_at_utc"], "stage": e["stage"], "name": e["event_name"],
                     "status": e["status"], "duration_ms": e["duration_ms"],
                     "hash": (e["request_hash"] or "")[:12]} for e in events[:100]],
@@ -107,6 +128,7 @@ def snapshot(root: Path, worker_active=False):
 def format_snapshot(view):
     counts = view["counts"]
     eta = view["local_eta"]
+    usage = view["observed_usage"]
     eta_line = (f"Impaginazione locale stimata: {max(1, round(eta['low_ms'] / 1000))}–"
                 f"{max(1, round(eta['high_ms'] / 1000))} secondi per gli schemi restanti "
                 f"(almeno {eta['samples_min']} misure comparabili). {eta['reason']}"
@@ -114,6 +136,10 @@ def format_snapshot(view):
     lines = [f"{view['name']} · {view['execution_mode']}",
              f"PDF pronti {counts['pdf_ok']}/{counts['total']} · HTML pronti {counts['html_ok']}/{counts['total']}",
              f"Batch accettati {counts['accepted_batches']} · in attesa locale {counts['waiting_batches']}",
+             (f"Token nelle risposte conservate ({usage['jobs_with_usage']} job): input {usage['input_tokens']:,} "
+              f"(di cui cache {usage['cached_input_tokens']:,}) · output {usage['output_tokens']:,}. "
+              "Dato parziale, non spesa fatturata." if usage["jobs_with_usage"] else
+              "Token locali: non disponibili; per la spesa reale consulta la dashboard OpenAI."),
              "Pilota: " + ("approvato" if view["pilot"]["approved"] else
                            "pronto per revisione" if view["pilot"]["ready_for_review"] else "in attesa"),
              eta_line, "", "Mac → OpenAI → Mac", view["summary"]["local"], view["summary"]["server"],
