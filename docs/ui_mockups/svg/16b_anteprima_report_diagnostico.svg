@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>16b_anteprima_report_diagnostico</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#142B40" opacity="0.09"/>
+<rect x="138.0" y="55" width="1004" height="710" rx="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="138.0" y="55" width="1004" height="73" rx="11" fill="#EAF0F2"/>
+<rect x="138.0" y="119" width="1004" height="10" rx="0" fill="#EAF0F2"/>
+<text x="162.0" y="86" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#142B40">Anteprima report diagnostico</text>
+<text x="162.0" y="108" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Controlla i dati prima di esportare</text>
+<text x="1090.0" y="91" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#627585">✕</text>
+<rect x="939.0" y="71" width="132" height="24" rx="12" fill="#EAF0F2"/>
+<text x="950.0" y="87.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<line x1="139.0" y1="128" x2="1141.0" y2="128" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="162.0" y="148" width="956" height="48" rx="7" fill="#E6F5F3"/>
+<rect x="162.0" y="148" width="4" height="48" rx="2" fill="#087D79"/>
+<text x="180.0" y="169" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#087D79">Report creato localmente; nessun dato inviato a Codex.</text>
+<rect x="162.0" y="219" width="956" height="393" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="180.0" y="249" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Contenuto del report · demo</text>
+<rect x="180.0" y="273" width="920" height="310" rx="5" fill="#F7FAFB" stroke="#D9E2E6" stroke-width="1"/>
+<text x="204.0" y="301" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">diagnostica_schemi_esami_v2/</text>
+<text x="204.0" y="321" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">  report.txt</text>
+<text x="204.0" y="341" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">  configurazione_redatta.json</text>
+<text x="204.0" y="361" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">  eventi_locali_demo.csv</text>
+<text x="204.0" y="381" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">  batch_id_incerti.txt</text>
+<text x="204.0" y="401" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">  manifest_file_hash.txt</text>
+<text x="204.0" y="421" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43"></text>
+<text x="204.0" y="441" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">INCIDENTE: INVIO_REMOTO_NON_CONFERMATO</text>
+<text x="204.0" y="461" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">Ora rilevamento: 2026-10-29 09:11 · demo</text>
+<text x="204.0" y="481" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">Mac: fermo · remoto: stato non verificato</text>
+<text x="204.0" y="501" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">Chiave API: [NON INCLUSA]</text>
+<text x="204.0" y="521" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="23" text-anchor="start" fill="#142C43">Sbobine personali: [NON INCLUSE]</text>
+<rect x="169.0" y="641" width="18" height="18" rx="4" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="178.0" y="655" font-family="DejaVu Sans, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#FFFFFF">✓</text>
+<text x="197.0" y="655" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Ho verificato il contenuto del report prima dell’esportazione</text>
+<rect x="807.0" y="703" width="286" height="37" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="950.0" y="726.0" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Esporta ZIP dopo la verifica</text>
+</svg>

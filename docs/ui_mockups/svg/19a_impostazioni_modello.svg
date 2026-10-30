@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>19a_impostazioni_modello</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#142B40" opacity="0.09"/>
+<rect x="138.0" y="55" width="1004" height="710" rx="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="138.0" y="55" width="1004" height="73" rx="11" fill="#EAF0F2"/>
+<rect x="138.0" y="119" width="1004" height="10" rx="0" fill="#EAF0F2"/>
+<text x="162.0" y="86" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#142B40">Impostazioni del modello</text>
+<text x="162.0" y="108" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Preferenze locali · demo</text>
+<text x="1090.0" y="91" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#627585">✕</text>
+<rect x="939.0" y="71" width="132" height="24" rx="12" fill="#EAF0F2"/>
+<text x="950.0" y="87.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<line x1="139.0" y1="128" x2="1141.0" y2="128" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="162.0" y="155" width="956" height="416" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="180.0" y="185" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Profilo API predefinito</text>
+<text x="182.0" y="211" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">IDENTIFICATIVO MODELLO API</text>
+<rect x="182.0" y="219" width="438" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="195.0" y="243.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="645.0" y="211" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">RAGIONAMENTO</text>
+<rect x="645.0" y="219" width="435" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="658.0" y="243.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="182.0" y="305" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">MASSIMO TOKEN</text>
+<rect x="182.0" y="313" width="243" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="195.0" y="337.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="446.0" y="305" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">TOKEN PER RETRY</text>
+<rect x="446.0" y="313" width="244" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="459.0" y="337.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="182.0" y="425" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#142B40">Compatibilità</text>
+<rect x="182.0" y="441" width="18" height="18" rx="4" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="210.0" y="455" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Immagini</text>
+<rect x="363.0" y="441" width="18" height="18" rx="4" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="391.0" y="455" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">JSON strutturato</text>
+<text x="182.0" y="512" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#627585">Valori confermati dal modello selezionato: non disponibile</text>
+<rect x="183.0" y="529" width="194" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="280.0" y="550.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Aggiorna elenco modelli</text>
+<rect x="392.0" y="529" width="249" height="34" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="516.5" y="550.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Salva modello predefinito</text>
+<rect x="162.0" y="594" width="956" height="57" rx="7" fill="#EAF0F2"/>
+<rect x="162.0" y="594" width="4" height="57" rx="2" fill="#142B40"/>
+<text x="180.0" y="615" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#142B40">Il profilo si applica alle nuove materie e non sovrascrive inaspettatamente quelle esistenti.</text>
+<rect x="163.0" y="701" width="166" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="246.0" y="722.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Chiave OpenAI</text>
+<rect x="341.0" y="701" width="220" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="451.0" y="722.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Aiuto · manuale PDF locale</text>
+</svg>

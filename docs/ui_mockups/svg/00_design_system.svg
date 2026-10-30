@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>00_design_system</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<text x="43" y="54" font-family="DejaVu Sans, sans-serif" font-size="25" font-weight="700" text-anchor="start" fill="#142B40">Schemi Esami V2 · Design system</text>
+<text x="43" y="81" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#627585">Desktop macOS · 1280 × 820 · varianti 880 × 650 · dati demo</text>
+<rect x="1083" y="39" width="150" height="24" rx="12" fill="#EAF0F2"/>
+<text x="1094" y="55.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<text x="43" y="129" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#627585">PALETTE</text>
+<rect x="43" y="146" width="116" height="56" rx="7" fill="#F3F6F7" stroke="#D9E2E6" stroke-width="1"/>
+<text x="43" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Fondo</text>
+<text x="43" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#F3F6F7</text>
+<rect x="177" y="146" width="116" height="56" rx="7" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="177" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Superficie</text>
+<text x="177" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#FFFFFF</text>
+<rect x="311" y="146" width="116" height="56" rx="7" fill="#EAF0F2" stroke="#D9E2E6" stroke-width="1"/>
+<text x="311" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Secondaria</text>
+<text x="311" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#EAF0F2</text>
+<rect x="445" y="146" width="116" height="56" rx="7" fill="#142B40" stroke="#D9E2E6" stroke-width="1"/>
+<text x="445" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Sidebar</text>
+<text x="445" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#142B40</text>
+<rect x="579" y="146" width="116" height="56" rx="7" fill="#142C43" stroke="#D9E2E6" stroke-width="1"/>
+<text x="579" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Testo</text>
+<text x="579" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#142C43</text>
+<rect x="713" y="146" width="116" height="56" rx="7" fill="#087D79" stroke="#D9E2E6" stroke-width="1"/>
+<text x="713" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Attivo</text>
+<text x="713" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#087D79</text>
+<rect x="847" y="146" width="116" height="56" rx="7" fill="#A76313" stroke="#D9E2E6" stroke-width="1"/>
+<text x="847" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Attesa</text>
+<text x="847" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#A76313</text>
+<rect x="981" y="146" width="116" height="56" rx="7" fill="#A63A42" stroke="#D9E2E6" stroke-width="1"/>
+<text x="981" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Errore</text>
+<text x="981" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#A63A42</text>
+<rect x="1115" y="146" width="116" height="56" rx="7" fill="#D9E2E6" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1115" y="224" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Bordo</text>
+<text x="1115" y="242" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">#D9E2E6</text>
+<line x1="43" y1="270" x2="1234" y2="270" stroke="#D9E2E6" stroke-width="1"/>
+<text x="43" y="309" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#627585">TIPOGRAFIA E SPAZIATURE</text>
+<text x="43" y="351" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#142B40">Titolo di pagina · 22–24 px</text>
+<text x="43" y="382" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#142C43">Titolo di sezione · 14–18 px</text>
+<text x="43" y="407" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Testo e tabelle · 11–13 px</text>
+<text x="43" y="438" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#627585">Distanze · 4 / 8 / 12 / 16 / 24 px · raggio 6–9 px</text>
+<text x="650" y="309" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#627585">PULSANTI</text>
+<rect x="650" y="340" width="158" height="37" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="729.0" y="363.0" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Primario</text>
+<rect x="828" y="340" width="158" height="37" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="907.0" y="363.0" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Secondario</text>
+<rect x="1006" y="340" width="158" height="37" rx="6" fill="#EAF0F2" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1085.0" y="363.0" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#A6B3BB">Disabilitato</text>
+<text x="650" y="407" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#627585">BADGE · sempre con etichetta, oltre al colore</text>
+<rect x="650" y="427" width="123" height="24" rx="12" fill="#E6F5F3"/>
+<text x="661" y="443.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">Pronto</text>
+<rect x="787" y="427" width="123" height="24" rx="12" fill="#FFF4E6"/>
+<text x="798" y="443.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A76313">Attesa</text>
+<rect x="924" y="427" width="123" height="24" rx="12" fill="#FAEBED"/>
+<text x="935" y="443.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A63A42">Errore</text>
+<rect x="1061" y="427" width="123" height="24" rx="12" fill="#F1F2F3"/>
+<text x="1072" y="443.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">Non attivo</text>
+<line x1="43" y1="475" x2="1234" y2="475" stroke="#D9E2E6" stroke-width="1"/>
+<text x="43" y="506" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#627585">TABELLA · RIGHE COMPATTE / SCORRIMENTO IN ALTEZZA</text>
+<rect x="43" y="521" width="746" height="163" rx="7" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="43" y="521" width="746" height="37" rx="7" fill="#EAF0F2"/>
+<text x="55" y="544.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Materia</text>
+<text x="295" y="544.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Obiettivo</text>
+<text x="478" y="544.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">PDF</text>
+<text x="561" y="544.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Stato</text>
+<line x1="43" y1="558" x2="789" y2="558" stroke="#D9E2E6" stroke-width="1"/>
+<text x="55" y="583.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">Ortopedia</text>
+<text x="295" y="583.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Completa</text>
+<text x="478" y="583.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">3/8</text>
+<rect x="558" y="567.0" width="61.0" height="24" rx="12" fill="#E6F5F3"/>
+<text x="569" y="583.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">Pronto</text>
+<rect x="44" y="600" width="744" height="42" rx="0" fill="#FAFCFC"/>
+<line x1="43" y1="600" x2="789" y2="600" stroke="#D9E2E6" stroke-width="1"/>
+<text x="55" y="625.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">Pediatria</text>
+<text x="295" y="625.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Sintesi</text>
+<text x="478" y="625.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">0/5</text>
+<rect x="558" y="609.0" width="80.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="569" y="625.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">In attesa</text>
+<line x1="43" y1="642" x2="789" y2="642" stroke="#D9E2E6" stroke-width="1"/>
+<text x="55" y="667.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">Neurologia</text>
+<text x="295" y="667.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Completa</text>
+<text x="478" y="667.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">0/4</text>
+<rect x="558" y="651.0" width="106.5" height="24" rx="12" fill="#FFF4E6"/>
+<text x="569" y="667.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A76313">Invio incerto</text>
+<rect x="811" y="521" width="422" height="171" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="829" y="551" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">STATES · messaggio e azione</text>
+<text x="828" y="563" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Vuoto → «Crea una nuova materia».</text>
+<text x="828" y="583" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Caricamento → «Attendi il controllo remoto».</text>
+<text x="828" y="603" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Pronto → «Apri il primo PDF».</text>
+<text x="828" y="623" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Avviso → «Riconcilia prima del reinvio».</text>
+<text x="828" y="643" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Errore → «Apri diagnostica».</text>
+<text x="828" y="663" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="23" text-anchor="start" fill="#142C43">Disabilitato → «Completa i controlli».</text>
+<rect x="43" y="727" width="1191" height="54" rx="7" fill="#EAF0F2"/>
+<rect x="43" y="727" width="4" height="54" rx="2" fill="#142B40"/>
+<text x="61" y="748" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#142B40">Regola: niente costi o durate inventati. La sola frazione di avanzamento è PDF pronti / schemi correnti.</text>
+</svg>

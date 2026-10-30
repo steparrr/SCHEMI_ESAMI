@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>09b_dettaglio_da_caricare</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#142B40" opacity="0.09"/>
+<rect x="138.0" y="55" width="1004" height="710" rx="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="138.0" y="55" width="1004" height="73" rx="11" fill="#EAF0F2"/>
+<rect x="138.0" y="119" width="1004" height="10" rx="0" fill="#EAF0F2"/>
+<text x="162.0" y="86" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#142B40">Dettaglio del materiale</text>
+<text x="162.0" y="108" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Finestra secondaria di sola lettura</text>
+<text x="1090.0" y="91" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#627585">✕</text>
+<rect x="939.0" y="71" width="132" height="24" rx="12" fill="#EAF0F2"/>
+<text x="950.0" y="87.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<line x1="139.0" y1="128" x2="1141.0" y2="128" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="161.0" y="154" width="958" height="212" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="179.0" y="184" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Informazioni sul file</text>
+<text x="180.0" y="215" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Nome</text>
+<text x="350.0" y="215" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">quesiti.pdf</text>
+<text x="650.0" y="215" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Formato</text>
+<text x="820.0" y="215" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">PDF</text>
+<text x="180.0" y="254" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Dimensione</text>
+<text x="350.0" y="254" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">410 KB</text>
+<text x="650.0" y="254" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Pagine</text>
+<text x="820.0" y="254" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="180.0" y="293" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Numero immagini</text>
+<text x="350.0" y="293" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="650.0" y="293" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Hash SHA-256</text>
+<text x="820.0" y="293" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="180.0" y="332" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">OCR</text>
+<text x="350.0" y="332" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="650.0" y="332" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Errore</text>
+<text x="820.0" y="332" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">non disponibile</text>
+<text x="178.0" y="391" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#627585">Stato del file</text>
+<rect x="298.0" y="374" width="93.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="309.0" y="390.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Da caricare</text>
+<rect x="161.0" y="415" width="958" height="223" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="179.0" y="445" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Campione del testo estratto</text>
+<text x="640.0" y="506" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#A76313">Da caricare: salva la materia per leggere l’anteprima</text>
+<text x="640.0" y="542" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#627585">Nessuna lettura OCR eseguita su questo file.</text>
+<rect x="974.0" y="703" width="136" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1042.0" y="724.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Chiudi</text>
+</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>12a_versioni_pdf</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#142B40" opacity="0.09"/>
+<rect x="138.0" y="55" width="1004" height="710" rx="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="138.0" y="55" width="1004" height="73" rx="11" fill="#EAF0F2"/>
+<rect x="138.0" y="119" width="1004" height="10" rx="0" fill="#EAF0F2"/>
+<text x="162.0" y="86" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#142B40">Versioni PDF</text>
+<text x="162.0" y="108" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Apri una versione senza sovrascrivere quelle precedenti</text>
+<text x="1090.0" y="91" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#627585">✕</text>
+<rect x="939.0" y="71" width="132" height="24" rx="12" fill="#EAF0F2"/>
+<text x="950.0" y="87.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<line x1="139.0" y1="128" x2="1141.0" y2="128" stroke="#D9E2E6" stroke-width="1"/>
+<text x="165.0" y="175" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#142B40">Schema: 01 · Gonartrosi</text>
+<rect x="163.0" y="202" width="954" height="301" rx="7" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="163.0" y="202" width="954" height="37" rx="7" fill="#EAF0F2"/>
+<text x="175.0" y="225.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Schema</text>
+<text x="265.0" y="225.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Titolo</text>
+<text x="525.0" y="225.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Versione</text>
+<text x="730.0" y="225.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Stato</text>
+<text x="940.0" y="225.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Dimensione</text>
+<rect x="164.0" y="239" width="952" height="66" rx="0" fill="#ECF8F6"/>
+<line x1="163.0" y1="239" x2="1117.0" y2="239" stroke="#D9E2E6" stroke-width="1"/>
+<text x="175.0" y="276.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">01</text>
+<text x="265.0" y="276.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Gonartrosi</text>
+<text x="525.0" y="276.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">v3 · corrente</text>
+<rect x="727.0" y="260.0" width="87.0" height="24" rx="12" fill="#E6F5F3"/>
+<text x="738.0" y="276.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">PDF pronto</text>
+<text x="940.0" y="276.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">1,4 MB</text>
+<rect x="164.0" y="305" width="952" height="66" rx="0" fill="#FAFCFC"/>
+<line x1="163.0" y1="305" x2="1117.0" y2="305" stroke="#D9E2E6" stroke-width="1"/>
+<text x="175.0" y="342.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">01</text>
+<text x="265.0" y="342.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Gonartrosi</text>
+<text x="525.0" y="342.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">v2 · storica</text>
+<rect x="727.0" y="326.0" width="87.0" height="24" rx="12" fill="#E6F5F3"/>
+<text x="738.0" y="342.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">PDF pronto</text>
+<text x="940.0" y="342.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">1,3 MB</text>
+<line x1="163.0" y1="371" x2="1117.0" y2="371" stroke="#D9E2E6" stroke-width="1"/>
+<text x="175.0" y="408.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">01</text>
+<text x="265.0" y="408.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Gonartrosi</text>
+<text x="525.0" y="408.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">v1 · storica</text>
+<rect x="727.0" y="392.0" width="87.0" height="24" rx="12" fill="#E6F5F3"/>
+<text x="738.0" y="408.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">PDF pronto</text>
+<text x="940.0" y="408.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">1,2 MB</text>
+<rect x="164.0" y="437" width="952" height="66" rx="0" fill="#FAFCFC"/>
+<line x1="163.0" y1="437" x2="1117.0" y2="437" stroke="#D9E2E6" stroke-width="1"/>
+<text x="175.0" y="474.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">02</text>
+<text x="265.0" y="474.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Lesioni meniscali</text>
+<text x="525.0" y="474.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">v1 · corrente</text>
+<rect x="727.0" y="458.0" width="93.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="738.0" y="474.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">HTML pronto</text>
+<text x="940.0" y="474.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">non disponibile</text>
+<rect x="163.0" y="560" width="954" height="55" rx="7" fill="#EAF0F2"/>
+<rect x="163.0" y="560" width="4" height="55" rx="2" fill="#142B40"/>
+<text x="181.0" y="581" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#142B40">Le versioni storiche restano consultabili anche quando esiste una nuova generazione.</text>
+<rect x="826.0" y="704" width="268" height="34" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="960.0" y="725.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Apri versione selezionata</text>
+</svg>

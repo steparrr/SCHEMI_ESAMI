@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>15a_control_pipeline_schemi</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="242" height="820" rx="0" fill="#142B40"/>
+<circle cx="23" cy="22" r="5.2" fill="#FF5E58"/>
+<circle cx="41" cy="22" r="5.2" fill="#FFBC2E"/>
+<circle cx="59" cy="22" r="5.2" fill="#28C840"/>
+<text x="20" y="63" font-family="DejaVu Sans, sans-serif" font-size="17" font-weight="700" text-anchor="start" fill="#FFFFFF">Schemi Esami</text>
+<text x="20" y="83" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#ADC4D2">V2 · desktop macOS</text>
+<rect x="16" y="104" width="210" height="34" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="121.0" y="125.5" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">+ Nuova materia</text>
+<rect x="16" y="151" width="210" height="34" rx="5" fill="#203E56"/>
+<text x="27" y="173" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#D3E2EA">⌕  Cerca materia…</text>
+<text x="18" y="211" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="700" text-anchor="start" fill="#ADC4D2">MATERIE · DEMO</text>
+<rect x="10" y="223" width="222" height="36" rx="6" fill="#31566A"/>
+<text x="21" y="246" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#FFFFFF">★ Ortopedia</text>
+<text x="21" y="288" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#D2E0E8">Pediatria</text>
+<text x="21" y="330" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#D2E0E8">Neurologia</text>
+<text x="21" y="372" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#D2E0E8">Radiologia</text>
+<line x1="16" y1="655" x2="226" y2="655" stroke="#385368" stroke-width="1"/>
+<text x="18" y="673" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#E0EBF0">⚙  Impostazioni modello</text>
+<text x="18" y="713" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#E0EBF0">◉  Chiave OpenAI</text>
+<text x="18" y="753" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="400" text-anchor="start" fill="#E0EBF0">?  Aiuto · manuale PDF</text>
+<rect x="242" y="0" width="1038" height="130" rx="0" fill="#FFFFFF"/>
+<line x1="242" y1="129" x2="1280" y2="129" stroke="#D9E2E6" stroke-width="1"/>
+<text x="262" y="27" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="700" text-anchor="start" fill="#627585">MATERIA CORRENTE</text>
+<text x="262" y="52" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="700" text-anchor="start" fill="#142B40">Schemi Esami V2</text>
+<rect x="262" y="76" width="340" height="32" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="275" y="97.0" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Ortopedia · demo</text>
+<text x="624" y="97" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#627585">Obiettivo</text>
+<rect x="684" y="77" width="72" height="32" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="720.0" y="97.5" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="600" text-anchor="middle" fill="#FFFFFF">Completa</text>
+<rect x="756" y="77" width="70" height="32" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="791.0" y="97.5" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="600" text-anchor="middle" fill="#142C43">Sintesi</text>
+<rect x="1121" y="15" width="143" height="24" rx="12" fill="#EAF0F2"/>
+<text x="1132" y="31.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<rect x="242" y="132" width="1038" height="47" rx="0" fill="#FFFFFF"/>
+<text x="336.8333333333333" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#627585">Progetti</text>
+<text x="506.49999999999994" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#627585">Materiali e domande</text>
+<text x="676.1666666666666" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#627585">Schemi e PDF</text>
+<text x="845.8333333333333" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#627585">Stato e batch</text>
+<rect x="934.6666666666665" y="137" width="161.66666666666666" height="36" rx="5" fill="#EAF0F2"/>
+<text x="1015.4999999999999" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#087D79">Control Room</text>
+<text x="1185.1666666666665" y="160" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#627585">Medical Illustrator</text>
+<line x1="242" y1="178" x2="1280" y2="178" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="242" y="738" width="1038" height="82" rx="0" fill="#FFFFFF"/>
+<line x1="242" y1="738" x2="1280" y2="738" stroke="#D9E2E6" stroke-width="1"/>
+<text x="262" y="762" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">Modello corrente: non disponibile</text>
+<text x="262" y="784" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Batch: elaborazione asincrona · Urgente: API a costo standard</text>
+<rect x="710" y="762" width="100" height="35" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="760.0" y="784.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#142C43">Salva</text>
+<rect x="819" y="762" width="148" height="35" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="893.0" y="784.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#142C43">Stanotte · Batch</text>
+<rect x="975" y="762" width="134" height="35" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1042.0" y="784.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#142C43">Avvia urgente</text>
+<rect x="1117" y="762" width="145" height="35" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="1189.5" y="784.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="middle" fill="#FFFFFF">Avvia · Batch</text>
+<text x="265" y="197" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="700" text-anchor="start" fill="#142B40">Control Room · Pipeline</text>
+<text x="265" y="222" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#627585">Dettagli verificabili senza percentuali arbitrarie.</text>
+<rect x="265" y="253" width="128" height="32" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="329.0" y="273.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Overview</text>
+<rect x="405" y="253" width="128" height="32" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="469.0" y="273.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Schemi</text>
+<rect x="545" y="253" width="128" height="32" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="609.0" y="273.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Batch</text>
+<rect x="685" y="253" width="128" height="32" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="749.0" y="273.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Prestazioni</text>
+<rect x="265" y="299" width="991" height="175" rx="7" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="265" y="299" width="991" height="37" rx="7" fill="#EAF0F2"/>
+<text x="277" y="322.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">#</text>
+<text x="342" y="322.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Titolo</text>
+<text x="642" y="322.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Hash breve</text>
+<text x="827" y="322.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Stato</text>
+<text x="1127" y="322.0" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="start" fill="#627585">Retry</text>
+<rect x="266" y="336" width="989" height="46" rx="0" fill="#ECF8F6"/>
+<line x1="265" y1="336" x2="1256" y2="336" stroke="#D9E2E6" stroke-width="1"/>
+<text x="277" y="363.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">01</text>
+<text x="342" y="363.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Gonartrosi</text>
+<text x="642" y="363.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">ab19…3c0f</text>
+<rect x="824" y="347.0" width="87.0" height="24" rx="12" fill="#E6F5F3"/>
+<text x="835" y="363.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">PDF pronto</text>
+<text x="1127" y="363.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">0</text>
+<rect x="266" y="382" width="989" height="46" rx="0" fill="#FAFCFC"/>
+<line x1="265" y1="382" x2="1256" y2="382" stroke="#D9E2E6" stroke-width="1"/>
+<text x="277" y="409.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">02</text>
+<text x="342" y="409.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">Lesioni meniscali</text>
+<text x="642" y="409.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">99e2…ac10</text>
+<rect x="824" y="393.0" width="93.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="835" y="409.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">HTML pronto</text>
+<text x="1127" y="409.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">1</text>
+<line x1="265" y1="428" x2="1256" y2="428" stroke="#D9E2E6" stroke-width="1"/>
+<text x="277" y="455.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="600" text-anchor="start" fill="#142C43">03</text>
+<text x="342" y="455.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">LCA</text>
+<text x="642" y="455.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">c1a8…419e</text>
+<rect x="824" y="439.0" width="80.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="835" y="455.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">In attesa</text>
+<text x="1127" y="455.5" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="400" text-anchor="start" fill="#142C43">0</text>
+<rect x="265" y="501" width="991" height="201" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="283" y="531" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Job 01 · eventi cronologici</text>
+<circle cx="286" cy="546" r="4" fill="#087D79"/>
+<text x="304" y="550" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">09:00 · Materiale indicizzato</text>
+<text x="1228" y="550" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="end" fill="#627585">misura: non disponibile</text>
+<circle cx="286" cy="583" r="4" fill="#087D79"/>
+<text x="304" y="587" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">09:04 · Richiesta inviata</text>
+<text x="1228" y="587" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="end" fill="#627585">non disponibile</text>
+<circle cx="286" cy="620" r="4" fill="#087D79"/>
+<text x="304" y="624" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">09:06 · Risposta conservata</text>
+<text x="1228" y="624" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="end" fill="#627585">non disponibile</text>
+<circle cx="286" cy="657" r="4" fill="#087D79"/>
+<text x="304" y="661" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">09:07 · PDF locale generato</text>
+<text x="1228" y="661" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="end" fill="#627585">non disponibile</text>
+</svg>

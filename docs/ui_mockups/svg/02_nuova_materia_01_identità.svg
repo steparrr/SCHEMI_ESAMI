@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>02_nuova_materia_01_identità</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="110" y="37" width="1060" height="746" rx="13" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="110" y="37" width="238" height="746" rx="13" fill="#142B40"/>
+<rect x="331" y="37" width="17" height="746" rx="0" fill="#142B40"/>
+<text x="135" y="78" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#FFFFFF">+ Nuova materia</text>
+<text x="135" y="101" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#B8CCD9">Procedura guidata · demo</text>
+<rect x="124" y="127" width="207" height="52" rx="6" fill="#31566A"/>
+<circle cx="150" cy="152" r="15" fill="#087D79"/>
+<text x="150" y="156" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+<text x="177" y="157" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#FFFFFF">Identità</text>
+<circle cx="150" cy="231" r="15" fill="#416277"/>
+<text x="150" y="235" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+<text x="177" y="236" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Obiettivo</text>
+<circle cx="150" cy="310" r="15" fill="#416277"/>
+<text x="150" y="314" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+<text x="177" y="315" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Materiali</text>
+<circle cx="150" cy="389" r="15" fill="#416277"/>
+<text x="150" y="393" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+<text x="177" y="394" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Produzione</text>
+<circle cx="150" cy="468" r="15" fill="#416277"/>
+<text x="150" y="472" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+<text x="177" y="473" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Grafica</text>
+<circle cx="150" cy="547" r="15" fill="#416277"/>
+<text x="150" y="551" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">6</text>
+<text x="177" y="552" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Riepilogo</text>
+<text x="380" y="82" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="700" text-anchor="start" fill="#087D79">PASSO 1 DI 6</text>
+<text x="1136" y="82" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="end" fill="#627585">DEMO · dati fittizi</text>
+<line x1="348" y1="111" x2="1170" y2="111" stroke="#D9E2E6" stroke-width="1"/>
+<line x1="348" y1="715" x2="1170" y2="715" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="380" y="731" width="112" height="34" rx="6" fill="#EAF0F2" stroke="#D9E2E6" stroke-width="1"/>
+<text x="436.0" y="752.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#A6B3BB">Indietro</text>
+<rect x="1005" y="731" width="132" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1071.0" y="752.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Avanti</text>
+<text x="510" y="754" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Salvare la bozza non avvia richieste OpenAI.</text>
+<text x="380" y="154" font-family="DejaVu Sans, sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#142B40">Identità della materia</text>
+<text x="380" y="188" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#627585">Dai un nome riconoscibile al progetto. Potrai cambiarlo.</text>
+<text x="380" y="232" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">NOME DELLA MATERIA</text>
+<rect x="380" y="240" width="650" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="393" y="264.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Ortopedia</text>
+<text x="380" y="326" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">TITOLO BREVE · FACOLTATIVO</text>
+<rect x="380" y="334" width="650" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="393" y="358.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">Orto</text>
+<text x="380" y="420" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#627585">DATA ESAME · FACOLTATIVA (AAAA-MM-GG)</text>
+<rect x="380" y="428" width="295" height="39" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="393" y="452.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#142C43">2026-12-15</text>
+<rect x="380" y="517" width="680" height="55" rx="7" fill="#EAF0F2"/>
+<rect x="380" y="517" width="4" height="55" rx="2" fill="#142B40"/>
+<text x="398" y="538" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#142B40">Questi sono dati demo. Una data assente resta «non disponibile»; non blocca il salvataggio.</text>
+</svg>

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>04_nuova_materia_03_materiali</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="110" y="37" width="1060" height="746" rx="13" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="110" y="37" width="238" height="746" rx="13" fill="#142B40"/>
+<rect x="331" y="37" width="17" height="746" rx="0" fill="#142B40"/>
+<text x="135" y="78" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#FFFFFF">+ Nuova materia</text>
+<text x="135" y="101" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#B8CCD9">Procedura guidata · demo</text>
+<circle cx="150" cy="152" r="15" fill="#087D79"/>
+<text x="150" y="156" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+<text x="177" y="157" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Identità</text>
+<circle cx="150" cy="231" r="15" fill="#087D79"/>
+<text x="150" y="235" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+<text x="177" y="236" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Obiettivo</text>
+<rect x="124" y="285" width="207" height="52" rx="6" fill="#31566A"/>
+<circle cx="150" cy="310" r="15" fill="#087D79"/>
+<text x="150" y="314" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+<text x="177" y="315" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="start" fill="#FFFFFF">Materiali</text>
+<circle cx="150" cy="389" r="15" fill="#416277"/>
+<text x="150" y="393" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+<text x="177" y="394" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Produzione</text>
+<circle cx="150" cy="468" r="15" fill="#416277"/>
+<text x="150" y="472" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+<text x="177" y="473" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Grafica</text>
+<circle cx="150" cy="547" r="15" fill="#416277"/>
+<text x="150" y="551" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">6</text>
+<text x="177" y="552" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#D0DEE6">Riepilogo</text>
+<text x="380" y="82" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="700" text-anchor="start" fill="#087D79">PASSO 3 DI 6</text>
+<text x="1136" y="82" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="end" fill="#627585">DEMO · dati fittizi</text>
+<line x1="348" y1="111" x2="1170" y2="111" stroke="#D9E2E6" stroke-width="1"/>
+<line x1="348" y1="715" x2="1170" y2="715" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="380" y="731" width="112" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="436.0" y="752.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Indietro</text>
+<rect x="1005" y="731" width="132" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="1071.0" y="752.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Avanti</text>
+<text x="510" y="754" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Salvare la bozza non avvia richieste OpenAI.</text>
+<text x="380" y="154" font-family="DejaVu Sans, sans-serif" font-size="23" font-weight="700" text-anchor="start" fill="#142B40">Materiali da usare</text>
+<text x="380" y="189" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#627585">Tre categorie separate. Puoi salvare una bozza senza allegati.</text>
+<rect x="380" y="223" width="659" height="105" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="397" y="253" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#142B40">Sbobine e appunti</text>
+<rect x="398" y="269" width="106.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="409" y="285.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">2 file · demo</text>
+<rect x="741" y="265" width="139" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="810.5" y="286.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Aggiungi file</text>
+<rect x="891" y="265" width="125" height="34" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="953.5" y="286.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Svuota</text>
+<rect x="380" y="348" width="659" height="105" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="397" y="378" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#142B40">Domande d’esame</text>
+<rect x="398" y="394" width="106.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="409" y="410.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">1 file · demo</text>
+<rect x="741" y="390" width="139" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="810.5" y="411.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Aggiungi file</text>
+<rect x="891" y="390" width="125" height="34" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="953.5" y="411.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Svuota</text>
+<rect x="380" y="473" width="659" height="105" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="397" y="503" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#142B40">Programma ufficiale</text>
+<rect x="398" y="519" width="106.5" height="24" rx="12" fill="#EAF0F2"/>
+<text x="409" y="535.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">0 file · demo</text>
+<rect x="741" y="515" width="139" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="810.5" y="536.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Aggiungi file</text>
+<rect x="891" y="515" width="125" height="34" rx="6" fill="#EAF0F2" stroke="#EAF0F2" stroke-width="1"/>
+<text x="953.5" y="536.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Svuota</text>
+<rect x="380" y="617" width="660" height="48" rx="7" fill="#FFF4E6"/>
+<rect x="380" y="617" width="4" height="48" rx="2" fill="#A76313"/>
+<text x="398" y="638" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="400" text-anchor="start" fill="#A76313">Per avviare la generazione serve almeno un materiale. «Salva bozza» resta disponibile.</text>
+</svg>

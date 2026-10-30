@@ -32,7 +32,8 @@
 <div class="callout"><strong>In breve.</strong> La preparazione dei file, l'impaginazione e Medical Illustrator funzionano sul Mac. La generazione dei testi usa l'API OpenAI già configurata. Per completare il lavoro locale il Mac deve rimanere acceso e sveglio.</div>
 
 <h2>1. Orientarsi nella finestra</h2>
-<p>La barra laterale mostra le materie e permette di crearne una nuova. La parte centrale contiene le aree di lavoro. Se restringi la finestra, i nomi delle schede diventano più brevi; il contenuto resta lo stesso.</p>
+<p>La barra blu laterale mostra le materie e permette di crearne una nuova. In alto scegli la materia corrente e l'obiettivo; al centro trovi le aree di lavoro, in basso i comandi di salvataggio e avvio. I riquadri chiari mostrano dati salvati o osservati, senza avviare richieste OpenAI quando li apri.</p>
+<p>Se restringi la finestra, i nomi delle schede diventano più brevi. In Progetti il riepilogo passa sotto la tabella; in Schemi e PDF le azioni del primo schema sono nel menu <strong>Azioni primo schema</strong>.</p>
 <div class="map"><strong>Progetti</strong> → <strong>Materiali</strong> → <strong>Schemi e PDF</strong> → <strong>Stato e batch</strong> → <strong>Control Room</strong> → <strong>Medical Illustrator</strong></div>
 <table>
 <tr><th>Area</th><th>A cosa serve</th></tr>
@@ -64,7 +65,7 @@
 
 <h2>5. Leggere stato, errori e costi</h2>
 <p>In <strong>Stato e batch</strong> trovi tre fasi: preparazione sul Mac, generazione OpenAI e creazione dei PDF sul Mac. «Motore locale attivo» conferma un worker in esecuzione. La Control Room mostra lo stato di ogni schema, gli identificativi remoti, gli avvisi e le misure locali disponibili.</p>
-<p>Un invio indicato come <strong>incerto</strong> non viene ripetuto automaticamente: così si evita di pagare due volte per la stessa richiesta. <strong>Controlla ora lo stato su OpenAI</strong> legge lo stato remoto; <strong>Recupera solo PDF locali</strong> prova a ricostruire artefatti locali esistenti senza una nuova generazione.</p>
+<p>Un invio indicato come <strong>incerto</strong> non viene ripetuto automaticamente: così si evita di pagare due volte per la stessa richiesta. <strong>Controlla ora lo stato su OpenAI</strong> legge lo stato remoto; <strong>Recupera PDF locali</strong> prova a ricostruire artefatti locali esistenti senza una nuova generazione.</p>
 <p>La Control Room mostra i token conservati nei nuovi job, compresi i tentativi successivi. Lo storico può essere incompleto: per la spesa effettiva consulta la dashboard OpenAI. I tempi p90/p95 sono mostrati soltanto dopo abbastanza misure comparabili; non sono una promessa di completamento dell'intera materia.</p>
 
 <h2>6. PDF, controllo visivo e diagnostica</h2>
@@ -72,13 +73,13 @@
 <p>Puoi annotare «verificata» o «falso positivo». La decisione resta legata al contenuto esatto del PDF e non modifica lo stato tecnico <strong>PDF_OK</strong>. Il report diagnostico viene prima mostrato in anteprima; la sua esportazione è locale e non invia automaticamente dati a Codex.</p>
 
 <h2>7. Medical Illustrator</h2>
-<p>Premi <strong>Cerca tavole utili</strong> per proposte conservative ricavate dalle fonti correnti, oppure <strong>Aggiungi tavola manuale</strong>. Una proposta può essere modificata o scartata. <strong>Accetta e crea bozza SVG</strong> produce una tavola concettuale sul Mac, senza un nuovo provider di immagini o una chiamata API.</p>
-<p>Apri la bozza e confrontala con le fonti. Dopo eventuali modifiche al file SVG usa <strong>Valida SVG modificato</strong>. <strong>Segna revisionata</strong> richiede sei controlli espliciti: fonti, anatomia, orientamento, alterazione, etichette e diritti d'uso. Questa revisione dell'utente <strong>non è una validazione clinica specialistica</strong>.</p>
+<p>Premi <strong>Cerca tavole utili</strong> per proposte conservative ricavate dalle fonti correnti, oppure <strong>Aggiungi tavola manuale</strong>. Una proposta può essere modificata o scartata. <strong>Crea bozza SVG</strong> produce una tavola concettuale sul Mac, senza un nuovo provider di immagini o una chiamata API.</p>
+<p>Apri la bozza e confrontala con le fonti. Dopo eventuali modifiche al file SVG usa <strong>Valida SVG</strong>. <strong>Segna revisionata</strong> richiede sei controlli espliciti: fonti, anatomia, orientamento, alterazione, etichette e diritti d'uso. Questa revisione dell'utente <strong>non è una validazione clinica specialistica</strong>.</p>
 <p><strong>Esporta PDF con tavola</strong> crea una copia separata con appendice illustrata, se figura e didascalia rispettano il limite di pagine. Il PDF originale resta intatto. Le forme SVG sono schematiche: non rappresentano un atlante anatomico certificato.</p>
 
 <h2>8. Dati, aggiornamenti e aiuto</h2>
 <p>La `.app` installata conserva materie, fonti e PDF in <strong>~/Library/Application Support/Schemi Esami</strong>. La chiave OpenAI è gestita localmente tramite il Portachiavi macOS. Prima di un aggiornamento conserva una copia della cartella dati e della vecchia `.app`; non aggiornare mentre un esame è in corso.</p>
-<p>Se la finestra mostra un problema, apri <strong>Stato e batch</strong> e <strong>Control Room</strong> per leggere la fase e gli avvisi. Aprire queste schede non avvia nuove richieste generative. Il pulsante <strong>Aiuto</strong> nella barra laterale riapre questo manuale.</p>
-<p class="small">Manuale della versione locale · 29 ottobre 2026. Le funzioni visuali e l'OCR vanno verificate con i propri materiali. Nessun servizio cloud aggiuntivo è necessario per consultare i progetti sul Mac.</p>
+<p>Se la finestra mostra un problema, apri <strong>Stato e batch</strong> e <strong>Control Room</strong> per leggere la fase e gli avvisi. La voce <strong>Errori e recupero</strong> riepiloga le azioni disponibili. Aprire queste schede non avvia nuove richieste generative. Il pulsante <strong>Aiuto · manuale PDF</strong> nella barra laterale riapre questo manuale.</p>
+<p class="small">Manuale della versione locale · 30 ottobre 2026. Le funzioni visuali e l'OCR vanno verificate con i propri materiali. Nessun servizio cloud aggiuntivo è necessario per consultare i progetti sul Mac.</p>
 </body>
 </html>

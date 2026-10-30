@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+<title>12b_controllo_visivo</title>
+<desc>Mockup desktop Schemi Esami V2, dati fittizi demo. Testi e forme editabili.</desc>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#F3F6F7"/>
+<rect x="0" y="0" width="1280" height="820" rx="0" fill="#142B40" opacity="0.09"/>
+<rect x="138.0" y="55" width="1004" height="710" rx="11" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="138.0" y="55" width="1004" height="73" rx="11" fill="#EAF0F2"/>
+<rect x="138.0" y="119" width="1004" height="10" rx="0" fill="#EAF0F2"/>
+<text x="162.0" y="86" font-family="DejaVu Sans, sans-serif" font-size="19" font-weight="700" text-anchor="start" fill="#142B40">Controllo visivo</text>
+<text x="162.0" y="108" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="400" text-anchor="start" fill="#627585">Il controllo visivo segnala sospetti; non cambia automaticamente PDF_OK</text>
+<text x="1090.0" y="91" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" text-anchor="start" fill="#627585">✕</text>
+<rect x="939.0" y="71" width="132" height="24" rx="12" fill="#EAF0F2"/>
+<text x="950.0" y="87.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">DEMO · fittizio</text>
+<line x1="139.0" y1="128" x2="1141.0" y2="128" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="161.0" y="154" width="264" height="506" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="179.0" y="184" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Pagine</text>
+<rect x="178.0" y="203" width="225" height="24" rx="12" fill="#E6F5F3"/>
+<text x="189.0" y="219.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#087D79">Pagina 1 · verificata</text>
+<rect x="178.0" y="263" width="225" height="24" rx="12" fill="#FFF4E6"/>
+<text x="189.0" y="279.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A76313">Pagina 2 · quasi vuota</text>
+<rect x="178.0" y="323" width="225" height="24" rx="12" fill="#FFF4E6"/>
+<text x="189.0" y="339.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A76313">Pagina 3 · margine</text>
+<rect x="178.0" y="383" width="225" height="24" rx="12" fill="#EAF0F2"/>
+<text x="189.0" y="399.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#142C43">Pagina 4 · nessun avviso</text>
+<rect x="442.0" y="154" width="677" height="506" rx="9" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="460.0" y="184" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#142C43">Anteprima · pagina 2</text>
+<rect x="523.0" y="219" width="407" height="363" rx="3" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<rect x="558.0" y="247" width="335" height="1" rx="0" fill="#D9E2E6"/>
+<text x="559.0" y="283" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700" text-anchor="start" fill="#142B40">2. Sintesi della gonartrosi</text>
+<line x1="559.0" y1="309" x2="883.0" y2="309" stroke="#D9E2E6" stroke-width="3"/>
+<line x1="559.0" y1="327" x2="853.0" y2="327" stroke="#D9E2E6" stroke-width="3"/>
+<line x1="559.0" y1="345" x2="877.0" y2="345" stroke="#D9E2E6" stroke-width="3"/>
+<rect x="549.0" y="372" width="355" height="157" rx="4" fill="#FFF4E6" stroke="#E9C58D" stroke-width="1"/>
+<text x="726.0" y="450" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#A76313">AREA CON POCO CONTENUTO</text>
+<rect x="465.0" y="601" width="191.0" height="24" rx="12" fill="#FFF4E6"/>
+<text x="476.0" y="617.3" font-family="DejaVu Sans, sans-serif" font-size="11" font-weight="600" text-anchor="start" fill="#A76313">Avviso: Pagina quasi vuota</text>
+<rect x="175.0" y="702" width="178" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="264.0" y="723.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Apri PDF originale</text>
+<rect x="669.0" y="702" width="160" height="34" rx="6" fill="#087D79" stroke="#087D79" stroke-width="1"/>
+<text x="749.0" y="723.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#FFFFFF">Segna verificata</text>
+<rect x="839.0" y="702" width="195" height="34" rx="6" fill="#FFFFFF" stroke="#D9E2E6" stroke-width="1"/>
+<text x="936.5" y="723.5" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#142C43">Annota falso positivo</text>
+</svg>
